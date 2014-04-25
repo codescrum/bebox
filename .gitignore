@@ -1,0 +1,64 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.box
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+#Rails specific stuff
+.DS_Store
+config/database.yml
+*.log
+tmp/
+*.sql
+*.sqlite
+*.sqlite3
+.rvmrc
+public/system
+public/spree
+/public/system*
+.idea/
+public/uploads
+.sass-cache/
+.bundle/
+.jhw-cache/
+
+## UNIX TEMP FILES
+*~
+
+# Vagrant
+.vagrant
+Vagrantfile
+
+# Hiera Development Environment
+puppet/hiera/data/server1.development.test.yaml
+puppet/hiera/data/server2.development.test.yaml
+puppet/hiera/data/server3.development.test.yaml
+puppet/hiera/data/vagrant.yaml
+puppet/hiera/data/development.yaml
