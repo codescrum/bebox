@@ -11,39 +11,19 @@ end
 
 include GLI::App
 
-program_desc 'Describe your application here'
+program_desc 'Create basic vagrant machines and environments for a specific project'
 
 version Bebox::VERSION
 
-desc 'Describe some switch here'
-switch [:s,:switch]
-
-desc 'Describe some flag here'
-default_value 'the default'
-arg_name 'The name of the argument'
-flag [:f,:flagname]
-
-desc 'Describe new here'
-arg_name 'Describe arguments to new here'
+desc 'Create the new vagrant machine(s) to my project through a simple wizard'
+arg_name 'The project name, "bebox new my_porject"'
 command :new do |c|
-  c.desc 'Describe a switch to new'
-  c.switch :s
-
-  c.desc 'Describe a flag to new'
-  c.default_value 'default'
-  c.flag :f
   c.action do |global_options,options,args|
 
-    # Your command logic here
-     
-    # If you have any errors, just raise them
-    # raise "that command made no sense"
-
-    puts "new command ran"
   end
 end
 
-pre do |global,command,options,args|
+pre do |global_options,command,options,args|
   # Pre logic here
   # Return true to proceed; false to abort and not call the
   # chosen command
@@ -52,7 +32,7 @@ pre do |global,command,options,args|
   true
 end
 
-post do |global,command,options,args|
+post do |global_options,command,options,args|
   # Post logic here
   # Use skips_post before a command to skip this
   # block on that command only
