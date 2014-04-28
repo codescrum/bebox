@@ -48,6 +48,7 @@ public/uploads
 .sass-cache/
 .bundle/
 .jhw-cache/
+boxes/
 
 ## UNIX TEMP FILES
 *~
@@ -55,6 +56,7 @@ public/uploads
 # Vagrant
 .vagrant
 Vagrantfile
+boxes_recreate.sh
 
 # Hiera Development Environment
 puppet/hiera/data/server1.development.test.yaml
@@ -62,3 +64,4 @@ puppet/hiera/data/server2.development.test.yaml
 puppet/hiera/data/server3.development.test.yaml
 puppet/hiera/data/vagrant.yaml
 puppet/hiera/data/development.yaml
+puppet/hiera/data/new_production.yaml
