@@ -21,10 +21,11 @@ class Wizard
           q.validate = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}, ?\w+\Z/
         end
         hosts_attributes = answer.split(',')
-        ip = hosts_attributes[0]
-        hostname = hosts_attributes[1]
+        ip = hosts_attributes[0].strip
+        hostname = hosts_attributes[1].strip
         host = Host.new(ip: ip, hostname: hostname)
         unless host.valid?
+          # TODO verify if the host is already taken.
           host.errors.full_messages.each{|message| puts message}
         end
       end while(!(host.valid?))
