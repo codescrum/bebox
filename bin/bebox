@@ -20,8 +20,8 @@ desc 'Create the new vagrant machine(s) to my project through a simple wizard'
 arg_name 'The project name, "bebox new my_project"'
 command :new do |c|
   c.action do |global_options,options,args|
-    servers, vbox_uri,vagrant_box_base_name =Wizard.process
-    Builder.create_folders
+    servers, vbox_uri,vagrant_box_base_name =Bebox::Wizard.process
+    Bebox::Builder.new(servers, vbox_uri, vagrant_box_base_name, Dir.pwd)
   end
 end
 

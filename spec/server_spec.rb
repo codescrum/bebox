@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Host do
-  subject{Host.new(ip: @ip, hostname: @hostname)}
+describe Bebox::Server do
+  subject{Bebox::Server.new(ip: @ip, hostname: @hostname)}
   #let(:ip){'192.168.0.10'}
   #let(:hostname){'server1.projectname.test'}
 
