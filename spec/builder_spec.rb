@@ -4,7 +4,7 @@ describe Bebox::Builder do
 
   subject{Bebox::Builder.new(@servers, @vbox_uri, @vagrant_box_base_name, "#{Dir.pwd }/tmp")}
 
-  context 'folder' do
+  context 'Folder' do
 
     it 'should create the directories' do
       directories_expected = ['config', 'deploy', 'templates']
@@ -15,7 +15,7 @@ describe Bebox::Builder do
       expect(directories.flatten).to include(*directories_expected)
     end
   end
-  context 'files' do
+  context 'Files' do
     it 'should create local_host.rb template' do
       ############################ RUBY
       content_expected = <<-RUBY
@@ -54,5 +54,29 @@ end
     subject.create_vagrant_template
     output_file = File.read("#{Dir.pwd }/tmp/config/templates/Vagrant.erb")
     expect(output_file).to eq(content_expected)
+  end
+
+  it 'should create deploy.rb template' do
+    ############################ RUBY
+    content_expected =''
+    ############################
+    subject.create_directories
+    subject.create_deploy_file
+    output_file = File.read("#{Dir.pwd }/tmp/config/deploy.rb")
+    expect(output_file).to eq(content_expected)
+  end
+
+  context 'Add vagrant boxes', :slow do
+    before :each do
+      @servers = []
+      3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.pname.test")}
+      @vbox_uri = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
+      @vagrant_box_base_name = 'test'
+    end
+    it 'should be add 3 vagrant boxes' do
+      vagrant_box_names_expected = ['test_0','test_1','test_2']
+      subject.add_vagrant_boxes
+      expect(subject.installed_vagrant_box_names).to include(*vagrant_box_names_expected)
+    end
   end
 end

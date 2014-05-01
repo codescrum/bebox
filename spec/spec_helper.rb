@@ -7,6 +7,7 @@ require_relative '../lib/bebox/builder'
 I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
+  config.treat_symbols_as_metadata_keys_with_true_values = true
 
   config.before(:each) do
     ENV['RUBY_ENV'] = 'test'
@@ -15,5 +16,6 @@ RSpec.configure do |config|
   config.after(:each) do
    ENV['RUBY_ENV'] = 'development'
    `rm -rf tmp/config`
+    `vagrant box remove test_1 virtualbox`
   end
 end

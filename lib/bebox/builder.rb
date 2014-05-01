@@ -3,12 +3,13 @@ require 'tilt'
 require "bebox/server"
 module Bebox
   class Builder
-    attr_accessor :servers, :vbox_uri, :vagrant_box_base_name, :new_project_root, :local_hosts_file_location
+    attr_accessor :servers, :vbox_uri, :vagrant_box_base_name, :vagrant_box_provider, :new_project_root, :local_hosts_file_location
 
-    def initialize(servers, vbox_uri, vagrant_box_base_name, new_project_root = Dir.pwd )
+    def initialize(servers, vbox_uri, vagrant_box_base_name, new_project_root = Dir.pwd, vagrant_box_provider = 'virtualbox' )
       @servers = servers
       @vbox_uri= vbox_uri
       @vagrant_box_base_name = vagrant_box_base_name
+      @vagrant_box_provider = vagrant_box_provider
       @new_project_root = new_project_root
       if  ENV['RUBY_ENV'].eql? 'test'
         @local_hosts_file_location =   "#{@new_project_root}/tmp"
@@ -16,6 +17,11 @@ module Bebox
         @local_hosts_file_location =   RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'
       end
     end
+
+    def vagrant_box_filename
+      @vbox_uri.split('/').last
+    end
+
     def build_vagrant_nodes
       create_directories
       create_files
@@ -125,6 +131,8 @@ end
       end
     end
 
+    # return an Array with the names of the currently installed vagrant boxes
+    # @returns Array
     def installed_vagrant_box_names
       (`vagrant box list`).split("\n").map{|vagrant_box| vagrant_box.split(' ').first}
     end
