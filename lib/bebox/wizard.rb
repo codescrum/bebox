@@ -1,4 +1,4 @@
-require_relative 'hosts'
+require_relative 'server'
 require 'highline/import'
 class Wizard
   attr_accessor :number_of_nodes, :hosts, :vbox_uri
@@ -11,7 +11,7 @@ class Wizard
       #q.validate = /\A\w+\Z/
       q.default = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
     end
-
+    [@hosts, @vbox_uri, 'ubuntu1204x64']
   end
 
   def self.host_validation

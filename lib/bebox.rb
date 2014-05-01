@@ -1,6 +1,6 @@
 require 'bebox/version.rb'
-require 'bebox/schema.rb'
-require 'bebox/hosts.rb'
+require 'bebox/builder.rb'
+require 'bebox/server.rb'
 require 'bebox/wizard.rb'
 
 # Add requires for other files you add to your project here, so
