@@ -1,17 +1,25 @@
 require_relative 'server'
 require 'highline/import'
 class Wizard
-  attr_accessor :number_of_nodes, :hosts, :vbox_uri
+  attr_accessor :number_of_nodes, :hosts, :vbox_uri,:vagrant_box_base_name
 
   def self.process
     @hosts= []
     @number_of_machines = ask('number of nodes?'){ |q| q.default = 1 }
+
     host_validation
+
     @vbox_uri =  ask('vbox uri?')do |q|
       #q.validate = /\A\w+\Z/
       q.default = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
     end
-    [@hosts, @vbox_uri, 'ubuntu1204x64']
+
+    @vagrant_box_base_name =  ask('vagrant box base name?') do |q|
+      #q.validate = /\A\w+\Z/
+      q.default ='ubuntu1204x64'
+    end
+
+    [@hosts, @vbox_uri, @vagrant_box_base_name]
   end
 
   def self.host_validation
