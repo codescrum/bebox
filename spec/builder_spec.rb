@@ -1,8 +1,7 @@
 require 'spec_helper'
 
 describe Bebox::Builder do
-# TODO  update host file /etc/hosts
-# TODO  generate the vagrant files
+
   subject{Bebox::Builder.new(@servers, @vbox_uri, @vagrant_box_base_name, "#{Dir.pwd }/tmp")}
 
   context 'folder' do
@@ -17,12 +16,8 @@ describe Bebox::Builder do
     end
   end
   context 'files' do
-    before :each do
-      subject.create_directories
-      #@servers = 3.times{|index| Bebox::Server.new("192.168.0.78#{index}", "server#{index}.pname.test")}
-    end
     it 'should create local_host.rb template' do
-      ############################
+      ############################ RUBY
       content_expected = <<-RUBY
 <% self.each do |server| %>
 
@@ -30,9 +25,34 @@ describe Bebox::Builder do
 <% end %>
       RUBY
       ############################
+      subject.create_directories
       subject.create_local_host_template
       output_file = File.read("#{Dir.pwd }/tmp/config/templates/local_hosts.erb")
       expect(output_file).to eq(content_expected)
     end
+  end
+
+  it 'should create Vagrant.rb template' do
+    ############################ RUBY
+    content_expected = <<-RUBY
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+<% self.each_with_index do |server, index| %>
+  config.vm.define :node_<%= index %> do |node|
+    node.vm.box = "#{@vagrant_box_base_name}_<%= index %>"
+    node.vm.hostname = "<%= server.hostname %>"
+    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
+    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= server.ip] %> netmask 255.255.255.0 up"
+  end
+<% end %>
+end
+    RUBY
+    ############################
+    subject.create_directories
+    subject.create_vagrant_template
+    output_file = File.read("#{Dir.pwd }/tmp/config/templates/Vagrant.erb")
+    expect(output_file).to eq(content_expected)
   end
 end
