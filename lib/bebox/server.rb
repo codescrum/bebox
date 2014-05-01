@@ -12,8 +12,8 @@ module Bebox
     def ip_free?
       pattern = Regexp.new("Destination Host Unreachable")
       ip_is_available =false
-      `ping #{ip} -c 1 >> '#{ip}_ping.log'`
-      file = File.read("#{ip}_ping.log")
+      `ping #{ip} -c 1 >> 'tmp/#{ip}_ping.log'`
+      file = File.read("tmp/#{ip}_ping.log")
       file.each_line do |line|
         if line.match(pattern)
           ip_is_available =  true
@@ -30,7 +30,7 @@ module Bebox
     end
 
     def remove_logs
-      `rm *_ping.log`
+      `rm tmp/*_ping.log`
     end
 
     def valid_hostname?

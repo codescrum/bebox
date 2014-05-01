@@ -3,26 +3,26 @@ require 'tilt'
 require "bebox/server"
 module Bebox
   class Builder
-    attr_accessor :servers, :vbox_uri, :vagrant_box_base_name, :new_project_folder, :local_hosts_file_location
+    attr_accessor :servers, :vbox_uri, :vagrant_box_base_name, :new_project_root, :local_hosts_file_location
 
-    def initialize(servers, vbox_uri, vagrant_box_base_name, new_project_folder = @new_project_folder )
+    def initialize(servers, vbox_uri, vagrant_box_base_name, new_project_root = Dir.pwd )
       @servers = servers
       @vbox_uri= vbox_uri
       @vagrant_box_base_name = vagrant_box_base_name
-      @new_project_folder = new_project_folder
-      if ENV['test']
-        @local_hosts_file_location =   "#{@new_project_folder}/tmp"
+      @new_project_root = new_project_root
+      if  ENV['RUBY_ENV'].eql? 'test'
+        @local_hosts_file_location =   "#{@new_project_root}/tmp"
       else
         @local_hosts_file_location =   RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'
       end
     end
     def build_vagrant_nodes
-      create_folders
+      create_directories
       create_files
     end
 
-    def create_folders
-      `mkdir config && mkdir config/deploy && mkdir config/templates`
+    def create_directories
+      `cd #{@new_project_root} && mkdir config && mkdir config/deploy && mkdir config/templates`
     end
 
     def create_files
@@ -34,8 +34,8 @@ module Bebox
 
     # Generate the vagrantfile take into account the settings into vagrant hiera file
     def generate_vagrantfile
-      template = Tilt::ERBTemplate.new("#{@new_project_folder}/config/templates/Vagrantfile.erb")
-      File.open("#{@new_project_folder}/Vagrantfile", 'w') do |f|
+      template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/Vagrantfile.erb")
+      File.open("#{@new_project_root}/Vagrantfile", 'w') do |f|
         f.write template.render(@servers)
       end
     end
@@ -54,7 +54,7 @@ module Bebox
 
     def create_deploy_file
       content = ''
-      File::open("#{@new_project_folder}/config/deploy.rb", "w")do |f|
+      File::open("#{@new_project_root}/config/deploy.rb", "w")do |f|
         f.write(content)
       end
     end
@@ -64,6 +64,7 @@ module Bebox
       create_vagrant_template
     end
 
+    # creates a template
     def create_local_host_template
       content = <<-RUBY
 <% self.each do |server| %>
@@ -71,11 +72,12 @@ module Bebox
 <%= server.ip %>   <%= server.hostname %>
 <% end %>
       RUBY
-      File::open("#{@new_project_folder}/config/templates/local_hosts.erb", "w")do |f|
+      File::open("#{@new_project_root}/config/templates/local_hosts.erb", "w")do |f|
         f.write(content)
       end
     end
 
+    # creates a template
     def create_vagrant_template
       content =<<-RUBY
 # -*- mode: ruby -*-
@@ -92,14 +94,14 @@ Vagrant.configure("2") do |config|
 <% end %>
 end
       RUBY
-      File::open("#{@new_project_folder}/config/templates/Vagrant.erb", "w")do |f|
+      File::open("#{@new_project_root}/config/templates/Vagrant.erb", "w")do |f|
         f.write(content)
       end
     end
 
     # Modify the local hosts file taking into account the settings into vagrant hiera file
     def config_local_hosts_file
-      template = Tilt::ERBTemplate.new("#{@new_project_folder}/config/templates/local_servers.erb")
+      template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/local_servers.erb")
       nameservers = template.render(@servers)
       is_hosts_configured = true
 
