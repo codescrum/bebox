@@ -4,29 +4,33 @@ module Bebox
   class Wizard
     attr_accessor :number_of_nodes, :hosts, :vbox_uri,:vagrant_box_base_name
 
-    def self.process
+    # Description
+    # @return ..
+    def self.create_new_project
       @hosts= []
       @number_of_machines = ask('number of nodes?'){ |q| q.default = 1 }
 
       host_validation
 
       @vbox_uri =  ask('vbox uri?')do |q|
-        #q.validate = /\A\w+\Z/
+        # TODO q.validate = /\A\w+\Z/
         q.default = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
       end
 
       @vagrant_box_base_name =  ask('vagrant box base name?') do |q|
-        #q.validate = /\A\w+\Z/
+        # TODO q.validate = /\A\w+\Z/
         q.default ='ubuntu1204x64'
       end
 
       [@hosts, @vbox_uri, @vagrant_box_base_name]
     end
 
+    # Description
+    # @return ..
     def self.host_validation
       eval(@number_of_machines).times do |number_node|
         begin
-          answer = ask("ip and hostname for node #{number_node} ( 127.0.0.1, server1.project1.development )?") do |q|
+          answer = ask("Ip and hostname for node #{number_node} ( 127.0.0.1, server1.project1.development )?") do |q|
             q.validate = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}, ?\w+\Z/
           end
           hosts_attributes = answer.split(',')

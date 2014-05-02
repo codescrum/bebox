@@ -15,7 +15,6 @@ RSpec.configure do |config|
 
   config.after(:each) do
    ENV['RUBY_ENV'] = 'development'
-   `rm -rf tmp/config`
-    `vagrant box remove test_1 virtualbox`
+   `rm -rf tmp/pname`
   end
 end
