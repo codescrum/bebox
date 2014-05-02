@@ -92,8 +92,8 @@ end
       3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
       subject.create_directories
       ############################ RUBY
-        content = <<-EOF
-127.0.0.1	localhost
+      content = <<-EOF
+127.0.0.1   localhost
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback
@@ -101,19 +101,19 @@ fe00::0 ip6-localnet
 ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
-        EOF
+      EOF
       ############################
 
-        File::open("#{Dir.pwd}/tmp/hosts", "w")do |f|
-          f.write(content)
-        end
+      File::open("#{Dir.pwd}/tmp/hosts", "w")do |f|
+        f.write(content)
+      end
       subject.create_local_host_template
     end
 
     it "should add the hosts to the hosts file" do
       ############################ RUBY
       expected_content = <<-EOF
-127.0.0.1	localhost
+127.0.0.1   localhost
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback
@@ -127,6 +127,25 @@ ff02::2 ip6-allrouters
 192.168.200.72   server2.pname.test
       EOF
       ############################
+      subject.config_local_hosts_file
+      output_file = File.read("#{Dir.pwd }/tmp/hosts")
+      expect(output_file.strip).to eq(expected_content.strip)
+    end
+
+    it "should not add any hosts into the hosts file" do
+      ############################ RUBY
+      expected_content = <<-EOF
+127.0.0.1   localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+      EOF
+      ############################
+      subject.servers << Bebox::Server.new(ip:"127.0.0.1", hostname: "localhost")
       subject.config_local_hosts_file
       output_file = File.read("#{Dir.pwd }/tmp/hosts")
       expect(output_file.strip).to eq(expected_content.strip)

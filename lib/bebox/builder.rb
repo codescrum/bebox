@@ -30,12 +30,12 @@ module Bebox
     end
 
     def create_project_directory
-      `cd #{@current_pwd} && mkdir #{@project_name}`
+      `cd #{@current_pwd} && mkdir -p #{@project_name}`
       @new_project_root = "#{@current_pwd}/#{@project_name}"
     end
 
     def create_directories
-      `cd #{@new_project_root} && mkdir config && mkdir config/deploy && mkdir config/templates`
+      `cd #{@new_project_root} && mkdir -p config && mkdir -p config/deploy && mkdir -p config/templates`
     end
 
     def create_files
