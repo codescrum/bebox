@@ -47,7 +47,7 @@ module Bebox
 
     # Generate the vagrantfile take into account the settings into vagrant hiera file
     def generate_vagrantfile
-      template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/Vagrantfile.erb")
+      template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/Vagrant.erb")
       File.open("#{@new_project_root}/Vagrantfile", 'w') do |f|
         f.write template.render(@servers)
       end
@@ -67,7 +67,7 @@ module Bebox
 
     # creates
     def create_deploy_file
-    content = ''
+      content = ''
       File::open("#{@new_project_root}/config/deploy.rb", "w")do |f|
         f.write(content)
       end
@@ -75,7 +75,7 @@ module Bebox
 
     # creates a template
     def create_templates
-    create_local_host_template
+      create_local_host_template
       create_vagrant_template
     end
 
@@ -104,7 +104,7 @@ Vagrant.configure("2") do |config|
     node.vm.box = "#{@vagrant_box_base_name}_<%= index %>"
     node.vm.hostname = "<%= server.hostname %>"
     node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
-    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= server.ip] %> netmask 255.255.255.0 up"
+    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= server.ip %> netmask 255.255.255.0 up"
   end
 <% end %>
 end
@@ -147,5 +147,3 @@ end
     end
   end
 end
-#Builder.create_local_server_template
-#Builder.config_local_hosts_file([server.new(ip: '127.0.0.2', hostname: 'ps' )],'test')

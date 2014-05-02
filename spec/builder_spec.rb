@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
     node.vm.box = "#{@vagrant_box_base_name}_<%= index %>"
     node.vm.hostname = "<%= server.hostname %>"
     node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
-    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= server.ip] %> netmask 255.255.255.0 up"
+    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= server.ip %> netmask 255.255.255.0 up"
   end
 <% end %>
 end
@@ -152,13 +152,61 @@ ff02::2 ip6-allrouters
     end
   end
 
-  #describe 'Generate Vagranfile' do
-  #  before :each do
-  #    #subject.create_directories
-  #  end
-  #
-  #  it 'should make a file using the user entries' do
-  #
-  #  end
-  #end
+  describe 'Generate Vagranfile' do
+    before :each do
+      @vbox_uri = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
+      @vagrant_box_base_name  ='ubuntu1204x64'
+      @project_name = 'pname'
+      @servers = []
+      3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
+      subject.create_directories
+      ############################ RUBY
+      content = <<-EOF
+127.0.0.1   localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+      EOF
+      ############################
+
+      File::open("#{Dir.pwd}/tmp/hosts", "w")do |f|
+        f.write(content)
+      end
+    end
+
+    it 'should make a file using the user entries' do
+      expected_content = <<-EOF
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.define :node_0 do |node|
+    node.vm.box = "ubuntu1204x64_0"
+    node.vm.hostname = "server0.pname.test"
+    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
+    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.70 netmask 255.255.255.0 up"
+  end
+  config.vm.define :node_1 do |node|
+    node.vm.box = "ubuntu1204x64_1"
+    node.vm.hostname = "server1.pname.test"
+    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
+    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.71 netmask 255.255.255.0 up"
+  end
+  config.vm.define :node_2 do |node|
+    node.vm.box = "ubuntu1204x64_2"
+    node.vm.hostname = "server2.pname.test"
+    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
+    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.72 netmask 255.255.255.0 up"
+  end
+end
+      EOF
+      subject.build_vagrant_nodes
+      output_file = File.read("#{subject.new_project_root}/Vagrantfile")
+      expect(output_file.strip).to eq(expected_content.strip)
+    end
+  end
 end

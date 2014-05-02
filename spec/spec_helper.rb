@@ -16,5 +16,6 @@ RSpec.configure do |config|
   config.after(:each) do
    ENV['RUBY_ENV'] = 'development'
    `rm -rf tmp/pname`
+   `rm -rf tmp/config`
   end
 end
