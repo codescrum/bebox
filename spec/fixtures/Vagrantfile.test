@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+	  config.vm.define :node_0 do |node|
+	    node.vm.box = test_0
+	    node.vm.hostname = "server0.pname.test"
+	    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
+	    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.70 netmask 255.255.255.0 up"
+	  end
+
+	  config.vm.define :node_1 do |node|
+	    node.vm.box = test_1
+	    node.vm.hostname = "server1.pname.test"
+	    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
+	    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.71 netmask 255.255.255.0 up"
+	  end
+
+	  config.vm.define :node_2 do |node|
+	    node.vm.box = test_2
+	    node.vm.hostname = "server2.pname.test"
+	    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
+	    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.72 netmask 255.255.255.0 up"
+	  end
+
+end

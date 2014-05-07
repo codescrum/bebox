@@ -17,15 +17,8 @@ describe Bebox::Builder do
     end
   end
   describe 'Files' do
-    it 'should create local_host.rb template' do
-      ############################ RUBY
-      expected_content = <<-RUBY
-<% self.each do |server| %>
-
-<%= server.ip %>   <%= server.hostname %>
-<% end %>
-      RUBY
-      ############################
+    it 'should create local_hosts.erb template' do
+      expected_content = File.read("templates/local_hosts.erb")
       subject.create_directories
       subject.create_local_host_template
       output_file = File.read("#{Dir.pwd }/tmp/config/templates/local_hosts.erb")
@@ -33,34 +26,16 @@ describe Bebox::Builder do
     end
   end
 
-  it 'should create Vagrant.rb template' do
-    ############################ RUBY
-    expected_content = <<-RUBY
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
-Vagrant.configure("2") do |config|
-<% self.each_with_index do |server, index| %>
-  config.vm.define :node_<%= index %> do |node|
-    node.vm.box = "#{@vagrant_box_base_name}_<%= index %>"
-    node.vm.hostname = "<%= server.hostname %>"
-    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
-    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= server.ip %> netmask 255.255.255.0 up"
-  end
-<% end %>
-end
-    RUBY
-    ############################
+  it 'should create Vagrantfile.erb template' do
+    expected_content = File.read("templates/Vagrantfile.erb")
     subject.create_directories
     subject.create_vagrant_template
-    output_file = File.read("#{Dir.pwd }/tmp/config/templates/Vagrant.erb")
+    output_file = File.read("#{Dir.pwd }/tmp/config/templates/Vagrantfile.erb")
     expect(output_file).to eq(expected_content)
   end
 
   it 'should create deploy.rb template' do
-    ############################ RUBY
     expected_content =''
-    ############################
     subject.create_directories
     subject.create_deploy_file
     output_file = File.read("#{Dir.pwd}/tmp/config/deploy.rb")
@@ -91,122 +66,43 @@ end
       @servers = []
       3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
       subject.create_directories
-      ############################ RUBY
-      content = <<-EOF
-127.0.0.1   localhost
-
-# The following lines are desirable for IPv6 capable hosts
-::1     ip6-localhost ip6-loopback
-fe00::0 ip6-localnet
-ff00::0 ip6-mcastprefix
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-      EOF
-      ############################
-
-      File::open("#{Dir.pwd}/tmp/hosts", "w")do |f|
-        f.write(content)
-      end
       subject.create_local_host_template
+      `cp spec/fixtures/hosts.test tmp/hosts`
     end
 
-    it "should add the hosts to the hosts file" do
-      ############################ RUBY
-      expected_content = <<-EOF
-127.0.0.1   localhost
-
-# The following lines are desirable for IPv6 capable hosts
-::1     ip6-localhost ip6-loopback
-fe00::0 ip6-localnet
-ff00::0 ip6-mcastprefix
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-
-192.168.200.70   server0.pname.test
-192.168.200.71   server1.pname.test
-192.168.200.72   server2.pname.test
-      EOF
-      ############################
+    it 'should add the hosts config to hosts file' do
       subject.config_local_hosts_file
-      output_file = File.read("#{Dir.pwd }/tmp/hosts")
-      expect(output_file.strip).to eq(expected_content.strip)
+      expect(File).to exist("#{Dir.pwd }/tmp/hosts")
+      hosts_content = File.read("#{Dir.pwd }/tmp/hosts").gsub(/\s+/, ' ').strip
+      expect(hosts_content).to include(*@servers.map{|server| "#{server.ip} #{server.hostname}"})
     end
 
-    it "should not add any hosts into the hosts file" do
-      ############################ RUBY
-      expected_content = <<-EOF
-127.0.0.1   localhost
-
-# The following lines are desirable for IPv6 capable hosts
-::1     ip6-localhost ip6-loopback
-fe00::0 ip6-localnet
-ff00::0 ip6-mcastprefix
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-      EOF
-      ############################
-      subject.servers << Bebox::Server.new(ip:"127.0.0.1", hostname: "localhost")
-      subject.config_local_hosts_file
-      output_file = File.read("#{Dir.pwd }/tmp/hosts")
-      expect(output_file.strip).to eq(expected_content.strip)
+    it 'should create a hosts backup file' do
+      hosts_backup_file = subject.config_local_hosts_file
+      expect(File).to exist(hosts_backup_file)
+      original_hosts_content = File.read("spec/fixtures/hosts.test").gsub(/\s+/, ' ').strip
+      hosts_backup_content = File.read(hosts_backup_file).gsub(/\s+/, ' ').strip
+      expect(original_hosts_content).to eq(hosts_backup_content)
     end
   end
 
-  describe 'Generate Vagranfile' do
+  describe 'Generate Vagrantfile' do
     before :each do
       @vbox_uri = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
-      @vagrant_box_base_name  ='ubuntu1204x64'
+      @vagrant_box_base_name  ='test'
       @project_name = 'pname'
       @servers = []
       3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
       subject.create_directories
-      ############################ RUBY
-      content = <<-EOF
-127.0.0.1   localhost
-
-# The following lines are desirable for IPv6 capable hosts
-::1     ip6-localhost ip6-loopback
-fe00::0 ip6-localnet
-ff00::0 ip6-mcastprefix
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-      EOF
-      ############################
-
-      File::open("#{Dir.pwd}/tmp/hosts", "w")do |f|
-        f.write(content)
-      end
     end
 
-    it 'should make a file using the user entries' do
-      expected_content = <<-EOF
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
-Vagrant.configure("2") do |config|
-  config.vm.define :node_0 do |node|
-    node.vm.box = "ubuntu1204x64_0"
-    node.vm.hostname = "server0.pname.test"
-    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
-    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.70 netmask 255.255.255.0 up"
-  end
-  config.vm.define :node_1 do |node|
-    node.vm.box = "ubuntu1204x64_1"
-    node.vm.hostname = "server1.pname.test"
-    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
-    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.71 netmask 255.255.255.0 up"
-  end
-  config.vm.define :node_2 do |node|
-    node.vm.box = "ubuntu1204x64_2"
-    node.vm.hostname = "server2.pname.test"
-    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
-    node.vm.provision :shell, :inline => "sudo ifconfig eth1 192.168.200.72 netmask 255.255.255.0 up"
-  end
-end
-      EOF
-      subject.build_vagrant_nodes
-      output_file = File.read("#{subject.new_project_root}/Vagrantfile")
-      expect(output_file.strip).to eq(expected_content.strip)
+    it 'should create a Vagrantfile using the user entries' do
+      subject.create_vagrant_template
+      subject.generate_vagrantfile
+      expect(File).to exist("#{subject.new_project_root}/Vagrantfile")
+      output_file = File.read("#{subject.new_project_root}/Vagrantfile").gsub(/\s+/, ' ').strip
+      output_file_test = File.read("spec/fixtures/Vagrantfile.test").gsub(/\s+/, ' ').strip
+      expect(output_file).to eq(output_file_test)
     end
   end
 end

@@ -47,9 +47,9 @@ module Bebox
 
     # Generate the vagrantfile take into account the settings into vagrant hiera file
     def generate_vagrantfile
-      template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/Vagrant.erb")
+      template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/Vagrantfile.erb")
       File.open("#{@new_project_root}/Vagrantfile", 'w') do |f|
-        f.write template.render(@servers)
+        f.write template.render(@servers, :vagrant_box_base_name => @vagrant_box_base_name)
       end
     end
 
@@ -81,12 +81,7 @@ module Bebox
 
     # creates a template
     def create_local_host_template
-      content = <<-RUBY
-<% self.each do |server| %>
-
-<%= server.ip %>   <%= server.hostname %>
-<% end %>
-      RUBY
+      content = File.read("templates/local_hosts.erb")
       File::open("#{@new_project_root}/config/templates/local_hosts.erb", "w")do |f|
         f.write(content)
       end
@@ -94,50 +89,30 @@ module Bebox
 
     # creates a template
     def create_vagrant_template
-      content =<<-RUBY
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
-Vagrant.configure("2") do |config|
-<% self.each_with_index do |server, index| %>
-  config.vm.define :node_<%= index %> do |node|
-    node.vm.box = "#{@vagrant_box_base_name}_<%= index %>"
-    node.vm.hostname = "<%= server.hostname %>"
-    node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
-    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= server.ip %> netmask 255.255.255.0 up"
-  end
-<% end %>
-end
-      RUBY
-      File::open("#{@new_project_root}/config/templates/Vagrant.erb", "w")do |f|
+      content = File.read("templates/Vagrantfile.erb")
+      File::open("#{@new_project_root}/config/templates/Vagrantfile.erb", "w")do |f|
         f.write(content)
       end
     end
 
     # Modify the local hosts file
     def config_local_hosts_file
-      template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/local_hosts.erb")
-      nameservers = template.render(@servers)
-      is_hosts_configured = true
+      sudo = (ENV['RUBY_ENV'].eql? 'test') ? '' : 'sudo'
 
-      nameservers.each_line.with_index do |hostname, index|
-        unless index==0
-          is_hosts_configured &= (`if grep -q '#{hostname}' '#{@local_hosts_file_location}/hosts'; then echo 'true'; else echo 'false'; fi`).strip == 'true'
-        end
+      # Get the content of the hosts file
+      hosts_content = File.read("#{@local_hosts_file_location}/hosts").gsub(/\s+/, ' ').strip
+
+      # Make a backup of hosts file with the actual datetime
+      hosts_backup_file = "#{@local_hosts_file_location}/hosts_#{Time.now.strftime('%Y_%m_%d_%H_%M_%S')}"
+      `#{sudo} cp #{@local_hosts_file_location}/hosts #{hosts_backup_file}`
+
+      # For each server it adds a line to the hosts file if this not exist
+      @servers.each do |server|
+        line = "#{server.ip} #{server.hostname}"
+        server_present = (hosts_content =~ /#{server.ip}\s+#{server.hostname}/) ? true : false
+        `#{sudo} echo '#{line}    # Added by bebox' | #{sudo} tee -a #{@local_hosts_file_location}/hosts` unless server_present
       end
-
-      puts is_hosts_configured
-
-      if is_hosts_configured
-        puts 'the server file is already configured'
-      else
-        puts 'Configuring hosts file'
-        `sudo cp #{@local_hosts_file_location}/hosts #{@local_hosts_file_location}/hosts_.test`
-        `sudo chmod 777 #{@local_hosts_file_location}/hosts_.test`
-        # Write the template
-        File.open("#{@local_hosts_file_location}/hosts_.test", 'a') {|f| f.write nameservers}
-        `sudo mv #{@local_hosts_file_location}/hosts_.test #{@local_hosts_file_location}/hosts`
-      end
+      hosts_backup_file
     end
 
     # return an Array with the names of the currently installed vagrant boxes

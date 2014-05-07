@@ -25,7 +25,7 @@ describe Bebox::Server do
       expect(subject.ip_free?).to eq(true)
     end
 
-    it 'returns false because the ip is free' do
+    it 'returns false because the ip is not free' do
       @ip = '127.0.0.1'
       expect(subject.ip_free?).to eq(false)
     end
