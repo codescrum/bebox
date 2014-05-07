@@ -10,27 +10,14 @@ module Bebox
     I18n.enforce_available_locales = false
 
     def ip_free?
-      pattern = Regexp.new("Destination Host Unreachable")
-      ip_is_available =false
-      `ping #{ip} -c 1 >> 'tmp/#{ip}_ping.log'`
-      file = File.read("tmp/#{ip}_ping.log")
-      file.each_line do |line|
-        if line.match(pattern)
-          ip_is_available =  true
-          break
-        end
-      end
+      `ping -q -c 1 #{ip}`
+      ip_is_available = ($?.exitstatus == 0) ? false : true
       errors.add(:ip, 'is already taken!') unless ip_is_available
-      remove_logs
       ip_is_available
     end
 
     def valid?
       ip_free? && valid_hostname?
-    end
-
-    def remove_logs
-      `rm tmp/*_ping.log`
     end
 
     def valid_hostname?
