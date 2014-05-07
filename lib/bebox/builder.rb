@@ -45,6 +45,18 @@ module Bebox
       generate_vagrantfile
     end
 
+    # Up the vagrant boxes in Vagrantfile
+    def up_vagrant_nodes
+      # Dir.chdir "#{@new_project_root}"
+      `cd #{@new_project_root} && vagrant up --provision`
+    end
+
+    # Halt the vagrant boxes running
+    def halt_vagrant_nodes
+      # Dir.chdir "#{@new_project_root}"
+      `cd #{@new_project_root} && vagrant halt`
+    end
+
     # Generate the vagrantfile take into account the settings into vagrant hiera file
     def generate_vagrantfile
       template = Tilt::ERBTemplate.new("#{@new_project_root}/config/templates/Vagrantfile.erb")
@@ -64,6 +76,13 @@ module Bebox
       end
     end
 
+    # Remove the specified boxes from vagrant
+    def remove_vagrant_boxes
+      @servers.size.times do |i|
+        `cd #{@new_project_root} && vagrant destroy -f node_#{i}`
+        `vagrant box remove #{@vagrant_box_base_name}_#{i} #{@vagrant_box_provider}`
+      end
+    end
 
     # creates
     def create_deploy_file
@@ -119,6 +138,13 @@ module Bebox
     # @returns Array
     def installed_vagrant_box_names
       (`vagrant box list`).split("\n").map{|vagrant_box| vagrant_box.split(' ').first}
+    end
+
+    # return an String with the status of vagrant boxes
+    # @returns String
+    def vagrant_nodes_status
+      # Dir.chdir "#{@new_project_root}"
+      `cd #{@new_project_root} && vagrant status`
     end
   end
 end

@@ -45,12 +45,12 @@ describe Bebox::Builder do
   describe 'Add vagrant boxes', :slow do
     before :each do
       @servers = []
-      3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.pname.test")}
+      3.times{|i| @servers << Bebox::Server.new(ip:"192.168.0.7#{i}", hostname: "server#{i}.pname.test")}
       @vbox_uri = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
       @vagrant_box_base_name = 'test'
     end
     after(:each) do
-      3.times{|i| `vagrant box remove test_#{i} virtualbox`}
+      subject.remove_vagrant_boxes
     end
 
     it 'should be add 3 vagrant boxes' do
@@ -64,7 +64,7 @@ describe Bebox::Builder do
     before :each do
       @project_name = 'pname'
       @servers = []
-      3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
+      3.times{|i| @servers << Bebox::Server.new(ip:"192.168.0.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
       subject.create_directories
       subject.create_local_host_template
       `cp spec/fixtures/hosts.test tmp/hosts`
@@ -92,7 +92,7 @@ describe Bebox::Builder do
       @vagrant_box_base_name  ='test'
       @project_name = 'pname'
       @servers = []
-      3.times{|i| @servers << Bebox::Server.new(ip:"192.168.200.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
+      1.times{|i| @servers << Bebox::Server.new(ip:"192.168.0.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
       subject.create_directories
     end
 
@@ -103,6 +103,37 @@ describe Bebox::Builder do
       output_file = File.read("#{subject.new_project_root}/Vagrantfile").gsub(/\s+/, ' ').strip
       output_file_test = File.read("spec/fixtures/Vagrantfile.test").gsub(/\s+/, ' ').strip
       expect(output_file).to eq(output_file_test)
+    end
+  end
+
+  describe 'Vagrant boxes up', :slow do
+    before :each do
+      @vbox_uri = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
+      @vagrant_box_base_name  ='test'
+      @project_name = 'pname'
+      @servers = []
+      1.times{|i| @servers << Bebox::Server.new(ip:"192.168.0.7#{i}", hostname: "server#{i}.#{@project_name}.test")}
+      subject.build_vagrant_nodes
+      subject.up_vagrant_nodes
+    end
+    after :each do
+      # halt and remove vagrant boxes
+      subject.halt_vagrant_nodes
+      subject.remove_vagrant_boxes
+    end
+    it 'should up the vagrant boxes' do
+      vagrant_status = subject.vagrant_nodes_status
+      nodes_running = true
+      @servers.size.times{|i| nodes_running &= (vagrant_status =~ /node_#{i}\s+running/)}
+      expect(nodes_running).to eq(true)
+    end
+    it 'should connect to config boxes through ssh' do
+      connection_successful = true
+      @servers.each do |server|
+        `ssh -q -oStrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key -l vagrant #{server.ip} exit`
+        connection_successful &= ($?.exitstatus == 0)
+      end
+      expect(connection_successful).to eq(true)
     end
   end
 end
