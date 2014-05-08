@@ -31,6 +31,18 @@ module Bebox
       [@hosts, @vbox_uri, @vagrant_box_base_name]
       builder = Bebox::Builder.new(project_name, @hosts, @vbox_uri, @vagrant_box_base_name, Dir.pwd, @vagrant_box_provider)
       builder.build_vagrant_nodes
+      builder
+    end
+
+    # Description
+    # @return ..
+    def self.prepuppet_project(builder)
+      pre_stages = ask('What stages do you want?. Comma separated (production,staging)') do |q|
+        q.default = 'vagrant'
+      end
+      stages = pre_stages.split(',')
+      stages << 'vagrant' unless pre_stages.include?('vagrant')
+      prepuppet_builder = Bebox::PrepuppetBuilder.new(builder, stages)
     end
 
     # Description
