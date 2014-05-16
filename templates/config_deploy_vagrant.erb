@@ -1,0 +1,23 @@
+set :user, "vagrant"
+set :application, "<%= builder.project_name %>"
+# set :rails_env, "vagrant"
+# set(:deploy_to) { "/home/#{user}/#{application}/code" }
+# set :deploy_via, :copy
+# set :scm, :none
+# set :repository, "."
+# set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes"]
+
+set :ssh_options, {
+  :keys => '~/.vagrant.d/insecure_private_key',
+  :port => '22',
+  :forward_agent => 'true'
+}
+
+<% builder.servers.each do |server| %>
+server "<%= server.hostname %>", :web, :app, :db
+<% end %>
+
+desc 'Test the vagrant connection by doing issuing a simple echo command'
+task :probe, roles: [:web, :app, :db] do
+  run 'echo $PATH'
+end

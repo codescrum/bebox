@@ -1,0 +1,72 @@
+require 'capistrano/ext/multistage'
+
+set :application, "<%= builder.project_name %>"
+set :stages, ["production", "vagrant"]
+set :default_stage, 'vagrant'
+
+set :use_sudo, false
+# set :keep_releases, 5
+# set :deploy_via, :remote_cache
+# set(:deploy_to) { "/home/#{user}/#{application}/code" }
+
+set(:apt_dependencies) { %w(git-core build-essential) }
+
+# default_run_options[:pty] = true
+# default_run_options[:shell] = '/bin/bash --login'
+
+# set(:facter_variables) { {deploy_environment: stage, deploy_user: user, deploy_to: deploy_to} }
+
+# # Correctly determine the location of the hosts files within the local machine (for vagrant/puppet fqdn purposes)
+# set(:local_hosts_file_location) { RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'}
+# set(:remote_hosts_file_location) { '/etc' } #TODO: Make this automatic
+
+# # Remote sources file location tipically "/etc/apt/sources.list"
+# set(:remote_sources_file) { '/etc/apt/sources.list' }
+# # Remote apt cache location tipically "/var/cache/apt/archives/"
+# set(:remote_apt_cache_location) { '/var/cache/apt/archives/' }
+
+namespace :deploy do
+
+	desc 'Installs tools and required dependencies in the remote machine'
+	namespace :prepare do
+
+	  desc 'Install dependencies and command line tools to operate correctly'
+	  task :default do
+	    ubuntu.setup
+	    dependencies
+	  end
+
+	  desc 'Install libraries'
+	  task :dependencies do
+	    run "#{sudo} aptitude update"
+	    run "#{sudo} aptitude -y install #{apt_dependencies.join(' ')}"
+	  end
+
+	  namespace :ubuntu do
+	    desc 'Install dependencies and command line tools to opperate correctly'
+	    task :setup do
+	      full_upgrade
+	      set_fqdn
+	    end
+
+	    desc 'Upgrade system'
+	    task :full_upgrade do
+	      run "#{sudo} apt-get update"
+	      run "#{sudo} apt-get -y install aptitude"
+	      run "#{sudo} aptitude -y full-upgrade"
+	    end
+
+	    desc "Sets the boxes' fully qualified domain name (fqdn), through the 'hostname' command"
+	    task :set_fqdn do
+	      run('hostname') do |ch, stream, out|
+	        if ch[:server].host.strip == out.strip
+	          puts "The #{ch[:server]} server hostname is configured properly"
+	        else
+	          run "#{sudo} hostname #{ch[:server].host}", hosts: ch[:server]
+	        end
+	      end
+	    end
+
+	  end
+	end
+end
