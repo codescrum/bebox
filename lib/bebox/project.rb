@@ -16,17 +16,40 @@ module Bebox
       self.local_hosts_file_location = RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'
     end
 
+		# Project creation phase
     def create
     	create_project_directory
     	create_subdirectories
     end
 
+    # Create project directory
     def create_project_directory
       `cd #{self.parent_path} && mkdir -p #{self.name}`
     end
 
+		# Create project subdirectories
     def create_subdirectories
       `cd #{self.path} && mkdir -p config && mkdir -p config/deploy`
+    end
+
+		# Project dependency installation
+    def install_dependencies
+    	create_gemfile
+    	setup_bundle
+    end
+
+    # Create Gemfile for the project and run bundle_install
+    def setup_bundle
+      create_gemfile
+      `cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install`
+    end
+
+    # Create Gemfile for the project
+    def create_gemfile
+      gemfile_content = File.read('templates/Gemfile')
+      File::open("#{self.path}/Gemfile", "w")do |f|
+        f.write(gemfile_content)
+      end
     end
   end
 end

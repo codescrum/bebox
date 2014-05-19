@@ -7,5 +7,10 @@ FactoryGirl.define do
     parent_path "#{Dir.pwd}/tmp"
 
     initialize_with { new(name, servers, vbox_uri, vagrant_box_base_name, parent_path) }
+
+    trait :created do
+      after(:build) { |project| project.create }
+    end
+
   end
 end
