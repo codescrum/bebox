@@ -1,5 +1,5 @@
 require 'bebox/version.rb'
-require 'bebox/builder.rb'
+require 'bebox/project.rb'
 require 'bebox/server.rb'
 require 'bebox/wizard.rb'
 

@@ -1,5 +1,5 @@
 require_relative 'server'
-require_relative 'builder'
+require_relative 'project'
 require 'highline/import'
 module Bebox
   class Wizard
@@ -20,7 +20,7 @@ module Bebox
 
       @vagrant_box_base_name =  ask('vagrant box base name?') do |q|
         # TODO q.validate = /\A\w+\Z/
-        q.default ='ubuntu1204x64'
+        q.default = "vagrant_#{project_name}"
       end
 
       @vagrant_box_provider = ask('vagrant box provider?') do |q|
@@ -29,9 +29,9 @@ module Bebox
       end
 
       [@hosts, @vbox_uri, @vagrant_box_base_name]
-      builder = Bebox::Builder.new(project_name, @hosts, @vbox_uri, @vagrant_box_base_name, Dir.pwd, @vagrant_box_provider)
-      builder.build_vagrant_nodes
-      builder
+      project = Bebox::Project.new(project_name, @hosts, @vbox_uri, @vagrant_box_base_name, Dir.pwd, @vagrant_box_provider)
+      project.create
+      project
     end
 
     # Description
