@@ -1,5 +1,5 @@
 set :user, "vagrant"
-set :application, "<%= builder.project_name %>"
+set :application, "<%= prepuppet.builder.project_name %>"
 # set :rails_env, "vagrant"
 # set(:deploy_to) { "/home/#{user}/#{application}/code" }
 # set :deploy_via, :copy
@@ -13,7 +13,7 @@ set :ssh_options, {
   :forward_agent => 'true'
 }
 
-<% builder.servers.each do |server| %>
+<% prepuppet.builder.servers.each do |server| %>
 server "<%= server.hostname %>", :web, :app, :db
 <% end %>
 

@@ -1,7 +1,7 @@
 require 'capistrano/ext/multistage'
 
-set :application, "<%= builder.project_name %>"
-set :stages, ["production", "vagrant"]
+set :application, "<%= prepuppet.builder.project_name %>"
+set :stages, <%= prepuppet.stages %>
 set :default_stage, 'vagrant'
 
 set :use_sudo, false
@@ -9,7 +9,7 @@ set :use_sudo, false
 # set :deploy_via, :remote_cache
 # set(:deploy_to) { "/home/#{user}/#{application}/code" }
 
-set(:apt_dependencies) { %w(git-core build-essential) }
+set(:apt_dependencies) { <%= Bebox::PrepuppetBuilder::UBUNTU_DEPENDENCIES %> }
 
 # default_run_options[:pty] = true
 # default_run_options[:shell] = '/bin/bash --login'

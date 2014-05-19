@@ -1,7 +1,7 @@
 require 'capistrano/ext/multistage'
 
 set :application, "pname"
-set :stages, ["production", "vagrant"]
+set :stages, ["vagrant", "production"]
 set :default_stage, 'vagrant'
 
 set :use_sudo, false
@@ -9,7 +9,7 @@ set :use_sudo, false
 # set :deploy_via, :remote_cache
 # set(:deploy_to) { "/home/#{user}/#{application}/code" }
 
-set(:apt_dependencies) { %w(git-core build-essential) }
+set(:apt_dependencies) { ["git-core", "build-essential"] }
 
 # default_run_options[:pty] = true
 # default_run_options[:shell] = '/bin/bash --login'
@@ -26,6 +26,7 @@ set(:apt_dependencies) { %w(git-core build-essential) }
 # set(:remote_apt_cache_location) { '/var/cache/apt/archives/' }
 
 namespace :deploy do
+
   desc 'Installs tools and required dependencies in the remote machine'
   namespace :prepare do
 

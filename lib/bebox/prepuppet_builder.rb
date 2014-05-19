@@ -1,6 +1,7 @@
 module Bebox
   class PrepuppetBuilder
 
+    UBUNTU_DEPENDENCIES = %w(git-core build-essential)
     attr_accessor :stages, :builder, :new_project_root
 
     def initialize(builder, stages)
@@ -36,13 +37,13 @@ module Bebox
     def create_deploy_files
       config_deploy_template = Tilt::ERBTemplate.new("templates/config_deploy.erb")
       File.open("#{@new_project_root}/config/deploy.rb", 'w') do |f|
-        f.write config_deploy_template.render(nil, :builder => self.builder)
+        f.write config_deploy_template.render(nil, :prepuppet => self)
       end
       stages.each do |stage|
         template_name = (stage == 'vagrant') ? "vagrant" : "stage"
         config_deploy_template = Tilt::ERBTemplate.new("templates/config_deploy_#{template_name}.erb")
         File.open("#{@new_project_root}/config/deploy/#{stage}.rb", 'w') do |f|
-          f.write config_deploy_template.render(nil, :builder => self.builder)
+          f.write config_deploy_template.render(nil, :prepuppet => self)
         end
       end
     end
