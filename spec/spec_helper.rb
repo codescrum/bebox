@@ -31,7 +31,7 @@ RSpec.configure do |config|
 	end
 
   config.after(:all) do
-    # `rm -rf tmp/*`
+    `rm -rf tmp/*`
   end
 
 	# Factory Girl methods
