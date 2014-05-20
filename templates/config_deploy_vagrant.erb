@@ -1,5 +1,9 @@
 set :user, "vagrant"
 set :application, "<%= self.name %>"
+set :deploy_via, :copy
+set :scm, :none
+set :repository, "."
+set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes"]
 
 set :ssh_options, {
   :keys => '~/.vagrant.d/insecure_private_key',

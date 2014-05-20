@@ -25,6 +25,7 @@ module Bebox
     def create
     	create_project_directory
     	create_subdirectories
+      copy_puppet
     end
 
 		# Project dependency installation (phase 2)
@@ -44,6 +45,13 @@ module Bebox
     def install_common_dev_environment
       self.environments.each do |environment|
         environment.install_common_dev if environment.name == 'vagrant'
+      end
+    end
+
+    # Install puppet for the environment (phase 5)
+    def install_puppet
+      self.environments.each do |environment|
+        Puppet.install if environment.name == 'vagrant'
       end
     end
 
@@ -98,6 +106,10 @@ module Bebox
       File::open("#{self.path}/Capfile", "w")do |f|
         f.write(capfile_content)
       end
+    end
+
+    def copy_puppet
+      `cp -r puppet #{self.path}`
     end
   end
 end

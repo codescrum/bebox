@@ -15,14 +15,14 @@ FactoryGirl.define do
     trait :dependency_installed do
       after(:build) do |project|
       	project.create
-      	project.setup_bundle
+      	project.install_dependencies
       end
     end
 
     trait :with_vagrant_up do
       after(:build) do |project|
       	project.create
-      	project.setup_bundle
+      	project.install_dependencies
       	project.run_vagrant_environment
       end
     end
