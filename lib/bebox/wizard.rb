@@ -28,15 +28,22 @@ module Bebox
         q.default ='virtualbox'
       end
 
-      [@hosts, @vbox_uri, @vagrant_box_base_name]
-      project = Bebox::Project.new(project_name, @hosts, @vbox_uri, @vagrant_box_base_name, Dir.pwd, @vagrant_box_provider)
+       pre_environments = ask('deploy environments?') do |q|
+        # TODO q.validate = /\A\w+\Z/
+        q.default ='vagrant'
+      end
+
+      environments = pre_environments.split(',')
+      environments << 'vagrant' unless pre_environments.include?('vagrant')
+
+      project = Bebox::Project.new(project_name, @hosts, @vbox_uri, @vagrant_box_base_name, Dir.pwd, @vagrant_box_provider, environments)
       project.create
       project
     end
 
     # Description
     # @return ..
-    def self.prepuppet_project(builder)
+    def self.create_environments(project)
       pre_stages = ask('What stages do you want?. Comma separated (production,staging)') do |q|
         q.default = 'vagrant'
       end

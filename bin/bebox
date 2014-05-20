@@ -26,7 +26,8 @@ command :new do |c|
     project.install_dependencies
     # Phase 3
     project.run_vagrant_environment
-    # Bebox::Wizard.prepuppet_project(builder)
+    # Phase 4
+    # Bebox::Wizard.common_dev_installation(builder)
   end
 end
 

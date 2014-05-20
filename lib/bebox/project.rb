@@ -1,11 +1,13 @@
 require 'tilt'
 require "bebox/server"
+require "bebox/environment"
+
 module Bebox
   class Project
 
-		attr_accessor :name, :servers, :vbox_path, :vagrant_box_base_name, :vagrant_box_provider, :parent_path, :path, :local_hosts_file_location, :environments
+		attr_accessor :name, :servers, :vbox_path, :vagrant_box_base_name, :vagrant_box_provider, :parent_path, :path, :hosts_path, :hosts_backup_file, :environments
 
-    def initialize(name, servers, vbox_path, vagrant_box_base_name, parent_path = Dir.pwd, vagrant_box_provider = 'virtualbox')
+    def initialize(name, servers, vbox_path, vagrant_box_base_name, parent_path = Dir.pwd, vagrant_box_provider = 'virtualbox', environments = [])
       self.name = name
       self.servers = servers
       self.vbox_path= vbox_path
@@ -13,7 +15,11 @@ module Bebox
       self.vagrant_box_provider = vagrant_box_provider
       self.parent_path = parent_path
       self.path = "#{self.parent_path}/#{self.name}"
-      self.local_hosts_file_location = RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'
+      self.hosts_path = RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'
+      self.environments = []
+      environments.each do |env|
+        self.environments << Bebox::Environment.new(env, self)
+      end
     end
 
 		# Project creation (phase 1)
@@ -30,6 +36,7 @@ module Bebox
 
 		# Run vagrant boxes for configure nodes in project (phase 3)
     def run_vagrant_environment
+      configure_local_hosts
     	generate_vagrantfile
     	add_vagrant_boxes
     	up_vagrant_nodes
@@ -63,7 +70,7 @@ module Bebox
     def generate_vagrantfile
       template = Tilt::ERBTemplate.new("templates/Vagrantfile.erb")
       File.open("#{self.path}/Vagrantfile", 'w') do |f|
-        f.write template.render(@servers, :vagrant_box_base_name => @vagrant_box_base_name)
+        f.write template.render(self.servers, :vagrant_box_base_name => self.vagrant_box_base_name)
       end
     end
 
@@ -79,7 +86,7 @@ module Bebox
 
     # Remove the specified boxes from vagrant
     def remove_vagrant_boxes
-      @servers.size.times do |i|
+      self.servers.size.times do |i|
         `cd #{self.path} && vagrant destroy -f node_#{i}`
         `cd #{self.path} && vagrant box remove #{self.vagrant_box_base_name}_#{i} #{self.vagrant_box_provider}`
       end
@@ -105,6 +112,38 @@ module Bebox
     # @returns String
     def vagrant_nodes_status
       `cd #{self.path} && vagrant status`
+    end
+
+    # Backup and add the vagrant hosts to local hosts file
+    def configure_local_hosts
+      backup_local_hosts
+      add_to_local_hosts
+    end
+
+    # Add the vagrant hosts to the local hosts file
+    def add_to_local_hosts
+      # Get the content of the hosts file
+      hosts_content = File.read("#{self.hosts_path}/hosts").gsub(/\s+/, ' ').strip
+      # For each server it adds a line to the hosts file if this not exist
+      self.servers.each do |server|
+        line = "#{server.ip} #{server.hostname}"
+        server_present = (hosts_content =~ /#{server.ip}\s+#{server.hostname}/) ? true : false
+        `sudo echo '#{line}     # Added by bebox' | sudo tee -a #{self.hosts_path}/hosts` unless server_present
+      end
+    end
+
+    # Backup the local hosts file
+    def backup_local_hosts
+      # Make a backup of hosts file with the actual datetime
+      self.hosts_backup_file = "#{self.hosts_path}/hosts_#{Time.now.strftime('%Y_%m_%d_%H_%M_%S')}"
+      `sudo cp #{self.hosts_path}/hosts #{self.hosts_backup_file}`
+    end
+
+    # Restore the previous local hosts file
+    def restore_local_hosts
+      `sudo cp #{self.hosts_backup_file} #{self.hosts_path}/hosts`
+      `sudo rm #{self.hosts_backup_file}`
+      self.hosts_backup_file = ''
     end
 
   end
