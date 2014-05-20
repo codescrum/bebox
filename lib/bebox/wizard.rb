@@ -15,7 +15,7 @@ module Bebox
 
       @vbox_uri =  ask('vbox uri?')do |q|
         # TODO q.validate = /\A\w+\Z/
-        q.default = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
+        q.default = "#{Dir.pwd}/ubuntu-server-12042-x64-vbox4210-nocm.box"
       end
 
       @vagrant_box_base_name =  ask('vagrant box base name?') do |q|

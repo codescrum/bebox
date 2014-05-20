@@ -24,6 +24,8 @@ command :new do |c|
     project = Bebox::Wizard.create_new_project(args.first)
     # Phase 2
     project.install_dependencies
+    # Phase 3
+    project.run_vagrant_environment
     # Bebox::Wizard.prepuppet_project(builder)
   end
 end

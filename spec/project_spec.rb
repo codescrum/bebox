@@ -33,9 +33,42 @@ describe Bebox::Project do
       expect(output_file).to eq(expected_content)
     end
     it 'should install dependencies' do
+      subject.create_gemfile
       subject.setup_bundle
       expect(File).to exist("#{subject.path}/Gemfile.lock")
       expect(Dir).to exist("#{subject.path}/.bundle")
+    end
+  end
+
+  describe 'Run vagrant boxes for project', :slow do
+
+    subject { build(:project, :dependency_installed) }
+
+    # after(:all) do
+    #   subject.halt_vagrant_nodes
+    #   subject.remove_vagrant_boxes
+    # end
+
+    it 'should create Vagrantfile' do
+      subject.generate_vagrantfile
+      output_file = File.read("#{subject.path}/Vagrantfile").gsub(/\s+/, ' ').strip
+      output_file_test = File.read("spec/fixtures/Vagrantfile.test").gsub(/\s+/, ' ').strip
+      expect(output_file).to eq(output_file_test)
+    end
+
+    it 'should add the boxes to vagrant' do
+      vagrant_box_names_expected = ['test_0']
+      subject.generate_vagrantfile
+      subject.add_vagrant_boxes
+      expect(subject.installed_vagrant_box_names).to include(*vagrant_box_names_expected)
+    end
+
+    it 'should up the vagrant boxes' do
+      subject.run_vagrant_environment
+      vagrant_status = subject.vagrant_nodes_status
+      nodes_running = true
+      subject.servers.size.times{|i| nodes_running &= (vagrant_status =~ /node_#{i}\s+running/)}
+      expect(nodes_running).to eq(true)
     end
   end
 end
