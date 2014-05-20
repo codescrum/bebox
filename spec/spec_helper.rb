@@ -10,12 +10,12 @@ require 'net/ssh'
 include Serverspec::Helper::Ssh
 include Serverspec::Helper::Debian
 
+require_relative '../lib/bebox/environment'
 require_relative '../lib/bebox/project'
 require_relative '../lib/bebox/server'
-require_relative '../lib/bebox/environment'
 require_relative '../spec/factories/server.rb'
 require_relative '../spec/factories/project.rb'
-# require_relative '../spec/factories/environment.rb'
+require_relative '../spec/factories/environment.rb'
 I18n.enforce_available_locales = false
 
 

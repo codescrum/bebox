@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe 'vagrant up environment' do
 
-	let(:project) { build(:project, :with_vagrant_up) }
+	let(:environment) { build(:environment, :with_vagrant_up) }
 
 	before :all do
 		RSpec.configure do |config|
-	    host = project.servers.first.ip
+	    host = environment.servers.first.ip
 	    if config.host != host
 	    	config.disable_sudo = true
 	      config.ssh.close if config.ssh
@@ -20,8 +20,13 @@ describe 'vagrant up environment' do
 		end
 	end
 
+  after(:all) do
+    environment.halt_vagrant_nodes
+    environment.remove_vagrant_boxes
+  end
+
 	describe interface('eth1') do
-	  it { should have_ipv4_address(project.servers.first.ip) }
+	  it { should have_ipv4_address(environment.servers.first.ip) }
 	end
 
 	describe host('server1.pname.test') do

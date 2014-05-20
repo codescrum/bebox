@@ -27,7 +27,7 @@ command :new do |c|
     # Phase 3
     project.run_vagrant_environment
     # Phase 4
-    # Bebox::Wizard.common_dev_installation(builder)
+    project.install_common_dev_environment
   end
 end
 
