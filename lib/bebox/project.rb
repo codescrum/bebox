@@ -30,8 +30,8 @@ module Bebox
 
 		# Project dependency installation (phase 2)
     def install_dependencies
-    	create_gemfile
     	setup_bundle
+      setup_capistrano
     end
 
 		# Run vagrant boxes for configure nodes in project (phase 3)
@@ -58,6 +58,12 @@ module Bebox
       `cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install`
     end
 
+    # Create Capfile and deploy files
+    def setup_capistrano
+      create_capfile
+      generate_deploy_files
+    end
+
     # Create Gemfile for the project
     def create_gemfile
       gemfile_content = File.read('templates/Gemfile')
@@ -66,11 +72,34 @@ module Bebox
       end
     end
 
-    # Generate the vagrantfile
+    # Generate the Vagrantfile
     def generate_vagrantfile
       template = Tilt::ERBTemplate.new("templates/Vagrantfile.erb")
       File.open("#{self.path}/Vagrantfile", 'w') do |f|
         f.write template.render(self.servers, :vagrant_box_base_name => self.vagrant_box_base_name)
+      end
+    end
+
+    # Generate the deploy files for each project environment
+    def generate_deploy_files
+      config_deploy_template = Tilt::ERBTemplate.new("templates/config_deploy.erb")
+      File.open("#{self.path}/config/deploy.rb", 'w') do |f|
+        f.write config_deploy_template.render(self)
+      end
+      self.environments.each do |environment|
+        template_name = (environment.name == 'vagrant') ? "vagrant" : "environment"
+        config_deploy_template = Tilt::ERBTemplate.new("templates/config_deploy_#{template_name}.erb")
+        File.open("#{self.path}/config/deploy/#{environment.name}.rb", 'w') do |f|
+          f.write config_deploy_template.render(self)
+        end
+      end
+    end
+
+    # Create Capfile for the project
+    def create_capfile
+      capfile_content = File.read('templates/Capfile')
+      File::open("#{self.path}/Capfile", "w")do |f|
+        f.write(capfile_content)
       end
     end
 

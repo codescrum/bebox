@@ -38,6 +38,16 @@ describe Bebox::Project do
       expect(File).to exist("#{subject.path}/Gemfile.lock")
       expect(Dir).to exist("#{subject.path}/.bundle")
     end
+
+    it 'should setup capistrano in project with the configured environments' do
+      subject.setup_capistrano
+      config_deploy_content = File.read("#{subject.path}/config/deploy.rb").gsub(/\s+/, ' ').strip
+      config_deploy_output_content = File.read("spec/fixtures/config_deploy.test").gsub(/\s+/, ' ').strip
+      expect(config_deploy_content).to eq(config_deploy_output_content)
+      config_deploy_vagrant_content = File.read("#{subject.path}/config/deploy/vagrant.rb").gsub(/\s+/, ' ').strip
+      config_deploy_vagrant_output_content = File.read("spec/fixtures/config_deploy_vagrant.test").gsub(/\s+/, ' ').strip
+      expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
+    end
   end
 
   describe 'Run vagrant boxes for project', :slow do

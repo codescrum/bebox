@@ -3,27 +3,8 @@ require 'capistrano/ext/multistage'
 set :application, "pname"
 set :stages, ["vagrant", "production"]
 set :default_stage, 'vagrant'
-
 set :use_sudo, false
-# set :keep_releases, 5
-# set :deploy_via, :remote_cache
-# set(:deploy_to) { "/home/#{user}/#{application}/code" }
-
-set(:apt_dependencies) { ["git-core", "build-essential"] }
-
-# default_run_options[:pty] = true
-# default_run_options[:shell] = '/bin/bash --login'
-
-# set(:facter_variables) { {deploy_environment: stage, deploy_user: user, deploy_to: deploy_to} }
-
-# # Correctly determine the location of the hosts files within the local machine (for vagrant/puppet fqdn purposes)
-# set(:local_hosts_file_location) { RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'}
-# set(:remote_hosts_file_location) { '/etc' } #TODO: Make this automatic
-
-# # Remote sources file location tipically "/etc/apt/sources.list"
-# set(:remote_sources_file) { '/etc/apt/sources.list' }
-# # Remote apt cache location tipically "/var/cache/apt/archives/"
-# set(:remote_apt_cache_location) { '/var/cache/apt/archives/' }
+set(:apt_dependencies) { ["git-core", "build-essential", "curl"] }
 
 namespace :deploy do
 
@@ -66,7 +47,6 @@ namespace :deploy do
           end
         end
       end
-
     end
   end
 end
