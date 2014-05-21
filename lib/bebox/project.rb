@@ -111,5 +111,11 @@ module Bebox
     def copy_puppet
       `cp -r puppet #{self.path}`
     end
+
+    def environment_by_name(name)
+      self.environments.each do |environment|
+        return environment if environment.name == name
+      end
+    end
   end
 end

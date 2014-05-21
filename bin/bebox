@@ -25,9 +25,13 @@ command :new do |c|
     # Phase 2
     project.install_dependencies
     # Phase 3
-    project.run_vagrant_environment
+    environment = project.environment_by_name('vagrant')
+    environment.up
     # Phase 4
-    project.install_common_dev_environment
+    environment.install_common_dev
+    # Phase 5
+    puppet = Bebox::Puppet.new(environment)
+    puppet.install
   end
 end
 

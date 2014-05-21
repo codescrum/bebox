@@ -58,7 +58,7 @@ module Bebox
       eval(@number_of_machines).times do |number_node|
         begin
           answer = ask("Ip and hostname for node #{number_node} ( 127.0.0.1, server1.project1.development )?") do |q|
-            q.validate = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}, ?\w+\Z/
+            q.validate = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3},\s*\S+\Z/
           end
           hosts_attributes = answer.split(',')
           ip = hosts_attributes[0].strip
