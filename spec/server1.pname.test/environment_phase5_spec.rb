@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe 'Environment with vagrant up' do
+describe 'Puppet installed in vagrant machine' do
 
-	let(:environment) { build(:environment, :with_vagrant_up) }
+	let(:puppet) { build(:puppet, :installed) }
 
 	before :all do
 		RSpec.configure do |config|
-	    host = environment.servers.first.ip
+	    host = puppet.environment.servers.first.ip
 	    if config.host != host
 	    	config.disable_sudo = true
 	      config.ssh.close if config.ssh
@@ -25,21 +25,12 @@ describe 'Environment with vagrant up' do
     environment.remove_vagrant_boxes
   end
 
-	describe interface('eth1') do
-	  it { should have_ipv4_address(environment.servers.first.ip) }
+	describe package('puppet') do
+		it { should be_installed }
 	end
 
-	describe host('server1.pname.test') do
-  	it { should be_resolvable }
-	end
-
-	describe host('server1.pname.test') do
-	  it { should be_reachable }
-	  it { should be_reachable.with( :port => 22 ) }
-	end
-
-	describe user('vagrant') do
-	  it { should exist }
+	describe service('puppet') do
+	  it { should be_installed }
 	end
 
 end

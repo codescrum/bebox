@@ -6,6 +6,16 @@ set :default_stage, 'vagrant'
 set :use_sudo, false
 set(:apt_dependencies) { ["git-core", "build-essential", "curl"] }
 
+set :keep_releases, 5
+set :deploy_via, :remote_cache
+set(:deploy_to) { "/home/#{user}/#{application}/code" }
+# Relative puppet deb location
+set(:relative_puppet_deb_location){'puppet/lib/deb/puppet_3.6.0/'}
+# Remote location of the puppet_repo
+set(:remote_puppet_repo_location) { "#{current_path}/#{relative_puppet_deb_location}" }
+
+after 'deploy:prepare', 'deploy:setup', 'deploy'
+
 namespace :deploy do
 
   desc 'Installs tools and required dependencies in the remote machine'
@@ -47,6 +57,17 @@ namespace :deploy do
           end
         end
       end
+    end
+  end
+end
+
+namespace :puppet do
+
+  namespace :install do
+
+    desc 'Install puppet on the remote machine (free-standalone) [including dependencies]'
+    task :default do
+      run "#{sudo} dpkg -i #{remote_puppet_repo_location}*.deb"
     end
   end
 end

@@ -59,15 +59,15 @@ namespace :deploy do
 	    end
 	  end
 	end
+end
 
-	namespace :puppet do
+namespace :puppet do
 
-	  namespace :install do
+  namespace :install do
 
-	    desc 'Install puppet on the remote machine (free-standalone) [including dependencies]'
-	    task :default do
-	      run "#{sudo} dpkg -i #{remote_puppet_repo_location}*.deb"
-	    end
-	  end
+    desc 'Install puppet on the remote machine (free-standalone) [including dependencies]'
+    task :default do
+      run "#{sudo} dpkg -i #{remote_puppet_repo_location}*.deb"
+    end
   end
 end

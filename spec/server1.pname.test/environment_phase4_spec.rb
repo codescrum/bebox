@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'environment with common dev installed' do
+describe 'Environment with common dev installed' do
 
 	let(:environment) { build(:environment, :with_common_dev) }
 
@@ -24,14 +24,6 @@ describe 'environment with common dev installed' do
     environment.halt_vagrant_nodes
     environment.remove_vagrant_boxes
   end
-
-	describe package('curl') do
-		it { should be_installed }
-	end
-
-	describe package('git-core') do
-		it { should be_installed }
-	end
 
 	describe command('hostname') do
 		it 'should configure the hostname' do
