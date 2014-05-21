@@ -79,7 +79,7 @@ module Bebox
 
     # Create Gemfile for the project
     def create_gemfile
-      gemfile_content = File.read('templates/Gemfile')
+      gemfile_content = File.read('templates/Gemfile.erb')
       File::open("#{self.path}/Gemfile", "w")do |f|
         f.write(gemfile_content)
       end
@@ -87,13 +87,13 @@ module Bebox
 
     # Generate the deploy files for each project environment
     def generate_deploy_files
-      config_deploy_template = Tilt::ERBTemplate.new("templates/config_deploy.erb")
+      config_deploy_template = Tilt::ERBTemplate.new("templates/config/deploy.erb")
       File.open("#{self.path}/config/deploy.rb", 'w') do |f|
         f.write config_deploy_template.render(self)
       end
       self.environments.each do |environment|
         template_name = (environment.name == 'vagrant') ? "vagrant" : "environment"
-        config_deploy_template = Tilt::ERBTemplate.new("templates/config_deploy_#{template_name}.erb")
+        config_deploy_template = Tilt::ERBTemplate.new("templates/config/deploy/#{template_name}.erb")
         File.open("#{self.path}/config/deploy/#{environment.name}.rb", 'w') do |f|
           f.write config_deploy_template.render(self)
         end
@@ -102,7 +102,7 @@ module Bebox
 
     # Create Capfile for the project
     def create_capfile
-      capfile_content = File.read('templates/Capfile')
+      capfile_content = File.read('templates/Capfile.erb')
       File::open("#{self.path}/Capfile", "w")do |f|
         f.write(capfile_content)
       end
