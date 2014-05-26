@@ -1,6 +1,7 @@
 require 'spec_helper'
+require_relative '../spec/factories/server.rb'
 
-describe Bebox::Server do
+describe 'Phase 00: Bebox::Server' do
 
   subject { build(:server) }
 

@@ -1,32 +1,18 @@
 require 'spec_helper'
+require_relative 'vagrant_spec_helper.rb'
+require_relative '../factories/environment.rb'
 
-describe 'Environment with vagrant up' do
+describe 'Phase 03: Environment with vagrant up' do
 
-	let(:environment) { build(:environment, :with_vagrant_up) }
+	# let(:environment) { build(:environment, :with_vagrant_up) }
+	let(:environment) { build(:environment) }
 
-	before :all do
-		RSpec.configure do |config|
-	    host = environment.servers.first.ip
-	    if config.host != host
-	    	config.disable_sudo = true
-	      config.ssh.close if config.ssh
-	      config.host  = host
-	      options = Net::SSH::Config.for(config.host)
-	      options[:keys] = %w(~/.vagrant.d/insecure_private_key)
-				options[:forward_agent] = true
-	      user = 'vagrant'
-	      config.ssh   = Net::SSH.start(config.host, user, options)
-	    end
-		end
+	before(:all) do
+		 environment.up
 	end
 
-  after(:all) do
-    environment.halt_vagrant_nodes
-    environment.remove_vagrant_boxes
-  end
-
 	describe interface('eth1') do
-	  it { should have_ipv4_address(environment.servers.first.ip) }
+	  it { should have_ipv4_address(environment.project.servers.first.ip) }
 	end
 
 	describe host('server1.pname.test') do

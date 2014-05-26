@@ -3,17 +3,13 @@ require 'tilt'
 module Bebox
   class Environment
 
-    UBUNTU_DEPENDENCIES = %w(git-core build-essential curl)
+    UBUNTU_DEPENDENCIES = %w(git-core build-essential curl whois openssl)
 
-    attr_accessor :name, :project_path, :servers, :vbox_path, :vagrant_box_base_name, :vagrant_box_provider, :hosts_backup_file, :local_hosts_path
+    attr_accessor :name, :project, :local_hosts_path, :hosts_backup_file
 
-    def initialize(name, project_path, servers, vbox_path, vagrant_box_base_name, vagrant_box_provider)
+    def initialize(name, project)
       self.name = name
-      self.project_path = project_path
-      self.servers = servers
-      self.vbox_path = vbox_path
-      self.vagrant_box_base_name = vagrant_box_base_name
-      self.vagrant_box_provider = vagrant_box_provider
+      self.project = project
       self.local_hosts_path = RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'
     end
 
@@ -27,59 +23,83 @@ module Bebox
 
     # Install the common development dependecies with capistrano prepare (phase 4)
     def install_common_dev
-      `cd #{self.project_path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{name} deploy:prepare`
+      config_initial_puppet
+      `cd #{self.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{name} deploy:prepare_common_dev -s phase='common_dev'`
+    end
+
+    def config_initial_puppet
+      config_initial_hiera
+      config_manifests
+    end
+
+    def config_initial_hiera
+      hiera_template = Tilt::ERBTemplate.new("templates/initial_puppet/hiera/hiera.yaml.erb")
+      File.open("#{self.project.path}/initial_puppet/hiera/hiera.yaml", 'w') do |f|
+        f.write hiera_template.render(nil)
+      end
+      common_hiera_template = Tilt::ERBTemplate.new("templates/initial_puppet/hiera/data/common.yaml.erb")
+      ssh_puppet_key = File.read("#{self.project.path}/keys/puppet.rsa.pub")
+      File.open("#{self.project.path}/initial_puppet/hiera/data/common.yaml", 'w') do |f|
+        f.write common_hiera_template.render(self, :puppet_key => ssh_puppet_key)
+      end
+    end
+
+    def config_manifests
+      `cp templates/initial_puppet/manifests/site.pp #{self.project.path}/initial_puppet/manifests`
+      `cp templates/initial_puppet/modules/users/manifests/*.pp #{self.project.path}/initial_puppet/modules/users/manifests`
     end
 
     # Generate the Vagrantfile
     def generate_vagrantfile
       template = Tilt::ERBTemplate.new("templates/Vagrantfile.erb")
-      File.open("#{self.project_path}/Vagrantfile", 'w') do |f|
-        f.write template.render(self.servers, :vagrant_box_base_name => self.vagrant_box_base_name)
+      File.open("#{self.project.path}/Vagrantfile", 'w') do |f|
+        f.write template.render(self.project.servers, :vagrant_box_base_name => self.project.vagrant_box_base_name)
       end
     end
 
     # Add the configured boxes to vagrant
     def add_vagrant_boxes
       already_installed_boxes = installed_vagrant_box_names
-      self.servers.each_with_index do |server, index|
-        box_name = "#{self.vagrant_box_base_name}_#{index}"
+      self.project.servers.each_with_index do |server, index|
+        box_name = "#{self.project.vagrant_box_base_name}_#{index}"
         puts "  Adding server: #{server.hostname}..."
-        `cd #{self.project_path} && vagrant box add #{box_name} #{vbox_path}` unless already_installed_boxes.include? box_name
+        `cd #{self.project.path} && vagrant box add #{box_name} #{self.project.vbox_path}` unless already_installed_boxes.include? box_name
       end
     end
 
     # Remove the specified boxes from vagrant
     def remove_vagrant_boxes
-      self.servers.size.times do |i|
-        `cd #{self.project_path} && vagrant destroy -f node_#{i}`
-        `cd #{self.project_path} && vagrant box remove #{self.vagrant_box_base_name}_#{i} #{self.vagrant_box_provider}`
+      self.project.servers.size.times do |i|
+        `cd #{self.project.path} && vagrant destroy -f node_#{i}`
+        `cd #{self.project.path} && vagrant box remove #{self.project.vagrant_box_base_name}_#{i} #{self.project.vagrant_box_provider}`
       end
     end
 
     # Up the vagrant boxes in Vagrantfile
     def up_vagrant_nodes
-      `cd #{self.project_path} && vagrant up --provision`
+      `cd #{self.project.path} && vagrant up --provision`
     end
 
     # Halt the vagrant boxes running
     def halt_vagrant_nodes
-      `cd #{self.project_path} && vagrant halt`
+      `cd #{self.project.path} && vagrant halt`
     end
 
     # return an Array with the names of the currently installed vagrant boxes
     # @returns Array
     def installed_vagrant_box_names
-      (`cd #{self.project_path} && vagrant box list`).split("\n").map{|vagrant_box| vagrant_box.split(' ').first}
+      (`cd #{self.project.path} && vagrant box list`).split("\n").map{|vagrant_box| vagrant_box.split(' ').first}
     end
 
     # return an String with the status of vagrant boxes
     # @returns String
     def vagrant_nodes_status
-      `cd #{self.project_path} && vagrant status`
+      `cd #{self.project.path} && vagrant status`
     end
 
     # Backup and add the vagrant hosts to local hosts file
     def configure_local_hosts
+      puts 'Please provide your root password, if asked, to configure the local hosts file'
       backup_local_hosts
       add_to_local_hosts
     end
@@ -89,7 +109,7 @@ module Bebox
       # Get the content of the hosts file
       hosts_content = File.read("#{self.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
       # For each server it adds a line to the hosts file if this not exist
-      self.servers.each do |server|
+      self.project.servers.each do |server|
         line = "#{server.ip} #{server.hostname}"
         server_present = (hosts_content =~ /#{server.ip}\s+#{server.hostname}/) ? true : false
         `sudo echo '#{line}     # Added by bebox' | sudo tee -a #{self.local_hosts_path}/hosts` unless server_present

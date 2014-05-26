@@ -1,3 +1,5 @@
+require_relative '../factories/server.rb'
+
 FactoryGirl.define do
   factory :project, :class => Bebox::Project do
     name "pname"
@@ -16,14 +18,6 @@ FactoryGirl.define do
       after(:build) do |project|
       	project.create
       	project.install_dependencies
-      end
-    end
-
-    trait :with_vagrant_up do
-      after(:build) do |project|
-      	project.create
-      	project.install_dependencies
-      	project.run_vagrant_environment
       end
     end
   end

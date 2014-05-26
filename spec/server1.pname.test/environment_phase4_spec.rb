@@ -1,33 +1,19 @@
 require 'spec_helper'
+require_relative 'vagrant_spec_helper.rb'
+require_relative '../factories/environment.rb'
 
-describe 'Environment with common dev installed' do
+describe 'Phase 04: Environment with common dev installed and initial hiera for users configured' do
 
-	let(:environment) { build(:environment, :with_common_dev) }
+	# let(:environment) { build(:environment, :with_common_dev) }
+	let(:environment) { build(:environment) }
 
-	before :all do
-		RSpec.configure do |config|
-	    host = environment.servers.first.ip
-	    if config.host != host
-	    	config.disable_sudo = true
-	      config.ssh.close if config.ssh
-	      config.host  = host
-	      options = Net::SSH::Config.for(config.host)
-	      options[:keys] = %w(~/.vagrant.d/insecure_private_key)
-				options[:forward_agent] = true
-	      user = 'vagrant'
-	      config.ssh   = Net::SSH.start(config.host, user, options)
-	    end
-		end
+	before(:all) do
+  	environment.install_common_dev
 	end
-
-  after(:all) do
-    environment.halt_vagrant_nodes
-    environment.remove_vagrant_boxes
-  end
 
 	describe command('hostname') do
 		it 'should configure the hostname' do
-			should return_stdout environment.servers.first.hostname
+			should return_stdout environment.project.servers.first.hostname
 		end
 	end
 
@@ -35,6 +21,18 @@ describe 'Environment with common dev installed' do
 		it 'should install ubuntu dependencies' do
 			should return_stdout /(Status: install ok installed\s*){#{Bebox::Environment::UBUNTU_DEPENDENCIES.size}}/
 		end
+	end
+
+	describe file('/home/vagrant/pname/code/current/initial_puppet/hiera/hiera.yaml') do
+	  it { should be_file }
+	  its(:content) {
+			hiera_content = File.read("spec/fixtures/hiera.yaml.test")
+	  	should == hiera_content
+	  }
+	end
+
+	describe file('/home/vagrant/pname/code/current/initial_puppet/hiera/data/common.yaml') do
+	  it { should be_file }
 	end
 
 end

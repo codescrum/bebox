@@ -14,12 +14,8 @@ require_relative '../lib/bebox/environment'
 require_relative '../lib/bebox/project'
 require_relative '../lib/bebox/server'
 require_relative '../lib/bebox/puppet'
-require_relative '../spec/factories/server.rb'
-require_relative '../spec/factories/project.rb'
-require_relative '../spec/factories/environment.rb'
-require_relative '../spec/factories/puppet.rb'
-I18n.enforce_available_locales = false
 
+I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
 	config.treat_symbols_as_metadata_keys_with_true_values = true
@@ -32,7 +28,7 @@ RSpec.configure do |config|
    		ENV['RUBY_ENV'] = 'development'
 	end
 
-  config.after(:all) do
+  config.after(:suite) do
     `rm -rf tmp/*`
   end
 

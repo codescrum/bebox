@@ -17,7 +17,7 @@ module Bebox
       self.path = "#{self.parent_path}/#{self.name}"
       self.environments = []
       environments.each do |env|
-        self.environments << Bebox::Environment.new(env, self.path, self.servers, self.vbox_path, self.vagrant_box_base_name, self.vagrant_box_provider)
+        self.environments << Bebox::Environment.new(env, self)
       end
     end
 
@@ -25,34 +25,13 @@ module Bebox
     def create
     	create_project_directory
     	create_subdirectories
-      copy_puppet
+      copy_puppet_libs
     end
 
 		# Project dependency installation (phase 2)
     def install_dependencies
     	setup_bundle
       setup_capistrano
-    end
-
-		# Run vagrant boxes for configure nodes in project (phase 3)
-    def run_vagrant_environment
-      self.environments.each do |environment|
-        environment.up if environment.name == 'vagrant'
-      end
-    end
-
-    # Install common dev packages for the environment (phase 4)
-    def install_common_dev_environment
-      self.environments.each do |environment|
-        environment.install_common_dev if environment.name == 'vagrant'
-      end
-    end
-
-    # Install puppet for the environment (phase 5)
-    def install_puppet
-      self.environments.each do |environment|
-        Puppet.install if environment.name == 'vagrant'
-      end
     end
 
     # Create project directory
@@ -62,7 +41,9 @@ module Bebox
 
 		# Create project subdirectories
     def create_subdirectories
-      `cd #{self.path} && mkdir -p config && mkdir -p config/deploy`
+      `cd #{self.path} && mkdir -p config/deploy && mkdir -p keys`
+      `cd #{self.path} && mkdir -p initial_puppet/hiera/data && mkdir -p initial_puppet/manifests && mkdir -p initial_puppet/modules/users/manifests && mkdir -p initial_puppet/lib/deb/puppet_3.6.0`
+      `cd #{self.path} && mkdir -p puppet/hiera/data && mkdir -p puppet/manifests && mkdir -p puppet/modules`
     end
 
     # Create Gemfile for the project and run bundle_install
@@ -75,6 +56,7 @@ module Bebox
     def setup_capistrano
       create_capfile
       generate_deploy_files
+      generate_puppet_user_keys
     end
 
     # Create Gemfile for the project
@@ -92,12 +74,17 @@ module Bebox
         f.write config_deploy_template.render(self)
       end
       self.environments.each do |environment|
-        template_name = (environment.name == 'vagrant') ? "vagrant" : "environment"
+        template_name = (environment.name == 'vagrant') ? 'vagrant' : "environment"
         config_deploy_template = Tilt::ERBTemplate.new("templates/config/deploy/#{template_name}.erb")
         File.open("#{self.path}/config/deploy/#{environment.name}.rb", 'w') do |f|
           f.write config_deploy_template.render(self)
         end
       end
+    end
+
+    # Generate ssh keys for posterior connection with user puppet
+    def generate_puppet_user_keys
+      `cd #{self.path}/keys && ssh-keygen -f puppet.rsa -t rsa -N ''` unless File.file?("#{self.path}/keys/puppet.rsa")
     end
 
     # Create Capfile for the project
@@ -108,10 +95,12 @@ module Bebox
       end
     end
 
-    def copy_puppet
-      `cp -r puppet #{self.path}`
+    # Copy puppet lib files to project initial_puppet
+    def copy_puppet_libs
+      `cp lib/deb/puppet_3.6.0/*.deb #{self.path}/initial_puppet/lib/deb/puppet_3.6.0`
     end
 
+    # Retrieve a environment from the environments array by name
     def environment_by_name(name)
       self.environments.each do |environment|
         return environment if environment.name == name

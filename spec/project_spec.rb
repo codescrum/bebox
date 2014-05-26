@@ -1,6 +1,7 @@
 require 'spec_helper'
+require_relative '../spec/factories/project.rb'
 
-describe Bebox::Project do
+describe 'Phase 01: Bebox::Project' do
 
   describe 'Project creation' do
 
@@ -12,7 +13,7 @@ describe Bebox::Project do
     end
 
     it 'should create the project subdirectories' do
-      directories_expected = ['config', 'deploy']
+      directories_expected = ['config', 'deploy', 'keys', 'initial_puppet', 'puppet']
       subject.create_subdirectories
       directories = []
       directories << Dir["#{subject.path}/*/"].map { |f| File.basename(f) }
@@ -28,8 +29,8 @@ describe Bebox::Project do
 
     it 'should create Gemfile in project' do
       subject.create_gemfile
-      expected_content = File.read("templates/Gemfile")
-      output_file = File.read("#{subject.path}/Gemfile")
+      expected_content = File.read("templates/Gemfile.erb")
+      output_file = File.read("spec/fixtures/Gemfile.test")
       expect(output_file).to eq(expected_content)
     end
     it 'should install dependencies' do
@@ -49,6 +50,4 @@ describe Bebox::Project do
       expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
     end
   end
-
-
 end
