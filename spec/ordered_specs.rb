@@ -7,6 +7,7 @@ require 'server1.pname.test/environment_phase4_spec'
 require 'server1.pname.test/puppet_phase5_spec'
 require 'server1.pname.test/puppet_phase6_spec'
 require 'server1.pname.test/puppet_phase7_spec'
+require 'server1.pname.test/puppet_phase8_spec'
 
 describe 'Phase 99: ordered specs' do
 
@@ -20,8 +21,8 @@ describe 'Phase 99: ordered specs' do
 	let(:puppet) { build(:puppet) }
 
   after(:all) do
-    puppet.environment.halt_vagrant_nodes
-    puppet.environment.remove_vagrant_boxes
+    # puppet.environment.halt_vagrant_nodes
+    # puppet.environment.remove_vagrant_boxes
   end
 
 	specify("End of tests") {}
