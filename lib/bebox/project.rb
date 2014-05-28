@@ -42,7 +42,7 @@ module Bebox
 		# Create project subdirectories
     def create_subdirectories
       `cd #{self.path} && mkdir -p config/deploy && mkdir -p keys`
-      `cd #{self.path} && mkdir -p initial_puppet/hiera/data && mkdir -p initial_puppet/manifests && mkdir -p initial_puppet/modules/users/manifests && mkdir -p initial_puppet/lib/deb/puppet_3.6.0`
+      `cd #{self.path} && mkdir -p initial_puppet/hiera/data && mkdir -p initial_puppet/manifests && mkdir -p initial_puppet/modules && mkdir -p initial_puppet/lib/deb/puppet_3.6.0`
       `cd #{self.path} && mkdir -p puppet/hiera/data && mkdir -p puppet/manifests && mkdir -p puppet/modules`
     end
 

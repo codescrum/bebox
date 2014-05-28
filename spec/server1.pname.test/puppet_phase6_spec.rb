@@ -36,4 +36,8 @@ describe 'Phase 06: Puppet apply users module' do
 	  }
 	end
 
+	describe file('/etc/sudoers.d/10_puppet') do
+		let(:disable_sudo) { false }
+	  it { should be_file }
+	end
 end

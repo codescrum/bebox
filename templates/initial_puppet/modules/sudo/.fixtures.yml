@@ -1,0 +1,5 @@
+fixtures:
+  symlinks:
+    "sudo": "#{source_dir}"
+  repositories:
+    stdlib: "http://github.com/puppetlabs/puppetlabs-stdlib.git"

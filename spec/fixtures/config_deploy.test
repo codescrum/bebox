@@ -126,4 +126,11 @@ namespace :puppet do
     puts 'Creating the symlink to initial hiera.yaml!'
     run "#{sudo} ln -fs #{local_hiera_path} #{remote_hiera_path}"
   end
+
+  desc 'Applies puppet using the current path puppet repo uploaded through capistrano itself'
+  task :apply_modules do
+    run 'touch puppet.log'
+    run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
+    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/puppet/modules --parser future --pluginsync #{current_path}/puppet/manifests/site.pp ; true"
+  end
 end

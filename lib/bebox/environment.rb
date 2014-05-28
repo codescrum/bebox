@@ -46,7 +46,7 @@ module Bebox
 
     def config_manifests
       `cp templates/initial_puppet/manifests/site.pp #{self.project.path}/initial_puppet/manifests`
-      `cp templates/initial_puppet/modules/users/manifests/*.pp #{self.project.path}/initial_puppet/modules/users/manifests`
+      `cp -r templates/initial_puppet/modules/* #{self.project.path}/initial_puppet/modules`
     end
 
     # Generate the Vagrantfile

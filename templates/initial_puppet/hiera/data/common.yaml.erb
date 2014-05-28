@@ -1,8 +1,13 @@
 user_accounts:
-  - name: puppet
-    email: '<%= "puppet@#{self.project.name}.com"%>'
-    key: '<%= puppet_key %>'
-    uid: 7000
+  - name:  puppet
+    email:  '<%= "puppet@#{self.project.name}.com"%>'
+    key:  '<%= puppet_key %>'
+    uid:  7000
   - name: '<%= "#{self.project.name}"%>'
-    email: '<%= "#{self.project.name}@#{self.project.name}.com"%>'
-    uid: 7001
+    email:  '<%= "#{self.project.name}@#{self.project.name}.com"%>'
+    uid:  7001
+sudo::configs:
+  'puppet':
+    ensure:  'present'
+    content:  '%puppet ALL=(ALL) NOPASSWD: ALL'
+    priority:  10
