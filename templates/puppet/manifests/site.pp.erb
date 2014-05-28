@@ -1,6 +1,14 @@
 node default {
 	include 'stdlib'
   include 'nginx'
+  rbenv::install { '<%= self.environment.project.name %>':
+	  group => '<%= self.environment.project.name %>',
+	  home  => '/home/<%= self.environment.project.name %>'
+	}
+	rbenv::compile { "1.9.3-p327":
+	  user => "<%= self.environment.project.name %>",
+	  home => "/home/<%= self.environment.project.name %>",
+	}
 }
 
 # class vhosts {

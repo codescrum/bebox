@@ -30,5 +30,12 @@ describe 'Phase 08: Puppet configure common modules' do
 		end
 	end
 
-
+  context 'rbenv module' do
+		describe file('/home/pname/.rbenv') do
+		  it { should be_directory }
+		end
+    describe file('/home/pname/.rbenv/versions/1.9.3-p327') do
+      it { should be_directory }
+    end
+	end
 end

@@ -3,7 +3,7 @@ require 'tilt'
 module Bebox
   class Environment
 
-    UBUNTU_DEPENDENCIES = %w(git-core build-essential curl whois openssl)
+    UBUNTU_DEPENDENCIES = %w(git-core build-essential curl whois openssl libxslt1-dev autoconf bison libreadline6-dev)
 
     attr_accessor :name, :project, :local_hosts_path, :hosts_backup_file
 
