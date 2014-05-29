@@ -4,9 +4,22 @@ nginx::nginx_vhosts:
     ensure: 'present'
     listen_port:  3000
     use_default_location: false
-    www_root: '/usr/share/nginx/www'
+    www_root: '/home/pname/pname/public'
     access_log: '/var/log/nginx/puppet_access.log'
     error_log: '/var/log/nginx/puppet_error.log'
+rbenv::install:
+    user:  '<%= self.environment.project.name %>'
+    group:  '<%= self.environment.project.name %>'
+    home:  '/home/<%= self.environment.project.name %>'
+rbenv::compile:
+    "1.9.3-p327":
+        user:  "<%= self.environment.project.name %>"
+        home:  "/home/<%= self.environment.project.name %>"
+        global:  true
+rbenv::gem:
+    'rails':
+        user:  '<%= self.environment.project.name %>'
+        ruby:  '1.9.3-p327'
 <% else %>
 nginx::nginx_vhosts:
   '<%= self.environment.project.name %>':

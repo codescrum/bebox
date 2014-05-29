@@ -1,31 +1,14 @@
 node default {
 	include 'stdlib'
   include 'nginx'
-  rbenv::install { '<%= self.environment.project.name %>':
-	  group => '<%= self.environment.project.name %>',
-	  home  => '/home/<%= self.environment.project.name %>'
-	}
-	rbenv::compile { "1.9.3-p327":
-	  user => "<%= self.environment.project.name %>",
-	  home => "/home/<%= self.environment.project.name %>",
-	}
+  include 'rbenv'
 }
 
-# class vhosts {
-#   $nginx_vhosts = hiera("nginx::nginx_vhosts")
-#   each($nginx_vhosts) |$value| {
-#   	$name = $value[0]
-#   	$vhost_hash = $value[1]
-#   	$listen_port = $vhost_hash[listen_port]
-#   	$www_root = $vhost_hash[www_root]
-# 		nginx::resource::vhost { $name:
-# 		  ensure               => present,
-# 		  server_name          => [$name],
-# 		  listen_port          => $listen_port,
-# 		  www_root             => $www_root,
-# 		  use_default_location => false,
-# 		  access_log           => '/var/log/nginx/puppet_access.log',
-# 		  error_log            => '/var/log/nginx/puppet_error.log',
-# 		}
-#   }
-# }
+class rbenv {
+  $rbenv_install_hash = { 'rbenv_install' => hiera('rbenv::install', {}) }
+  $rbenv_compile_hash = hiera('rbenv::compile', {})
+  $rbenv_gem_hash = hiera('rbenv::gem', {})
+  create_resources('rbenv::install', $rbenv_install_hash)
+  create_resources('rbenv::compile', $rbenv_compile_hash)
+  create_resources('rbenv::gem', $rbenv_gem_hash)
+}
