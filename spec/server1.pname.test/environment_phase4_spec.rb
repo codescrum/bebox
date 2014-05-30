@@ -23,7 +23,7 @@ describe 'Phase 04: Environment with common dev installed and initial hiera for 
 		end
 	end
 
-	describe file('/home/vagrant/pname/code/current/initial_puppet/hiera/hiera.yaml') do
+	describe file('/home/vagrant/initial_puppet/current/hiera/hiera.yaml') do
 	  it { should be_file }
 	  its(:content) {
 			hiera_content = File.read("spec/fixtures/hiera.yaml.test")
@@ -31,7 +31,7 @@ describe 'Phase 04: Environment with common dev installed and initial hiera for 
 	  }
 	end
 
-	describe file('/home/vagrant/pname/code/current/initial_puppet/hiera/data/common.yaml') do
+	describe file('/home/vagrant/initial_puppet/current/hiera/data/common.yaml') do
 	  it { should be_file }
 	end
 

@@ -8,9 +8,9 @@ set(:apt_dependencies) { ["git-core", "build-essential", "curl", "whois", "opens
 
 set :keep_releases, 5
 set :deploy_via, :remote_cache
-set(:deploy_to) { "/home/#{user}/#{application}/code" }
+# set(:deploy_to) { "/home/#{user}/#{application}/code" }
 # Relative puppet deb location
-set(:relative_puppet_deb_location){'initial_puppet/lib/deb/puppet_3.6.0/'}
+set(:relative_puppet_deb_location){'lib/deb/puppet_3.6.0/'}
 # Remote location of the puppet_repo
 set(:remote_puppet_repo_location) { "#{current_path}/#{relative_puppet_deb_location}" }
 
@@ -97,17 +97,22 @@ namespace :puppet do
     end
   end
 
+  desc 'Bundle modules listed in the Puppetfile through librarian-puppet'
+  task :bundle_modules do
+    run "cd #{current_path} && /home/puppet/.rbenv/shims/librarian-puppet install"
+  end
+
   desc 'Applies puppet using the current path puppet repo uploaded through capistrano itself'
   task :apply do
     run 'touch puppet.log'
     run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
-    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/puppet/modules --parser future --pluginsync #{current_path}/puppet/manifests/site.pp ; true"
+    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/modules --parser future --pluginsync #{current_path}/manifests/site.pp ; true"
   end
 
   desc 'Make a symlink to configure the hiera settings from hiera project directory'
   task :config_hiera do
     remote_hiera_path = "/etc/puppet/hiera.yaml"
-    local_hiera_path = "#{current_path}/puppet/hiera/hiera.yaml"
+    local_hiera_path = "#{current_path}/hiera/hiera.yaml"
     puts 'Creating the symlink to hiera.yaml!'
     run "#{sudo} ln -fs #{local_hiera_path} #{remote_hiera_path}"
   end
@@ -116,13 +121,13 @@ namespace :puppet do
   task :apply_users do
     run 'touch puppet.log'
     run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
-    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/initial_puppet/modules --parser future --pluginsync #{current_path}/initial_puppet/manifests/site.pp ; true"
+    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/modules --parser future --pluginsync #{current_path}/manifests/site.pp ; true"
   end
 
   desc 'Make a symlink to configure the hiera settings from hiera project directory'
   task :config_hiera_users do
     remote_hiera_path = "/etc/puppet/hiera.yaml"
-    local_hiera_path = "#{current_path}/initial_puppet/hiera/hiera.yaml"
+    local_hiera_path = "#{current_path}/hiera/hiera.yaml"
     puts 'Creating the symlink to initial hiera.yaml!'
     run "#{sudo} ln -fs #{local_hiera_path} #{remote_hiera_path}"
   end
@@ -131,6 +136,6 @@ namespace :puppet do
   task :apply_modules do
     run 'touch puppet.log'
     run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
-    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/puppet/modules --parser future --pluginsync #{current_path}/puppet/manifests/site.pp ; true"
+    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/modules --parser future --pluginsync #{current_path}/manifests/site.pp ; true"
   end
 end

@@ -17,20 +17,32 @@ module Bebox
     	`cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:apply_users -s phase='apply_users'`
     end
 
-    def deploy
+    def prepare_puppet_user
       `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} deploy:prepare_puppet_user -s phase='deploy_puppet_user'`
     end
 
-    def configure_common_modules
-      copy_modules
+    def install_common_modules
       setup_manifest
       setup_common_hiera
       deploy
       apply_common_modules
     end
 
-    def copy_modules
-      `cp -r lib/modules/* #{self.environment.project.path}/puppet/modules`
+    def setup_modules
+      generate_puppetfile
+      prepare_puppet_user
+      bundle_modules
+    end
+
+    def bundle_modules
+      `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:bundle_modules -s phase='bundle_modules'`
+    end
+
+    def generate_puppetfile
+      puppetfile_template = Tilt::ERBTemplate.new("templates/Puppetfile.erb")
+      File.open("#{self.environment.project.path}/puppet/Puppetfile", 'w') do |f|
+        f.write puppetfile_template.render(self)
+      end
     end
 
     def setup_manifest

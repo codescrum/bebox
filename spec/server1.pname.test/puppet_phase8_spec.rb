@@ -11,11 +11,6 @@ describe 'Phase 08: Puppet configure common modules' do
 	  puppet.configure_common_modules
 	end
 
-  after(:all) do
-    # puppet.environment.halt_vagrant_nodes
-    # puppetenvironment.remove_vagrant_boxes
-  end
-
   context 'nginx module' do
 		describe package('nginx') do
 		  it { should be_installed }

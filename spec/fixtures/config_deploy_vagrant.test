@@ -1,16 +1,22 @@
 set :pre_provision_phases, ['common_dev', 'puppet_install', 'apply_users']
 
 if pre_provision_phases.include?(phase)
-	set :user, "vagrant"
-	set :ssh_key, '~/.vagrant.d/insecure_private_key'
-	set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes", "keys", "puppet"]
+  set :user, "vagrant"
+  set :ssh_key, '~/.vagrant.d/insecure_private_key'
+  set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes", "keys"]
+  set(:deploy_to) { "/home/vagrant/initial_puppet" }
+  set(:deploy_via, :copy_subdir)
+  set(:deploy_subdir, 'initial_puppet')
 else
-	set :user, "puppet"
-	set :ssh_key, 'keys/puppet.rsa'
-	set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes", "keys", "initial_puppet"]
+  set :user, "puppet"
+  set :ssh_key, 'keys/puppet.rsa'
+  set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes", "keys"]
+  set(:deploy_to) { "/home/puppet/puppet" }
+  set(:deploy_via, :copy_subdir)
+  set(:deploy_subdir, 'puppet')
 end
 set :application, "pname"
-set :deploy_via, :copy
+# set :deploy_via, :copy
 set :scm, :none
 set :repository, "."
 
