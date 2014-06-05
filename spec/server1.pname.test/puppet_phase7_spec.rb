@@ -33,6 +33,30 @@ describe 'Phase 07: Puppet bundle modules' do
     describe file("#{module_dir}/nodejs") do
       it { should be_directory }
     end
+
+    describe file("#{module_dir}/redis") do
+      it { should be_directory }
+    end
+
+    describe file("#{module_dir}/mysql") do
+      it { should be_directory }
+    end
+
+    describe file("#{module_dir}/postgresql") do
+      it { should be_directory }
+    end
+
+    describe file("#{module_dir}/mongodb") do
+      it { should be_directory }
+    end
+
+    describe file("#{module_dir}/newrelic") do
+      it { should be_directory }
+    end
+
+    describe file("#{module_dir}/postfix") do
+      it { should be_directory }
+    end
   end
 
 end

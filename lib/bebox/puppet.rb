@@ -21,17 +21,16 @@ module Bebox
       `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} deploy:prepare_puppet_user -s phase='deploy_puppet_user'`
     end
 
-    def install_common_modules
+    def setup_modules
       setup_manifest
       setup_common_hiera
-      deploy
-      apply_common_modules
-    end
-
-    def setup_modules
       generate_puppetfile
       prepare_puppet_user
       bundle_modules
+    end
+
+    def apply_common_modules
+      `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:apply -s phase='apply_modules'`
     end
 
     def bundle_modules
@@ -62,10 +61,5 @@ module Bebox
         f.write common_hiera_template.render(self)
       end
     end
-
-    def apply_common_modules
-      `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:apply -s phase='apply_modules'`
-    end
-
   end
 end

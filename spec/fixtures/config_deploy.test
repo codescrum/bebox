@@ -4,7 +4,7 @@ set :application, "pname"
 set :stages, ["vagrant", "production"]
 set :default_stage, 'vagrant'
 set :use_sudo, false
-set(:apt_dependencies) { ["git-core", "build-essential", "curl", "whois", "openssl", "libxslt1-dev", "autoconf", "bison", "libreadline6-dev", "libsqlite3-dev"] }
+set(:apt_dependencies) { ["git-core", "build-essential", "curl", "whois", "openssl", "libxslt1-dev", "autoconf", "bison", "libreadline5", "libreadline6-dev", "libsqlite3-dev"] }
 
 set :keep_releases, 5
 set :deploy_via, :remote_cache
@@ -93,6 +93,7 @@ namespace :puppet do
 
     desc 'Install puppet on the remote machine (free-standalone) [including dependencies]'
     task :default do
+      run "#{sudo} apt-get --yes --fix-broken install"
       run "#{sudo} dpkg -i #{remote_puppet_repo_location}*.deb"
     end
   end
@@ -106,7 +107,7 @@ namespace :puppet do
   task :apply do
     run 'touch puppet.log'
     run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
-    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/modules --parser future --pluginsync #{current_path}/manifests/site.pp ; true"
+    run "#{sudo} #{custom_facter_variables} puppet apply --debug --verbose --modulepath=/etc/puppet/modules:#{current_path}/modules --parser future --pluginsync #{current_path}/manifests/site.pp ; true"
   end
 
   desc 'Make a symlink to configure the hiera settings from hiera project directory'
