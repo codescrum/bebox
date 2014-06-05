@@ -1,26 +1,6 @@
-# This file manages Puppet module dependencies.
-#
-# Shortcut for a module from GitHub's Puppetlabs organization
+# Bebox modules for a basic development environment.
 
 forge "http://forge.puppetlabs.com"
-
-def github(name, *args)
-  options ||= if args.last.is_a? Hash
-    args.last
-  else
-    {}
-  end
-
-  if path = options.delete(:path)
-    mod name, :path => path
-  else
-    version = args.first
-    options[:repo] ||= "puppetlabs/puppetlabs-#{name}"
-    mod name, version, :github_tarball => options[:repo]
-  end
-end
-
-# Bebox modules for a basic development environment.
 
 # For modules loaded from forge puppetlabs
 # mod 'organization/module_name', 'version'
@@ -28,14 +8,15 @@ end
 
 # For modules loaded from github releases tarball
 # mod "organization/module_name", :git => "git_url", :ref => 'v1.0.0'
+# mod "organization/module_name", :git => "git_url", :ref => 'branch_name'
 # example: mod "jfryman/nginx", :git => "git://github.com/jfryman/puppet-nginx.git", :ref => 'v0.0.9'
+# example: mod "jfryman/nginx", :git => "git://github.com/jfryman/puppet-nginx.git", :ref => 'master'
 
 mod 'alup/rbenv', '1.2.0'
-mod "jfryman/nginx", '0.0.9'
-mod "willdurand/nodejs", '1.6.4'
-mod "dwerder/redis", '1.1.0'
-mod "puppetlabs/mysql", '2.2.3'
-mod "akumria/postgresql", '1.2.0'
-mod "dwerder/mongodb", '3.3.1'
-mod "mwillbanks/newrelic", '0.1.0'
-mod "dhoppe/postfix", :git => "git://github.com/dhoppe/puppet-postfix.git", :ref => '3.0.x'
+mod 'jfryman/nginx', '0.0.9'
+mod 'dwerder/redis', '1.1.0'
+mod 'puppetlabs/mysql', '2.2.3'
+mod 'akumria/postgresql', '1.2.0'
+mod 'dwerder/mongodb', '3.3.1'
+mod 'mwillbanks/newrelic', '0.1.0'
+mod 'dhoppe/postfix', :git => 'git://github.com/dhoppe/puppet-postfix.git', :ref => '3.0.x'

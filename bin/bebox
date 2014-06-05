@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 require 'gli'
-begin # XXX: Remove this begin/rescue before distributing your app
+# begin # XXX: Remove this begin/rescue before distributing your app
 require 'bebox'
 require 'highline/import'
-rescue LoadError
-  STDERR.puts "In development, you need to use `bundle exec bin/bebox` to run your app"
-  STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
-  STDERR.puts "Feel free to remove this message from bin/bebox now"
-  exit 64
-end
+# rescue LoadError
+#   STDERR.puts "In development, you need to use `bundle exec bin/bebox` to run your app"
+#   STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
+#   STDERR.puts "Feel free to remove this message from bin/bebox now"
+#   exit 64
+# end
 
 include GLI::App
 
@@ -30,10 +30,15 @@ command :new do |c|
     # Phase 4: Installation of minimal development packages in Vagrant nodes
     environment.install_common_dev
     # Phase 5: Installation of puppet in Vagrant nodes
-    puppet = Bebox::Puppet.new(environment)
+    common_modules = Bebox::Wizard.setup_modules
+    puppet = Bebox::Puppet.new(environment, common_modules)
     puppet.install
     # Phase 6: Creation and access setup for users (puppet, application_user) in Vagrant nodes
     puppet.apply_users
+    # Phase 7: Setup common modules for puppet in Vagrant nodes
+    puppet.setup_modules
+    # Phase 8: Install common modules for puppet in Vagrant nodes
+    puppet.apply_common_modules
   end
 end
 

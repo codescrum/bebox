@@ -5,8 +5,8 @@ module Bebox
   class Wizard
     attr_accessor :number_of_nodes, :hosts, :vbox_uri,:vagrant_box_base_name, :vagrant_box_provider
 
-    # Description
-    # @return ..
+    # Asks for the project parameters and create the project squeleton
+    # @return project
     def self.create_new_project(project_name)
       @hosts= []
       @number_of_machines = ask('number of nodes?'){ |q| q.default = 1 }
@@ -41,19 +41,8 @@ module Bebox
       project
     end
 
-    # Description
-    # @return ..
-    def self.create_environments(project)
-      pre_stages = ask('What stages do you want?. Comma separated (production,staging)') do |q|
-        q.default = 'vagrant'
-      end
-      stages = pre_stages.split(',')
-      stages << 'vagrant' unless pre_stages.include?('vagrant')
-      prepuppet_builder = Bebox::PrepuppetBuilder.new(builder, stages)
-    end
-
-    # Description
-    # @return ..
+    # Asks for the hostname an IP for each node until they are valid
+    # @return array of Server objects
     def self.host_validation
       eval(@number_of_machines).times do |number_node|
         begin
@@ -71,6 +60,25 @@ module Bebox
         end while(!(host.valid?))
         @hosts << host
       end
+    end
+
+    # Asks for the what puppet modules include in the installation machine
+    # @return array of string modules
+    def self.setup_modules
+      common_modules = []
+      # Get the available modules from the modules yaml
+      yaml_modules = YAML.load(File.read('config/modules.yaml'))
+      available_modules = yaml_modules['common_modules'].keys
+
+      # Asks for each module to be included
+      say("what common modules do you want to include?")
+      available_modules.each do |puppet_module|
+        response =  ask("#{puppet_module} (y/n)")do |q|
+          q.default = "n"
+        end
+        common_modules << puppet_module if response == 'y'
+      end
+      common_modules
     end
   end
 end

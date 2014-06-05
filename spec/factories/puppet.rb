@@ -2,8 +2,10 @@ require_relative '../factories/environment.rb'
 
 FactoryGirl.define do
   factory :puppet, :class => Bebox::Puppet do
+    yaml_modules = YAML.load(File.read('config/modules.yaml'))
+    available_modules = yaml_modules['common_modules'].keys
   	environment FactoryGirl.build(:environment)
-    initialize_with { new(environment) }
+    initialize_with { new(environment, available_modules) }
 
     trait :installed do
       after(:build) { |puppet| puppet.install }

@@ -12,10 +12,11 @@ describe 'Phase 07: Puppet bundle modules' do
 
   describe file('/home/puppet/puppet/current/Puppetfile') do
     it { should be_file }
-    its(:content) {
-      puppetfile_content = File.read("spec/fixtures/Puppetfile.test")
-      should == puppetfile_content
-    }
+    it 'should create Puppetfile in project' do
+      expected_content = File.read("#{puppet.environment.project.path}/puppet/Puppetfile").gsub(/\s+/, ' ').strip
+      output_file = File.read("spec/fixtures/Puppetfile.test").gsub(/\s+/, ' ').strip
+      expect(output_file).to eq(expected_content)
+    end
   end
 
   context 'should download the configured modules' do
@@ -27,10 +28,6 @@ describe 'Phase 07: Puppet bundle modules' do
     end
 
     describe file("#{module_dir}/nginx") do
-      it { should be_directory }
-    end
-
-    describe file("#{module_dir}/nodejs") do
       it { should be_directory }
     end
 

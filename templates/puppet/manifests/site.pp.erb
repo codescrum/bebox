@@ -1,15 +1,7 @@
 node default {
-  include 'rbenv'
-  include 'nginx'
-  include 'wkhtmltopdf'
-  include 'imagemagick'
-  include 'htop'
-  include 'postfix'
-  include 'install_redis'
-  include 'install_mysql'
-  include 'install_postgresql'
-  include 'install_mongodb'
-  include 'install_newrelic'
+  <% self.each do |puppet_module| %>
+<%= "include '#{puppet_module.include_name}'" %>
+  <% end %>
 }
 
 class rbenv {
