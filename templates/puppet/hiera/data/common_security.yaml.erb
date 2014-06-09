@@ -1,0 +1,99 @@
+fail2ban:
+  bantime:   60
+  maxretry:  3
+  mailto: 'root@localhost'
+ssh::server:
+  password_authentication: 'no'
+  pubkey_authentication: 'yes'
+  permit_root_login: 'no'
+sysctl:
+  # IP Spoofing protection
+  'net.ipv4.conf.all.rp_filter':
+    value: '1'
+  'net.ipv4.conf.default.rp_filter':
+    value: '1'
+  # Ignore ICMP broadcast requests
+  'net.ipv4.icmp_echo_ignore_broadcasts':
+    value: '1'
+  # Disable source packet routing
+  'net.ipv4.conf.all.accept_source_route':
+    value: '0'
+  'net.ipv6.conf.all.accept_source_route':
+    value: '0'
+  'net.ipv4.conf.default.accept_source_route':
+    value: '0'
+  'net.ipv6.conf.default.accept_source_route':
+    value: '0'
+  # Ignore send redirects
+  'net.ipv4.conf.all.send_redirects':
+    value: '0'
+  'net.ipv4.conf.default.send_redirects':
+    value: '0'
+  # Block SYN attacks
+  'net.ipv4.tcp_syncookies':
+    value: '1'
+  'net.ipv4.tcp_max_syn_backlog':
+    value: '2048'
+  'net.ipv4.tcp_synack_retries':
+    value: '2'
+  'net.ipv4.tcp_syn_retries':
+    value: '5'
+  # Log Martians
+  'net.ipv4.conf.all.log_martians':
+    value: '1'
+  'net.ipv4.icmp_ignore_bogus_error_responses':
+    value: '1'
+  # Ignore ICMP redirects
+  'net.ipv4.conf.all.accept_redirects':
+    value: '0'
+  'net.ipv6.conf.all.accept_redirects':
+    value: '0'
+  'net.ipv4.conf.default.accept_redirects':
+    value: '0'
+  'net.ipv6.conf.default.accept_redirects':
+    value: '0'
+  # Ignore Directed pings
+  'net.ipv4.icmp_echo_ignore_all':
+    value: '1'
+iptables::allow_icmp: 'yes'
+iptables::allow_localhost: 'yes'
+iptables::log_failures: 'yes'
+iptables::ports:
+  22:
+    tcp: 'allow'
+  80:
+    tcp: 'allow'
+  23:
+    tcp: 'drop'
+    udp: 'drop'
+firewall:
+  '001 accept all icmp requests':
+    proto: 'icmp'
+    action: 'accept'
+  '002 allow loopback':
+    iniface: 'lo'
+    chain: 'INPUT'
+    action: 'accept'
+  '000 INPUT allow related and established':
+    state: ['RELATED', 'ESTABLISHED']
+    action: 'accept'
+    proto: 'all'
+  '100 allow ssh':
+    state: ['NEW']
+    dport: '22'
+    proto: 'tcp'
+    action: 'accept'
+  '100 allow httpd:80':
+    state: ['NEW']
+    dport: '80'
+    proto: 'tcp'
+    action: 'accept'
+  '998 deny all other requests':
+    action: 'reject'
+    proto: 'all'
+    reject: 'icmp-host-prohibited'
+  '999 deny all other requests':
+    chain: 'FORWARD'
+    action: 'reject'
+    proto: 'all'
+    reject: 'icmp-host-prohibited'

@@ -8,6 +8,7 @@ require 'server1.pname.test/puppet_phase5_spec'
 require 'server1.pname.test/puppet_phase6_spec'
 require 'server1.pname.test/puppet_phase7_spec'
 require 'server1.pname.test/puppet_phase8_spec'
+require 'server1.pname.test/puppet_phase9_spec'
 
 describe 'Phase 99: ordered specs' do
 
