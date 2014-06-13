@@ -2,7 +2,10 @@ PATH
   remote: .
   specs:
     bebox (0.0.1)
+      active_attr (= 0.8.3)
       gli (= 2.10.0)
+      highline (= 1.6.21)
+      tilt (= 2.0.1)
 
 GEM
   remote: https://rubygems.org/
@@ -90,6 +93,7 @@ GEM
     multi_test (0.1.1)
     net-ssh (2.9.1)
     posix-spawn (0.3.8)
+    progressbar (0.21.0)
     pry (0.9.12.6)
       coderay (~> 1.0)
       method_source (~> 0.8)
@@ -149,14 +153,15 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  active_attr
+  active_attr (= 0.8.3)
   aruba
   bebox!
-  factory_girl
-  highline
-  jazz_hands
+  factory_girl (= 4.3.0)
+  highline (= 1.6.21)
+  jazz_hands (= 0.5.2)
+  progressbar (= 0.21.0)
   rake
   rdoc
   rspec (= 2.14.1)
-  serverspec
-  tilt
+  serverspec (= 1.6.0)
+  tilt (= 2.0.1)

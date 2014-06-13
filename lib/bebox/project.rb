@@ -7,11 +7,11 @@ module Bebox
 
 		attr_accessor :name, :servers, :vbox_path, :vagrant_box_base_name, :vagrant_box_provider, :parent_path, :path, :environments
 
-    def initialize(name, servers, vbox_path, vagrant_box_base_name, parent_path = Dir.pwd, vagrant_box_provider = 'virtualbox', environments = [])
+    def initialize(name, vbox_path, parent_path = Dir.pwd, vagrant_box_provider = 'virtualbox', environments = [])
       self.name = name
-      self.servers = servers
+      # self.servers = servers
       self.vbox_path= vbox_path
-      self.vagrant_box_base_name = vagrant_box_base_name
+      self.vagrant_box_base_name = "#{name}_vagrant"
       self.vagrant_box_provider = vagrant_box_provider
       self.parent_path = parent_path
       self.path = "#{self.parent_path}/#{self.name}"

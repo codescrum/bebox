@@ -1,6 +1,6 @@
 require 'bebox/version'
 require 'bebox/server'
-require 'bebox/wizard'
+require 'bebox/project_wizard'
 require 'bebox/puppet'
 require 'bebox/project'
 require 'bebox/environment'
