@@ -39,5 +39,28 @@ describe 'test_03: Bebox::Environment' do
       end
     end
 
+    context 'environment deletion' do
+
+      it 'should remove checkpoints' do
+        environment_directories = [subject.name, 'nodes', 'prepared_nodes',
+          'steps', 'step-0', 'step-1', 'step-2', 'step-3']
+        subject.remove_checkpoints
+        directories = []
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to_not include(*environment_directories)
+      end
+
+      it 'should remove capistrano base' do
+        subject.remove_capistrano_base
+        expect(Dir.exist?("#{subject.project_root}/config/keys/environments/#{subject.name}")).to be (false)
+      end
+
+      it 'should remove deploy file' do
+        subject.remove_deploy_file
+        expect(File.exist?("#{subject.project_root}/config/deploy/#{subject.name}.rb")).to be (false)
+      end
+    end
   end
 end

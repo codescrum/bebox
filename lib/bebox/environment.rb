@@ -20,7 +20,9 @@ module Bebox
 
     # Delete all files and directories related to an environment
     def remove
-
+      remove_checkpoints
+      remove_capistrano_base
+      remove_deploy_file
     end
 
     # Lists existing environments
@@ -30,9 +32,13 @@ module Bebox
 
     # Create checkpoints base directories
     def create_checkpoints
-      # Create checkpoints directories
       `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/{nodes,prepared_nodes,steps}`
       (0..3).each{|i| `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/steps/step-#{i}`}
+    end
+
+    # Remove checkpoints base directories
+    def remove_checkpoints
+      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.name}`
     end
 
     # Create capistrano base
@@ -43,6 +49,11 @@ module Bebox
       generate_puppet_user_keys('vagrant') if self.name == 'vagrant'
     end
 
+    # Remove capistrano base
+    def remove_capistrano_base
+      `cd #{self.project_root} && rm -rf config/keys/environments/#{self.name}`
+    end
+
     # Generate the deploy file for the environment
     def generate_deploy_file
       template_name = (self.name == 'vagrant') ? 'vagrant' : "environment"
@@ -50,6 +61,11 @@ module Bebox
       File.open("#{self.project_root}/config/deploy/#{self.name}.rb", 'w') do |f|
         f.write config_deploy_template.render(nil)
       end
+    end
+
+    # Reove the deploy file for the environment
+    def remove_deploy_file
+      `cd #{self.project_root} && rm -rf config/deploy/#{self.name}.rb`
     end
 
     def templates_path
