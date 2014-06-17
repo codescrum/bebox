@@ -1,6 +1,8 @@
 source 'https://rubygems.org'
 gem 'serverspec', '1.6.0'
 gem 'rspec', '2.14.1'
+gem 'vcr'
+gem 'fakeweb'
 gem 'factory_girl', '4.3.0'
 gem 'jazz_hands', '0.5.2'
 gem 'active_attr', '0.8.3'

@@ -10,15 +10,17 @@ require 'pry'
 module Bebox
   class ProjectWizard
 
-    attr_accessor :number_of_nodes, :hosts, :vbox_uri,:vagrant_box_base_name, :vagrant_box_provider
-
     # Bebox boxes directory
     BEBOX_BOXES_PATH = '~/.bebox/boxes'
+
+    def self.bebox_boxes_path
+      BEBOX_BOXES_PATH
+    end
 
     # Asks for the project parameters and create the project skeleton
     def self.create_new_project(project_name)
       # Check project existence
-      return 'Project not created. There\'s already a project with that name in the current directory.!' if project_exists?(project_name)
+      return 'Project not created. There\'s already a project with that name in the current directory.!' if project_exists?(Dir.pwd, project_name)
       # Setup the bebox boxes directory
       bebox_boxes_setup
       # Asks to choose an existent box
@@ -40,22 +42,23 @@ module Bebox
       end
       vagrant_box_base = "#{BEBOX_BOXES_PATH}/#{valid_box_uri}"
       # Asks user to choose vagrant box provider
-      ask_box_provider
+      vagrant_box_provider = ask_box_provider
       # Set default environments
       default_environments = %w{vagrant staging production}
       # Project creation
       project = Bebox::Project.new(project_name, vagrant_box_base, Dir.pwd, vagrant_box_provider, default_environments)
       project.create
+      return "Project #{project_name} created!.\nMake: cd test\nNow you can add new environments or new nodes to your project.\nSee bebox help."
     end
 
     # Check if there's an existent project in that dir
-    def self.project_exists?(project_name)
-      Dir.exists?("#{Dir.pwd}/#{project_name}")
+    def self.project_exists?(parent_path, project_name)
+      Dir.exists?("#{parent_path}/#{project_name}")
     end
 
     # Menu to choose vagrant box provider
     def self.ask_box_provider
-      vagrant_box_provider = choose do |menu|
+      choose do |menu|
         menu.header = 'Choose the vagrant box provider'
         menu.choices('virtualbox', 'vmware')
       end
@@ -64,7 +67,7 @@ module Bebox
     # Setup the bebox boxes directory
     def self.bebox_boxes_setup
       # Create user project directories
-      `mkdir -p #{BEBOX_BOXES_PATH} && mkdir -p #{BEBOX_BOXES_PATH}/tmp`
+      `mkdir -p #{BEBOX_BOXES_PATH}/tmp`
       # Clear partial downloaded boxes
       `rm -f #{BEBOX_BOXES_PATH}/tmp/*`
     end
@@ -81,18 +84,18 @@ module Bebox
     # Setup the box in the bebox boxes directory
     def self.set_box(box_uri)
       uri = URI.parse(box_uri)
-      if uri.scheme == 'http'
+      if uri.scheme == ('http' || 'https')
         download_box(uri)
       else
         file_name = uri.path.split('/').last
-        `ln -s #{uri.path} #{BEBOX_BOXES_PATH}/#{file_name}`
+        `ln -fs #{uri.path} #{BEBOX_BOXES_PATH}/#{file_name}`
       end
     end
 
     # Validate uri download or local box existence
     def self.uri_valid?(vbox_uri)
       uri = URI.parse(vbox_uri)
-      if uri.scheme == 'http'
+      if uri.scheme == ('http' || 'https')
         request = Net::HTTP.new uri.host
         response = request.request_head uri.path
         if response.code.to_i == 302
