@@ -14,6 +14,9 @@ require_relative '../lib/bebox/project'
 require_relative '../lib/bebox/project_wizard'
 require_relative '../lib/bebox/environment'
 require_relative '../lib/bebox/environment_wizard'
+require_relative '../lib/bebox/node'
+require_relative '../lib/bebox/node_wizard'
+
 
 I18n.enforce_available_locales = false
 

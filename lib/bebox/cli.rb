@@ -53,7 +53,16 @@ module Bebox
       end
     end
 
-  # load project commands
+    # Obtain the environment from command parameters or menu
+    def get_environment(options)
+      environment = options[:environment]
+      # Ask for environment of node if flag environment not set
+      environment ||= Bebox::NodeWizard.choose_environment(Environment.list(project_root))
+      # Check environment existence
+      Bebox::EnvironmentWizard.environment_exists?(project_root, environment) ? (return environment) : exit_now!('The specified environment don\'t exist.')
+    end
+
+    # load project commands
     def load_project_commands
       # Environment management phase commands
       desc 'Manage environments for the project. The \'vagrant\', \'production\' and \'staging\' environments are present by default.'
@@ -84,8 +93,46 @@ module Bebox
         environment_command.command :remove do |environment_remove_command|
           environment_remove_command.action do |global_options,options,args|
             help_now!('You don\'t supply an environment') if args.count == 0
-            creation_message = Bebox::EnvironmentWizard.remove_environment(project_root, args.first)
+            deletion_message = Bebox::EnvironmentWizard.remove_environment(project_root, args.first)
+            puts deletion_message
+          end
+        end
+      end
+
+      # Nodes management phase commands
+      desc 'Manage nodes for a environment in the project.'
+      command :node do |node_command|
+        # Node list command
+        node_command.flag :environment, :desc => 'Set the environment of nodes'
+        node_command.desc 'list the nodes in a environment'
+        node_command.command :list do |node_list_command|
+          node_list_command.action do |global_options,options,args|
+            environment = get_environment(options)
+            # Call to list nodes
+            nodes = Bebox::NodeWizard.list_nodes(project_root, environment)
+            say("\nNodes :\n\n")
+            nodes.map{|node| say(node)}
+            say("There are not nodes yet. You can create a new one with: 'bebox node new' command.") if nodes.empty?
+          end
+        end
+        # Node new command
+        node_command.desc 'add a node to a environment'
+        node_command.arg_name "[node]"
+        node_command.command :new do |node_new_command|
+          node_new_command.action do |global_options,options,args|
+            help_now!('You don\'t supply a node') if args.count == 0
+            creation_message = Bebox::NodeWizard.create_new_node(project_root, args.first)
             puts creation_message
+          end
+        end
+        # Node remove command
+        node_command.desc "remove a node in a environment"
+        node_command.arg_name "[node]"
+        node_command.command :remove do |node_remove_command|
+          node_remove_command.action do |global_options,options,args|
+            help_now!('You don\'t supply a node') if args.count == 0
+            deletion_message = Bebox::NodeWizard.remove_node(project_root, args.first)
+            puts deletion_message
           end
         end
         # # Phase 2: Installation of bundle gems and capistrano in project
@@ -117,7 +164,6 @@ module Bebox
       on_error do |exception|
         true
       end
-
     end
   end
 end
