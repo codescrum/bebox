@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/project.rb'
 
-describe 'Phase 01: Bebox::Project' do
+describe 'test_01: Bebox::Project' do
 
   describe 'Project creation' do
 
@@ -12,42 +12,104 @@ describe 'Phase 01: Bebox::Project' do
       expect(Dir.exist?(subject.path)).to be true
     end
 
-    it 'should create the project subdirectories' do
-      directories_expected = ['config', 'deploy', 'keys', 'initial_puppet', 'puppet']
-      subject.create_subdirectories
-      directories = []
-      directories << Dir["#{subject.path}/*/"].map { |f| File.basename(f) }
-      directories << Dir["#{subject.path}/*/*/"].map { |f| File.basename(f) }
-      directories << Dir["#{subject.path}/*/*/*/"].map { |f| File.basename(f) }
-      expect(directories.flatten).to include(*directories_expected)
+    context 'Project config files creation' do
+      it 'should create config deploy directories' do
+        directories_expected = ['config', 'deploy', 'keys', 'environments']
+        subject.create_config_deploy_directories
+        directories = []
+        directories << Dir["#{subject.path}/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/*/*/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*directories_expected)
+      end
+
+      it 'should generate a .bebox file' do
+        subject.generate_dot_bebox_file
+        expected_content = File.read("#{subject.path}/.bebox")
+        output_file = File.read('spec/fixtures/dot_bebox.test')
+        expect(output_file).to eq(expected_content)
+      end
+
+      it 'should generate a .ruby-version file' do
+        subject.generate_ruby_version
+        version = File.read("#{subject.path}/.ruby-version").strip
+        expect(version).to eq '2.1.0'
+      end
+
+      it 'should generate a .ruby-version file' do
+        subject.create_capfile
+        expected_content = File.read("#{subject.path}/Capfile")
+        output_file = File.read('spec/fixtures/Capfile.test')
+        expect(output_file).to eq(expected_content)
+      end
+
+      it 'should generate deploy files' do
+        subject.generate_deploy_files
+        config_deploy_content = File.read("#{subject.path}/config/deploy.rb").gsub(/\s+/, ' ').strip
+        config_deploy_output_content = File.read("spec/fixtures/config/deploy.test").gsub(/\s+/, ' ').strip
+        expect(config_deploy_content).to eq(config_deploy_output_content)
+        config_deploy_vagrant_content = File.read("#{subject.path}/config/deploy/vagrant.rb").gsub(/\s+/, ' ').strip
+        config_deploy_vagrant_output_content = File.read("spec/fixtures/config/deploy/vagrant.test").gsub(/\s+/, ' ').strip
+        expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
+      end
+
+      it 'should create Gemfile' do
+        subject.create_gemfile
+        content = File.read("#{subject.path}/Gemfile")
+        output = File.read("spec/fixtures/Gemfile.test")
+        expect(output).to eq(content)
+      end
     end
-  end
 
-  describe 'Project dependency installation' do
+    context 'Create puppet base' do
+      it 'should generate SO dependencies files' do
+        subject.generate_so_dependencies_files
+        content = File.read("#{subject.path}/puppet/prepare/dependencies/ubuntu/packages")
+        output = File.read("spec/fixtures/puppet/ubuntu_dependencies.test")
+        expect(output).to eq(content)
+      end
 
-    subject { build(:project, :created) }
+      it 'should copy puppet install files' do
+        subject.copy_puppet_install_files
+        expect(Dir.exist?("#{subject.path}/puppet/lib/deb/puppet_3.6.0")).to be (true)
+        expect(Dir["#{subject.path}/puppet/lib/deb/puppet_3.6.0/*"].count).to eq(18)
+      end
 
-    it 'should create Gemfile in project' do
-      subject.create_gemfile
-      expected_content = File.read("templates/Gemfile.erb")
-      output_file = File.read("spec/fixtures/Gemfile.test")
-      expect(output_file).to eq(expected_content)
+      it 'should generate steps directories' do
+        expected_directories = ['prepare', 'profiles', 'roles', 'steps',
+          '0-fundamental', '1-users', '2-services', '3-security',
+          'hiera', 'manifests', 'modules', 'data']
+        subject.generate_steps_directories
+        directories = []
+        directories << Dir["#{subject.path}/puppet/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/puppet/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/puppet/*/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/puppet/*/*/*/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*expected_directories)
+      end
     end
-    it 'should install dependencies' do
-      subject.create_gemfile
-      subject.setup_bundle
-      expect(File).to exist("#{subject.path}/Gemfile.lock")
-      expect(Dir).to exist("#{subject.path}/.bundle")
+
+    context 'checkpoints' do
+      it 'should create checkpoints directories' do
+        expected_directories = ['environments', 'production', 'staging',
+          'vagrant', 'nodes', 'prepared_nodes', 'steps', 'step-0',
+          'step-1', 'step-2', 'step-3']
+        subject.create_checkpoints
+        directories = []
+        directories << Dir["#{subject.path}/.checkpoints/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/.checkpoints/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/.checkpoints/*/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/.checkpoints/*/*/*/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*expected_directories)
+      end
     end
 
-    it 'should setup capistrano in project with the configured environments' do
-      subject.setup_capistrano
-      config_deploy_content = File.read("#{subject.path}/config/deploy.rb").gsub(/\s+/, ' ').strip
-      config_deploy_output_content = File.read("spec/fixtures/config_deploy.test").gsub(/\s+/, ' ').strip
-      expect(config_deploy_content).to eq(config_deploy_output_content)
-      config_deploy_vagrant_content = File.read("#{subject.path}/config/deploy/vagrant.rb").gsub(/\s+/, ' ').strip
-      config_deploy_vagrant_output_content = File.read("spec/fixtures/config_deploy_vagrant.test").gsub(/\s+/, ' ').strip
-      expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
+    context 'bundle project' do
+      it 'should install dependencies' do
+        subject.bundle_project
+        expect(File).to exist("#{subject.path}/Gemfile.lock")
+        expect(Dir).to exist("#{subject.path}/.bundle")
+      end
     end
   end
 end

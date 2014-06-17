@@ -1,0 +1,2 @@
+project:          'pname'
+vagrant_box_base: '~/.bebox/boxes/ubuntu-server-12042-x64-vbox4210-nocm.box'
