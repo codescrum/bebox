@@ -62,7 +62,10 @@ module Bebox
         environment_command.desc 'list the remote environments in the project'
         environment_command.command :list do |environment_list_command|
           environment_list_command.action do |global_options,options,args|
-
+            environments = Bebox::EnvironmentWizard.list_environments(project_root)
+            say("\nCurrent environments :\n\n")
+            environments.map{|environment| say(environment)}
+            say("There are not environments yet. You can create a new one with: 'bebox environment create' command.") if environments.empty?
           end
         end
         # Environment new command

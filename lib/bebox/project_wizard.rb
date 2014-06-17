@@ -5,17 +5,12 @@ require 'net/http'
 require 'uri'
 require 'progressbar'
 require 'digest'
-require 'pry'
 
 module Bebox
   class ProjectWizard
 
     # Bebox boxes directory
     BEBOX_BOXES_PATH = '~/.bebox/boxes'
-
-    def self.bebox_boxes_path
-      BEBOX_BOXES_PATH
-    end
 
     # Asks for the project parameters and create the project skeleton
     def self.create_new_project(project_name)

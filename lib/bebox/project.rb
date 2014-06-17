@@ -1,7 +1,6 @@
 require 'tilt'
 require 'bebox/server'
 require 'bebox/environment'
-require 'pry'
 
 module Bebox
   class Project

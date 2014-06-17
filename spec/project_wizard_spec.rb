@@ -13,7 +13,7 @@ describe 'test_00: Create a new project with the wizard' do
     let(:parent_path) { "#{Dir.pwd}/tmp" }
     let(:http_box_uri) {'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'}
     let(:local_box_uri) {"#{Dir.pwd}/spec/fixtures/test_box.box"}
-    let(:bebox_boxes_path) {File.expand_path(Bebox::ProjectWizard.bebox_boxes_path)}
+    let(:bebox_boxes_path) {File.expand_path(Bebox::ProjectWizard::BEBOX_BOXES_PATH)}
 
     it 'should check project existence' do
       output = subject.project_exists?(parent_path, project_name)
