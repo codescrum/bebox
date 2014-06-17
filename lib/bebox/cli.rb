@@ -74,7 +74,8 @@ module Bebox
         environment_command.command :new do |environment_new_command|
           environment_new_command.action do |global_options,options,args|
             help_now!('You don\'t supply an environment') if args.count == 0
-            Bebox::EnvironmentWizard.create_new_environment(project_root, args.first)
+            creation_message = Bebox::EnvironmentWizard.create_new_environment(project_root, args.first)
+            puts creation_message
           end
         end
         # Environment remove command
@@ -83,7 +84,8 @@ module Bebox
         environment_command.command :remove do |environment_remove_command|
           environment_remove_command.action do |global_options,options,args|
             help_now!('You don\'t supply an environment') if args.count == 0
-            Bebox::EnvironmentWizard.remove_environment(project_root, args.first)
+            creation_message = Bebox::EnvironmentWizard.remove_environment(project_root, args.first)
+            puts creation_message
           end
         end
         # # Phase 2: Installation of bundle gems and capistrano in project

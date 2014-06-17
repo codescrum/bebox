@@ -66,5 +66,5 @@ puppet/hiera/data/vagrant.yaml
 puppet/hiera/data/development.yaml
 puppet/hiera/data/new_production.yaml
 
-config
+config/modules.yaml
 pkg/

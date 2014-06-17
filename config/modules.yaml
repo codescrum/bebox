@@ -1,0 +1,53 @@
+# 'common_modules':
+#   # if the module has version like the puppetlabs modules
+#   module:
+#     puppet_name:  'organization/module_name'
+#     version:      'x.x.x'
+#     include_name: 'name for the include in site.pp'
+#   # if the module come from github
+#   module:
+#     module_name:  'organization/module'
+#     git:          'git://github.com/organization/module.git'
+#     ref:          'branch_name' | 'release_version'
+#     include_name: 'name for the include in site.pp'
+
+'common_modules':
+  'rbenv':
+    puppet_name: 'alup/rbenv'
+    version: '1.2.0'
+    include_name: 'rbenv'
+  'nginx':
+    puppet_name: 'jfryman/nginx'
+    version: '0.0.9'
+    include_name: 'nginx'
+  'redis':
+    puppet_name: 'dwerder/redis'
+    version: '1.1.0'
+    include_name: 'install_redis'
+  'mysql':
+    puppet_name: 'puppetlabs/mysql'
+    version: '2.2.3'
+    include_name: 'install_mysql'
+  'postgresql':
+    puppet_name: 'akumria/postgresql'
+    version: '1.2.0'
+    include_name: 'install_postgresql'
+  'mongodb':
+    puppet_name: 'dwerder/mongodb'
+    version: '3.3.1'
+    include_name: 'install_mongodb'
+  'newrelic':
+    puppet_name: 'mwillbanks/newrelic'
+    version: '0.1.0'
+    include_name: 'install_newrelic'
+  'postfix':
+    puppet_name: 'dhoppe/postfix'
+    git: 'git://github.com/dhoppe/puppet-postfix.git'
+    ref: '3.0.x'
+    include_name: 'postfix'
+  'wkhtmltopdf':
+    include_name: 'wkhtmltopdf'
+  'imagemagick':
+    include_name: 'imagemagick'
+  'htop':
+    include_name: 'htop'

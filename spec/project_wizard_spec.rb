@@ -23,7 +23,7 @@ describe 'test_00: Create a new project with the wizard' do
     it 'should setup the bebox boxes directory' do
       subject.bebox_boxes_setup
       expect(Dir.exist?("#{bebox_boxes_path}/tmp")).to eq(true)
-      expect(Dir["#{bebox_boxes_path}/tmp"]).to eq(0)
+      expect(Dir["#{bebox_boxes_path}/tmp/*"].count).to eq(0)
     end
 
     it 'should validate an http box uri' do
