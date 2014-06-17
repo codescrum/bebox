@@ -12,6 +12,8 @@ include Serverspec::Helper::Debian
 
 require_relative '../lib/bebox/project'
 require_relative '../lib/bebox/project_wizard'
+require_relative '../lib/bebox/environment'
+require_relative '../lib/bebox/environment_wizard'
 
 I18n.enforce_available_locales = false
 

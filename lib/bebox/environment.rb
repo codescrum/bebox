@@ -13,7 +13,9 @@ module Bebox
 
     # Create all files and directories related to an environment
     def create
-
+      create_checkpoints
+      create_capistrano_base
+      generate_deploy_file
     end
 
     # Delete all files and directories related to an environment
@@ -24,6 +26,40 @@ module Bebox
     # Lists existing environments
     def self.list(project_root)
       Dir["#{project_root}/.checkpoints/*/*"].map { |f| File.basename(f) }
+    end
+
+    # Create checkpoints base directories
+    def create_checkpoints
+      # Create checkpoints directories
+      `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/{nodes,prepared_nodes,steps}`
+      (0..3).each{|i| `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/steps/step-#{i}`}
+    end
+
+    # Create capistrano base
+    def create_capistrano_base
+      # Create keys directory for environment
+      `cd #{self.project_root} && mkdir -p config/keys/environments/#{self.name}`
+      # Create ssh key for puppet user if environment is vagrant
+      generate_puppet_user_keys('vagrant') if self.name == 'vagrant'
+    end
+
+    # Generate the deploy file for the environment
+    def generate_deploy_file
+      template_name = (self.name == 'vagrant') ? 'vagrant' : "environment"
+      config_deploy_template = Tilt::ERBTemplate.new("#{templates_path}/project/config/deploy/#{template_name}.erb")
+      File.open("#{self.project_root}/config/deploy/#{self.name}.rb", 'w') do |f|
+        f.write config_deploy_template.render(nil)
+      end
+    end
+
+    def templates_path
+      # File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib/templates"))
+      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+    end
+
+    # Generate ssh keys for connection with puppet user in environment
+    def generate_puppet_user_keys(environment)
+      `cd #{self.project_root}/config/keys/environments/#{environment} && ssh-keygen -f id_rsa -t rsa -N ''`
     end
 
     # Run vagrant boxes for configure nodes in project (phase 3)

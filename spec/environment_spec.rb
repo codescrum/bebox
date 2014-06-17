@@ -1,0 +1,43 @@
+require 'spec_helper'
+require_relative '../spec/factories/environment.rb'
+
+describe 'test_03: Bebox::Environment' do
+
+  describe 'Environment management' do
+
+    subject { build(:environment) }
+
+    it 'should list the current environments' do
+      current_environments = %w{vagrant staging production}
+      environments = Bebox::Environment.list(subject.project_root)
+      expect(environments).to include(*current_environments)
+    end
+
+    context 'environment creation' do
+
+      it 'should create checkpoints' do
+        expected_directories = [subject.name, 'nodes', 'prepared_nodes',
+          'steps', 'step-0', 'step-1', 'step-2', 'step-3']
+        subject.create_checkpoints
+        directories = []
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*expected_directories)
+      end
+
+      it 'should generate capistrano base' do
+        subject.create_capistrano_base
+        expect(Dir.exist?("#{subject.project_root}/config/keys/environments/#{subject.name}")).to be (true)
+      end
+
+      it 'should generate deploy file' do
+        subject.generate_deploy_file
+        deploy_content = File.read("#{subject.project_root}/config/deploy/#{subject.name}.rb").gsub(/\s+/, ' ').strip
+        deploy_output_content = File.read("spec/fixtures/config/deploy/environment.test").gsub(/\s+/, ' ').strip
+        expect(deploy_content).to eq(deploy_output_content)
+      end
+    end
+
+  end
+end

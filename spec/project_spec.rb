@@ -36,21 +36,18 @@ describe 'test_01: Bebox::Project' do
         expect(version).to eq '2.1.0'
       end
 
-      it 'should generate a .ruby-version file' do
+      it 'should create a Capfile' do
         subject.create_capfile
         expected_content = File.read("#{subject.path}/Capfile")
         output_file = File.read('spec/fixtures/Capfile.test')
         expect(output_file).to eq(expected_content)
       end
 
-      it 'should generate deploy files' do
-        subject.generate_deploy_files
+      it 'should generate deploy file' do
+        subject.generate_deploy_file
         config_deploy_content = File.read("#{subject.path}/config/deploy.rb").gsub(/\s+/, ' ').strip
         config_deploy_output_content = File.read("spec/fixtures/config/deploy.test").gsub(/\s+/, ' ').strip
         expect(config_deploy_content).to eq(config_deploy_output_content)
-        config_deploy_vagrant_content = File.read("#{subject.path}/config/deploy/vagrant.rb").gsub(/\s+/, ' ').strip
-        config_deploy_vagrant_output_content = File.read("spec/fixtures/config/deploy/vagrant.test").gsub(/\s+/, ' ').strip
-        expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
       end
 
       it 'should create Gemfile' do
@@ -91,15 +88,11 @@ describe 'test_01: Bebox::Project' do
 
     context 'checkpoints' do
       it 'should create checkpoints directories' do
-        expected_directories = ['environments', 'production', 'staging',
-          'vagrant', 'nodes', 'prepared_nodes', 'steps', 'step-0',
-          'step-1', 'step-2', 'step-3']
+        expected_directories = ['.checkpoints', 'environments']
         subject.create_checkpoints
         directories = []
+        directories << Dir["#{subject.path}/.checkpoints/"].map { |f| File.basename(f) }
         directories << Dir["#{subject.path}/.checkpoints/*/"].map { |f| File.basename(f) }
-        directories << Dir["#{subject.path}/.checkpoints/*/*/"].map { |f| File.basename(f) }
-        directories << Dir["#{subject.path}/.checkpoints/*/*/*/"].map { |f| File.basename(f) }
-        directories << Dir["#{subject.path}/.checkpoints/*/*/*/*/"].map { |f| File.basename(f) }
         expect(directories.flatten).to include(*expected_directories)
       end
     end
@@ -109,6 +102,40 @@ describe 'test_01: Bebox::Project' do
         subject.bundle_project
         expect(File).to exist("#{subject.path}/Gemfile.lock")
         expect(Dir).to exist("#{subject.path}/.bundle")
+      end
+    end
+
+    context 'create default environments' do
+
+      before(:all) do
+        subject.create_default_environments
+      end
+
+      it 'should generate deploy files' do
+        subject.environments.each do |environment|
+          template_name = (environment.name == 'vagrant') ? 'vagrant' : "environment"
+          config_deploy_vagrant_content = File.read("#{subject.path}/config/deploy/#{environment.name}.rb").gsub(/\s+/, ' ').strip
+          config_deploy_vagrant_output_content = File.read("spec/fixtures/config/deploy/#{template_name}.test").gsub(/\s+/, ' ').strip
+          expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
+        end
+      end
+
+      it 'should create checkpoints' do
+        expected_directories = ['vagrant', 'staging', 'production', 'nodes', 'prepared_nodes',
+          'steps', 'step-0', 'step-1', 'step-2', 'step-3']
+        directories = []
+        directories << Dir["#{subject.path}/.checkpoints/environments/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/.checkpoints/environments/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/.checkpoints/environments/*/*/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*expected_directories)
+      end
+
+      it 'should create capistrano base' do
+        subject.environments.each do |environment|
+          expect(Dir.exist?("#{subject.path}/config/keys/environments/#{environment.name}")).to be (true)
+        end
+        expect(File.exist?("#{subject.path}/config/keys/environments/vagrant/id_rsa")).to be (true)
+        expect(File.exist?("#{subject.path}/config/keys/environments/vagrant/id_rsa.pub")).to be (true)
       end
     end
   end

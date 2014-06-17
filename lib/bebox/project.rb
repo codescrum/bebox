@@ -13,17 +13,17 @@ module Bebox
       self.vagrant_box_base = vagrant_box_base
       self.parent_path = parent_path
       self.vagrant_box_provider = vagrant_box_provider
-      self.environments = default_environments
-      # default_environments.each do |env|
-      #   self.environments << Bebox::Environment.new(env, self)
-      # end
+      self.environments = []
       self.path = "#{self.parent_path}/#{self.name}"
+      default_environments.each do |env|
+        self.environments << Bebox::Environment.new(env, self.path)
+      end
     end
 
 		# Project creation phase
     def create
     	create_project_directory
-      create_config_files
+      create_project_config
       create_puppet_base
       create_checkpoints
       bundle_project
@@ -32,12 +32,6 @@ module Bebox
     # Create project directory
     def create_project_directory
       `mkdir -p #{self.parent_path}/#{self.name}`
-    end
-
-    # Create all initial config files an directories
-    def create_config_files
-      create_project_config
-      create_capistrano_base
     end
 
     # Generate project config files
@@ -50,9 +44,11 @@ module Bebox
       generate_ruby_version
       # Generate Capfile and deploy files
       create_capfile
-      generate_deploy_files
+      generate_deploy_file
       # Generate Gemfile
       create_gemfile
+      # Create the default environments
+      create_default_environments
     end
 
     # Create rbenv local
@@ -73,20 +69,20 @@ module Bebox
       `cd #{self.path} && mkdir -p config/{deploy,keys/environments}`
     end
 
-    # Create capistrano base
-    def create_capistrano_base
-      # Create keys directories for each default environment
-      self.environments.each do |environment|
-        `cd #{self.path} && mkdir -p config/keys/environments/#{environment}`
-      end
-      # Create vagrant environment ssh key for puppet user
-      generate_puppet_user_keys('vagrant')
+    # Create the default environments
+    def create_default_environments
+      self.environments.map{|environment| environment.create}
     end
 
-    # Generate ssh keys for connection with puppet user in environment
-    def generate_puppet_user_keys(environment)
-      `cd #{self.path}/config/keys/environments/#{environment} && ssh-keygen -f id_rsa -t rsa -N ''`
-    end
+    # # Create capistrano base
+    # def create_capistrano_base
+    #   # Create keys directories for each default environment
+    #   self.environments.each do |environment|
+    #     `cd #{self.path} && mkdir -p config/keys/environments/#{environment.name}`
+    #   end
+    #   # Create vagrant environment ssh key for puppet user
+    #   generate_puppet_user_keys('vagrant')
+    # end
 
     # Create Capfile for the project
     def create_capfile
@@ -139,11 +135,7 @@ module Bebox
 
     # Create checkpoints base directories
     def create_checkpoints
-      # Create checkpoints directories
-      self.environments.each do |env|
-        `cd #{self.path} && mkdir -p .checkpoints/environments/#{env}/{nodes,prepared_nodes,steps}`
-        (0..3).each{|i| `cd #{self.path} && mkdir -p .checkpoints/environments/#{env}/steps/step-#{i}`}
-      end
+      `cd #{self.path} && mkdir -p .checkpoints/environments`
     end
 
     # Bundle install packages for project
@@ -151,18 +143,11 @@ module Bebox
       `cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install 1>/dev/null`
     end
 
-    # Generate the deploy files for each project environment
-    def generate_deploy_files
+    # Generate the deploy file for the project
+    def generate_deploy_file
       config_deploy_template = Tilt::ERBTemplate.new("#{templates_path}/project/config/deploy.erb")
       File.open("#{self.path}/config/deploy.rb", 'w') do |f|
         f.write config_deploy_template.render(nil, project: self)
-      end
-      self.environments.each do |environment|
-        template_name = (environment == 'vagrant') ? 'vagrant' : "environment"
-        config_deploy_template = Tilt::ERBTemplate.new("#{templates_path}/project/config/deploy/#{template_name}.erb")
-        File.open("#{self.path}/config/deploy/#{environment}.rb", 'w') do |f|
-          f.write config_deploy_template.render(nil, project: self)
-        end
       end
     end
 
