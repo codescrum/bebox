@@ -106,13 +106,19 @@ module Bebox
         node_command.flag :environment, :desc => 'Set the environment of nodes'
         node_command.desc 'list the nodes in a environment'
         node_command.command :list do |node_list_command|
+          node_list_command.switch :all
           node_list_command.action do |global_options,options,args|
-            environment = get_environment(options)
             # Call to list nodes
-            nodes = Bebox::NodeWizard.list_nodes(project_root, environment)
-            say("\nNodes :\n\n")
-            nodes.map{|node| say(node)}
-            say("There are not nodes yet. You can create a new one with: 'bebox node new' command.") if nodes.empty?
+            if options[:all].present?
+              Bebox::NodeWizard.list_all_nodes(project_root)
+            else
+              environment = get_environment(options)
+              nodes = Bebox::NodeWizard.list_nodes(project_root, environment)
+              say("\nNodes :\n\n")
+              nodes.map{|node| say(node)}
+              say("There are not nodes yet. You can create a new one with: 'bebox node new' command.") if nodes.empty?
+              say("\n")
+            end
           end
         end
         # Node new command

@@ -33,6 +33,17 @@ module Bebox
       Node.list(project_root, environment)
     end
 
+    # Lists nodes for all environments
+    def self.list_all_nodes(project_root)
+      environments = Bebox::EnvironmentWizard.list_environments(project_root)
+      environments.each do |environment|
+        nodes = Node.list(project_root, environment)
+        say("\nNodes for environment #{environment}:\n\n")
+        nodes.map{|node| say(node)}
+      end
+      say("\n")
+    end
+
     # Check if there's an existent node in a environment
     def self.node_exists?(project_root, environment, node_name)
       File.exists?("#{project_root}/.checkpoints/environments/#{environment}/nodes/#{node_name}.yml")
@@ -73,6 +84,7 @@ module Bebox
       # Check if the node not exist
       if node_exists?(project_root, environment, hostname)
         say("A hostname with that name already exist!. Try a new one.")
+        say("\n")
         ask_hostname(project_root, environment)
       else
         return hostname
@@ -112,6 +124,7 @@ module Bebox
         return ip
       else
         say("The IP address is not free!. Try a new one.")
+        say("\n")
         ask_ip(environment)
       end
     end
