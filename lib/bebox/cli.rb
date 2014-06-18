@@ -117,21 +117,23 @@ module Bebox
         end
         # Node new command
         node_command.desc 'add a node to a environment'
-        node_command.arg_name "[node]"
+        #node_command.arg_name "[node]"
         node_command.command :new do |node_new_command|
           node_new_command.action do |global_options,options,args|
-            help_now!('You don\'t supply a node') if args.count == 0
-            creation_message = Bebox::NodeWizard.create_new_node(project_root, args.first)
+            #help_now!('You don\'t supply a node') if args.count == 0
+            environment = get_environment(options)
+            creation_message = Bebox::NodeWizard.create_new_node(project_root, environment)
             puts creation_message
           end
         end
         # Node remove command
         node_command.desc "remove a node in a environment"
-        node_command.arg_name "[node]"
+        # node_command.arg_name "[node_hostname]"
         node_command.command :remove do |node_remove_command|
           node_remove_command.action do |global_options,options,args|
-            help_now!('You don\'t supply a node') if args.count == 0
-            deletion_message = Bebox::NodeWizard.remove_node(project_root, args.first)
+            # help_now!('You don\'t supply a node') if args.count == 0
+            environment = get_environment(options)
+            deletion_message = Bebox::NodeWizard.remove_node(project_root, environment, args.first)
             puts deletion_message
           end
         end

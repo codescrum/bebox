@@ -3,31 +3,48 @@ require 'tilt'
 module Bebox
   class Node
 
-    attr_accessor :name, :project_root #, :local_hosts_path, :hosts_backup_file
+    attr_accessor :environment, :project_root, :hostname, :ip #, :local_hosts_path, :hosts_backup_file
 
-    def initialize(name, project_root)
-      self.name = name
+    def initialize(environment, project_root, hostname, ip)
+      self.environment = environment
       self.project_root = project_root
+      self.hostname = hostname
+      self.ip = ip
       # self.local_hosts_path = RUBY_PLATFORM =~ /darwin/ ? '/private/etc' : '/etc'
     end
 
     # Create all files and directories related to an node
     def create
-      create_checkpoints
-      create_capistrano_base
-      generate_deploy_file
+      create_checkpoint
     end
 
     # Delete all files and directories related to an node
     def remove
-      remove_checkpoints
-      remove_capistrano_base
-      remove_deploy_file
+      remove_checkpoint
     end
 
     # List existing nodes
     def self.list(project_root, environment)
       Dir["#{project_root}/.checkpoints/environments/#{environment}/nodes/*"].map { |f| File.basename(f, ".*") }
+    end
+
+    # Create checkpoint for node
+    def create_checkpoint
+      node_template = Tilt::ERBTemplate.new("#{templates_path}/node/node.yml.erb")
+      File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/nodes/#{self.hostname}.yml", 'w') do |f|
+        f.write node_template.render(nil, :node => self)
+      end
+    end
+
+    # Remove checkpoint for node
+    def remove_checkpoint
+      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/{nodes,prepared-nodes,steps/step-{0..3}}/#{self.hostname}.yml`
+    end
+
+    # Get the templates path inside the gem
+    def templates_path
+      # File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib/templates"))
+      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
     # Run vagrant boxes for configure nodes in project (phase 3)
