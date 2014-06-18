@@ -36,7 +36,7 @@ module Bebox
       environments = pre_environments.split(',')
       environments << 'vagrant' unless pre_environments.include?('vagrant')
 
-      project = Bebox::Project.new(project_name, @hosts, @vbox_uri, @vagrant_box_base_name, Dir.pwd, @vagrant_box_provider, environments)
+      project = Bebox::Project.new(project_name, @hosts, @vbox_uri, @vagrant_box_base_name, "#{Dir.pwd}/tmp", @vagrant_box_provider, environments)
       project.create
       project
     end

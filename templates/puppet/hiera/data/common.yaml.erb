@@ -12,14 +12,14 @@ rbenv::install:
     group:  '<%= self.environment.project.name %>'
     home:  '/home/<%= self.environment.project.name %>'
 rbenv::compile:
-    "1.9.3-p327":
+    "2.1.0":
         user:  "<%= self.environment.project.name %>"
         home:  "/home/<%= self.environment.project.name %>"
         global:  true
 rbenv::gem:
     'rails':
         user:  '<%= self.environment.project.name %>'
-        ruby:  '1.9.3-p327'
+        ruby:  '2.1.0'
 redis::install:
     redis_version: '2.8.8'
     redis_build_dir: '/opt'

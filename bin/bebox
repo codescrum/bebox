@@ -39,6 +39,9 @@ command :new do |c|
     puppet.setup_modules
     # Phase 8: Install common modules for puppet in Vagrant nodes
     puppet.apply_common_modules
+    # Phase 9: Install security modules for puppet in Vagrant nodes
+    puppet.install_security
+
   end
 end
 

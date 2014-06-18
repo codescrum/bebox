@@ -83,9 +83,9 @@ firewall:
     dport: '22'
     proto: 'tcp'
     action: 'accept'
-  '100 allow httpd:80':
+  '100 allow httpd:3000':
     state: ['NEW']
-    dport: '80'
+    dport: '3000'
     proto: 'tcp'
     action: 'accept'
   '998 deny all other requests':
