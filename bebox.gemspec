@@ -23,4 +23,5 @@ spec = Gem::Specification.new do |s|
   s.add_runtime_dependency('tilt', '2.0.1')
   s.add_runtime_dependency('highline', '1.6.21')
   s.add_runtime_dependency('progressbar', '0.21.0')
+  s.add_runtime_dependency('jazz_hands', '0.5.2')
 end

@@ -6,9 +6,8 @@ module Bebox
   class Project
 
 		attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path
-    #:servers,
+
     def initialize(name, vagrant_box_base, parent_path, vagrant_box_provider, default_environments)
-      # self.servers = servers
       self.name = name
       self.vagrant_box_base = vagrant_box_base
       self.parent_path = parent_path
@@ -51,6 +50,24 @@ module Bebox
       create_default_environments
     end
 
+    # Get Project vagrant box provider from the .bebox file
+    def self.vagrant_box_provider_from_file(project_root)
+      project_config = YAML.load_file("#{project_root}/.bebox")
+      project_config['vagrant_box_provider']
+    end
+
+    # Get Project vagrant box base from the .bebox file
+    def self.vagrant_box_base_from_file(project_root)
+      project_config = YAML.load_file("#{project_root}/.bebox")
+      project_config['vagrant_box_base']
+    end
+
+    # Get Project name from the .bebox file
+    def self.name_from_file(project_root)
+      project_config = YAML.load_file("#{project_root}/.bebox")
+      project_config['project']
+    end
+
     # Create rbenv local
     def generate_ruby_version
       `cd #{self.path} && rbenv local 2.1.0`
@@ -73,16 +90,6 @@ module Bebox
     def create_default_environments
       self.environments.map{|environment| environment.create}
     end
-
-    # # Create capistrano base
-    # def create_capistrano_base
-    #   # Create keys directories for each default environment
-    #   self.environments.each do |environment|
-    #     `cd #{self.path} && mkdir -p config/keys/environments/#{environment.name}`
-    #   end
-    #   # Create vagrant environment ssh key for puppet user
-    #   generate_puppet_user_keys('vagrant')
-    # end
 
     # Create Capfile for the project
     def create_capfile
@@ -132,7 +139,6 @@ module Bebox
       end
     end
 
-
     # Create checkpoints base directories
     def create_checkpoints
       `cd #{self.path} && mkdir -p .checkpoints/environments`
@@ -151,39 +157,15 @@ module Bebox
       end
     end
 
+    # Path to the lib directory in the gem
     def lib_path
       File.expand_path '..', File.dirname(__FILE__)
     end
 
+    # Path to the templates directory in the gem
     def templates_path
       # File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib/templates"))
       File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
-
-		# # Project dependency installation (phase 2)
-  #   def install_dependencies
-  #   	setup_bundle
-  #     setup_capistrano
-  #   end
-
-		# # Create project subdirectories
-  #   def create_subdirectories
-  #     `cd #{self.path} && mkdir -p config/deploy && mkdir -p keys`
-  #     `cd #{self.path} && mkdir -p initial_puppet/hiera/data && mkdir -p initial_puppet/manifests && mkdir -p initial_puppet/modules && mkdir -p initial_puppet/lib/deb/puppet_3.6.0`
-  #     `cd #{self.path} && mkdir -p puppet/hiera/data && mkdir -p puppet/manifests && mkdir -p puppet/modules`
-  #   end
-
-
-    # # Copy puppet lib files to project initial_puppet
-    # def copy_puppet_libs
-    #   `cp lib/deb/puppet_3.6.0/*.deb #{self.path}/initial_puppet/lib/deb/puppet_3.6.0`
-    # end
-
-    # # Retrieve a environment from the environments array by name
-    # def environment_by_name(name)
-    #   self.environments.each do |environment|
-    #     return environment if environment.name == name
-    #   end
-    # end
   end
 end
