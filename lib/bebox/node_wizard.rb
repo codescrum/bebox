@@ -44,6 +44,16 @@ module Bebox
       say("\n")
     end
 
+    # Prepare the nodes in a environment
+    def self.prepare(project_root, environment)
+      Bebox::Node.prepare(project_root, environment)
+    end
+
+    # Halt the vagrant nodes
+    def self.vagrant_halt(project_root)
+      Bebox::Node.halt_vagrant_nodes(project_root)
+    end
+
     # Check if there's an existent node in a environment
     def self.node_exists?(project_root, environment, node_name)
       File.exists?("#{project_root}/.checkpoints/environments/#{environment}/nodes/#{node_name}.yml")
