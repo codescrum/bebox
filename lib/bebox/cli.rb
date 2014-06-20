@@ -131,7 +131,7 @@ module Bebox
               else
                 environment = get_environment(options)
                 say("\nEnvironment #{environment}.\n\n")
-                nodes = Bebox::NodeWizard.list_nodes(project_root, environment)
+                nodes = Bebox::NodeWizard.list_nodes(project_root, environment, 'nodes')
                 say("Nodes :\n\n")
                 nodes.map{|node| say(node)}
                 say("There are not nodes yet. You can create a new one with: 'bebox node new' command.") if nodes.empty?
@@ -165,27 +165,24 @@ module Bebox
           end
         end
 
-        if Bebox::NodeWizard.list_nodes(project_root, 'vagrant').count > 0
+        if Bebox::NodeWizard.list_nodes(project_root, 'vagrant', 'nodes').count > 0
           # Prepare nodes phase commands
           desc 'Prepare the nodes for vagrant environment.'
           command :prepare do |prepare_command|
             prepare_command.flag :environment, :desc => 'Set the environment of node', default_value: default_environment
             prepare_command.action do |global_options,options,args|
               return 'Vagrant is not installed in the system. Nothing done.' unless vagrant_installed?
-              nodes = Bebox::Node.node_objects(project_root, 'vagrant')
+              #nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant')
               environment = get_environment(options)
               say("\nEnvironment #{environment}.\n")
-              say("\nPreparing nodes: \n")
-              nodes.each{|node| say(node.hostname)}
-              say("\n")
-              Bebox::NodeWizard.prepare(project_root, environment)
+              Bebox::NodeWizard.prepare(project_root, environment)#, nodes)
             end
           end
           desc 'Halt the nodes for vagrant environment.'
           command :vagrant_halt do |vagrant_halt_command|
             vagrant_halt_command.action do |global_options,options,args|
               return 'Vagrant is not installed in the system. Nothing done.' unless vagrant_installed?
-              nodes = Bebox::Node.node_objects(project_root, 'vagrant')
+              nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
               environment = 'vagrant'
               say("\nEnvironment #{environment}.\n")
               say("\nHalting nodes: \n")

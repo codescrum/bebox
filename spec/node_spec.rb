@@ -17,8 +17,8 @@ describe 'test_05: Bebox::Node' do
       end
 
       it 'should list the current nodes' do
-        current_nodes = %w{node_0.server1.test}
-        nodes = Bebox::Node.list(subject.project_root, subject.environment)
+        current_nodes = [subject.hostname]
+        nodes = Bebox::Node.list(subject.project_root, subject.environment, 'nodes')
         expect(nodes).to include(*current_nodes)
       end
     end
@@ -30,7 +30,7 @@ describe 'test_05: Bebox::Node' do
       end
 
       it 'should not list any nodes' do
-        nodes = Bebox::Node.list(subject.project_root, subject.environment)
+        nodes = Bebox::Node.list(subject.project_root, subject.environment, 'nodes')
         expect(nodes.count).to eq(0)
       end
     end

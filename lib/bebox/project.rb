@@ -75,7 +75,7 @@ module Bebox
 
     # Generate .bebox file
     def generate_dot_bebox_file
-      dotbebox_template = Tilt::ERBTemplate.new("#{templates_path}/project/dot_bebox.erb")
+      dotbebox_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/dot_bebox.erb")
       File.open("#{self.path}/.bebox", 'w') do |f|
         f.write dotbebox_template.render(nil, project: self)
       end
@@ -93,7 +93,7 @@ module Bebox
 
     # Create Capfile for the project
     def create_capfile
-      capfile_content = File.read("#{templates_path}/project/Capfile.erb")
+      capfile_content = File.read("#{Bebox::Project.templates_path}/project/Capfile.erb")
       File::open("#{self.path}/Capfile", "w")do |f|
         f.write(capfile_content)
       end
@@ -101,7 +101,7 @@ module Bebox
 
     # Create Gemfile for the project
     def create_gemfile
-      gemfile_content = File.read("#{templates_path}/project/Gemfile.erb")
+      gemfile_content = File.read("#{Bebox::Project.templates_path}/project/Gemfile.erb")
       File::open("#{self.path}/Gemfile", "w")do |f|
         f.write(gemfile_content)
       end
@@ -133,10 +133,14 @@ module Bebox
     # Generate SO dependencies files
     def generate_so_dependencies_files
       `cd #{self.path} && mkdir -p puppet/prepare/dependencies/ubuntu`
-      ubuntu_dependencies_content = File.read("#{templates_path}/project/ubuntu_dependencies")
+      ubuntu_dependencies_content = File.read("#{Bebox::Project.templates_path}/project/ubuntu_dependencies")
       File::open("#{self.path}/puppet/prepare/dependencies/ubuntu/packages", "w")do |f|
         f.write(ubuntu_dependencies_content)
       end
+    end
+
+    def self.so_dependencies
+      File.read("#{Bebox::Project.templates_path}/project/ubuntu_dependencies").gsub(/\s+/, ' ')
     end
 
     # Create checkpoints base directories
@@ -151,7 +155,7 @@ module Bebox
 
     # Generate the deploy file for the project
     def generate_deploy_file
-      config_deploy_template = Tilt::ERBTemplate.new("#{templates_path}/project/config/deploy.erb")
+      config_deploy_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/config/deploy.erb")
       File.open("#{self.path}/config/deploy.rb", 'w') do |f|
         f.write config_deploy_template.render(nil, project: self)
       end
@@ -163,9 +167,10 @@ module Bebox
     end
 
     # Path to the templates directory in the gem
-    def templates_path
+    def self.templates_path
       # File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib/templates"))
       File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
+
   end
 end

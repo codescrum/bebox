@@ -1,15 +1,15 @@
 # Select options accord to the phase parameter
 if phase == 'node_prepare'
-	set :user, "vagrant"
-	set :ssh_key, '~/.vagrant.d/insecure_private_key'
-	set :copy_exclude, ['profiles', 'roles', 'steps']
+  set :user, "vagrant"
+  set :ssh_key, '~/.vagrant.d/insecure_private_key'
+  set :copy_exclude, ['profiles', 'roles', 'steps']
   set(:deploy_to) { "/home/vagrant/code" }
   set(:deploy_via, :copy_subdir)
   set(:deploy_subdir, 'puppet')
 else
-	set :user, "puppet"
-	set :ssh_key, '<%= "keys/puppet.rsa" %>'
-	set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes", "keys"]
+  set :user, "puppet"
+  set :ssh_key, 'keys/puppet.rsa'
+  set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes", "keys"]
   set(:deploy_to) { "/home/puppet/puppet" }
   set(:deploy_via, :copy_subdir)
   set(:deploy_subdir, 'puppet')
@@ -26,11 +26,7 @@ set :ssh_options, {
 }
 
 # Start nodes definitions
-<% if nodes.present? %>
-<% nodes.each do |node| %>
-  server "<%= node.hostname %>", :web, :app, :db
-<% end %>
-<% end %>
+  server "node0.server1.test", :web, :app, :db
 # End nodes definitions
 
 desc 'Test the vagrant connection by doing issuing a simple echo command'

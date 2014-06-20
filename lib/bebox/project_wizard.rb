@@ -43,7 +43,7 @@ module Bebox
       # Project creation
       project = Bebox::Project.new(project_name, vagrant_box_base, Dir.pwd, vagrant_box_provider, default_environments)
       project.create
-      return "Project #{project_name} created!.\nMake: cd test\nNow you can add new environments or new nodes to your project.\nSee bebox help."
+      return "Project #{project_name} created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
     end
 
     # Check if there's an existent project in that dir

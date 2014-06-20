@@ -1,21 +1,20 @@
 require 'capistrano/ext/multistage'
 
 set :application, "pname"
-set :stages, Dir["#{current_path}/.checkpoints/*/*"].map{|f| File.basename(f)}
+set :stages, Dir[".checkpoints/*/*"].map{|f| File.basename(f)}
 set :default_stage, 'vagrant'
 set :use_sudo, false
-
-set :keep_releases, 5
+set :keep_releases, 3
 set :deploy_via, :remote_cache
-# set(:deploy_to) { "/home/#{user}/#{application}/code" }
-# Relative puppet deb location
-set(:relative_puppet_deb_location){'lib/deb/puppet_3.6.0/'}
+default_run_options[:pty] = true
+default_run_options[:shell] = '/bin/bash --login'
+set :normalize_asset_timestamps, false
+#set(:relative_puppet_deb_location){'lib/deb/puppet_3.6.0/'}
 # Remote location of the puppet_repo
-set(:remote_puppet_repo_location) { "#{current_path}/#{relative_puppet_deb_location}" }
-
+#set(:remote_puppet_repo_location) { "#{current_path}/#{relative_puppet_deb_location}" }
 set(:facter_variables) { {deploy_environment: stage, deploy_user: user, deploy_to: deploy_to} }
 
-after 'deploy:setup', 'deploy'
+#after 'deploy:setup', 'deploy'
 before 'puppet:apply', 'puppet:config_hiera'
 before 'puppet:apply_users', 'puppet:config_hiera_users'
 
@@ -37,49 +36,48 @@ end
 
 namespace :deploy do
 
-  desc 'Prepare and deploy files for puppet user'
-  task :prepare_puppet_user do
-    deploy.setup
-  end
-
   desc 'Installs tools and required dependencies in the remote machine'
-  namespace :prepare_common_dev do
+  namespace :prepare_installation do
 
     desc 'Install dependencies and command line tools to operate correctly'
-    task :default do
+    task :common do
       ubuntu.setup
       dependencies
-      deploy.setup
+    end
+
+    desc 'Install puppet on the remote machine (free-standalone) [including dependencies]'
+    task :puppet do
+      run "#{sudo} apt-get --yes --fix-broken install"
+      run "cd #{current_path}/lib/deb/puppet_3.6.0 && #{sudo} dpkg -i #{remote_puppet_repo_location}*.deb"
     end
 
     desc 'Install libraries'
     task :dependencies do
       run "#{sudo} aptitude update"
-      run "cat /home/puppet/prepare/dependencies/ubuntu/packages|xargs #{sudo} aptitude -y install"
+      run "cd #{current_path}/prepare/dependencies/ubuntu && cat packages|xargs #{sudo} aptitude -y install"
+    end
+  end
+  namespace :ubuntu do
+    desc 'Install dependencies and command line tools to opperate correctly'
+    task :setup do
+      install_aptitude
+      set_fqdn
     end
 
-    namespace :ubuntu do
-      desc 'Install dependencies and command line tools to opperate correctly'
-      task :setup do
-        full_upgrade
-        set_fqdn
-      end
+    desc 'Install aptitude'
+    task :install_aptitude do
+      run "#{sudo} apt-get update"
+      run "#{sudo} apt-get -y install aptitude"
+      # run "#{sudo} aptitude -y full-upgrade"
+    end
 
-      desc 'Upgrade system'
-      task :full_upgrade do
-        run "#{sudo} apt-get update"
-        run "#{sudo} apt-get -y install aptitude"
-        run "#{sudo} aptitude -y full-upgrade"
-      end
-
-      desc "Sets the boxes' fully qualified domain name (fqdn), through the 'hostname' command"
-      task :set_fqdn do
-        run('hostname') do |ch, stream, out|
-          if ch[:server].host.strip == out.strip
-            puts "The #{ch[:server]} server hostname is configured properly"
-          else
-            run "#{sudo} hostname #{ch[:server].host}", hosts: ch[:server]
-          end
+    desc "Sets the boxes' fully qualified domain name (fqdn), through the 'hostname' command"
+    task :set_fqdn do
+      run('hostname') do |ch, stream, out|
+        if ch[:server].host.strip == out.strip
+          puts "The #{ch[:server]} server hostname is configured properly"
+        else
+          run "#{sudo} hostname #{ch[:server].host}", hosts: ch[:server]
         end
       end
     end
@@ -87,15 +85,6 @@ namespace :deploy do
 end
 
 namespace :puppet do
-
-  namespace :install do
-
-    desc 'Install puppet on the remote machine (free-standalone) [including dependencies]'
-    task :default do
-      run "#{sudo} apt-get --yes --fix-broken install"
-      run "#{sudo} dpkg -i #{remote_puppet_repo_location}*.deb"
-    end
-  end
 
   desc 'Bundle modules listed in the Puppetfile through librarian-puppet'
   task :bundle_modules do

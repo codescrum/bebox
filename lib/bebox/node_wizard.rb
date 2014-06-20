@@ -29,8 +29,8 @@ module Bebox
     end
 
     # Lists existing nodes in a environment
-    def self.list_nodes(project_root, environment)
-      Node.list(project_root, environment)
+    def self.list_nodes(project_root, environment, node_type)
+      Node.list(project_root, environment, node_type)
     end
 
     # Lists nodes for all environments
@@ -45,8 +45,27 @@ module Bebox
     end
 
     # Prepare the nodes in a environment
-    def self.prepare(project_root, environment)
-      Bebox::Node.prepare(project_root, environment)
+    def self.prepare(project_root, environment)#, nodes)
+      # Check already prepared nodes
+      nodes_to_prepare = check_nodes_to_prepare(project_root, environment)
+      # Notify the nodes to be prepared
+      if nodes_to_prepare.count > 0
+        say("\nPreparing nodes: \n")
+        nodes_to_prepare.each{|node| say(node.hostname)}
+        say("\n")
+        # If environment is 'vagrant' Prepare and Up the machines
+        if environment == 'vagrant'
+          Bebox::Node.generate_vagrantfile(project_root, nodes_to_prepare)
+          Bebox::Node.regenerate_deploy_file(project_root, environment, nodes_to_prepare)
+          nodes_to_prepare.each{|node| node.prepare_vagrant}
+          Bebox::Node.up_vagrant_nodes(project_root)
+        end
+        # For all the environments do the preparation
+        nodes_to_prepare.each{|node| node.prepare}
+      else
+        say("\nNothing done.\n\n")
+      end
+
     end
 
     # Halt the vagrant nodes
@@ -54,9 +73,33 @@ module Bebox
       Bebox::Node.halt_vagrant_nodes(project_root)
     end
 
+    # Check the nodes already prepared and ask confirmation to re-do-it
+    def self.check_nodes_to_prepare(project_root, environment)
+      nodes_to_prepare = []
+      nodes = Bebox::Node.nodes_in_environment(project_root, environment, 'nodes')
+      prepared_nodes = Bebox::Node.list(project_root, environment, 'prepared_nodes')
+      nodes.each do |node|
+        if prepared_nodes.include?(node.hostname)
+          nodes_to_prepare << node if confirm_node_preparation?(node)
+        else
+          nodes_to_prepare << node
+        end
+      end
+      nodes_to_prepare
+    end
+
     # Check if there's an existent node in a environment
     def self.node_exists?(project_root, environment, node_name)
       File.exists?("#{project_root}/.checkpoints/environments/#{environment}/nodes/#{node_name}.yml")
+    end
+
+    # Ask for confirmation of node preparation
+    def self.confirm_node_preparation?(node)
+      say("The node #{node.hostname} is already prepared. Do you want to re-prepare it?")
+      response =  ask("(y/n)")do |q|
+        q.default = "n"
+      end
+      return response == 'y' ? true : false
     end
 
     # Ask for confirmation of node deletion

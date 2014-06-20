@@ -2,9 +2,9 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-	<% nodes.each_with_index do |vagrant_node, index| %>
-	  config.vm.define :node_<%= index %> do |node|
-	    node.vm.box = "<%= "#{vagrant_box_base_name}-#{vagrant_node.hostname}" %>"
+	<% nodes.each do |vagrant_node| %>
+	  config.vm.define :'<%= vagrant_node.hostname %>' do |node|
+	    node.vm.box = "<%= "#{project_name}-#{vagrant_node.hostname}" %>"
 	    node.vm.hostname = "<%= vagrant_node.hostname %>"
 	    node.vm.network :public_network, :bridge => '<%= network_interface %>: Ethernet', :auto_config => false
 	    node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%= vagrant_node.ip %> netmask 255.255.255.0 up"
