@@ -53,17 +53,18 @@ module Bebox
         say("\nPreparing nodes: \n")
         nodes_to_prepare.each{|node| say(node.hostname)}
         say("\n")
+        # For all environments regenerate the deploy file
+        Bebox::Node.regenerate_deploy_file(project_root, environment, nodes_to_prepare)
         # If environment is 'vagrant' Prepare and Up the machines
         if environment == 'vagrant'
           Bebox::Node.generate_vagrantfile(project_root, nodes_to_prepare)
-          Bebox::Node.regenerate_deploy_file(project_root, environment, nodes_to_prepare)
           nodes_to_prepare.each{|node| node.prepare_vagrant}
           Bebox::Node.up_vagrant_nodes(project_root)
         end
         # For all the environments do the preparation
         nodes_to_prepare.each{|node| node.prepare}
       else
-        say("\nNothing done.\n\n")
+        say("\nThere are no nodes to prepare. Nothing done.\n\n")
       end
 
     end
@@ -71,6 +72,11 @@ module Bebox
     # Halt the vagrant nodes
     def self.vagrant_halt(project_root)
       Bebox::Node.halt_vagrant_nodes(project_root)
+    end
+
+    # Halt the vagrant nodes
+    def self.vagrant_up(project_root)
+      Bebox::Node.up_vagrant_nodes(project_root)
     end
 
     # Check the nodes already prepared and ask confirmation to re-do-it
@@ -186,6 +192,16 @@ module Bebox
     def self.free_ip?(ip)
       `ping -q -c 1 -W 3000 #{ip}`
       ($?.exitstatus == 0) ? false : true
+    end
+
+    # Count the number of nodes in all environments
+    def self.nodes_count(project_root)
+      nodes_count = 0
+      environments = Bebox::EnvironmentWizard.list_environments(project_root)
+      environments.each do |environment|
+        nodes_count += Bebox::NodeWizard.list_nodes(project_root, environment, 'nodes').count
+      end
+      nodes_count
     end
   end
 end

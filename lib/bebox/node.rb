@@ -180,7 +180,7 @@ module Bebox
       template_name = (environment == 'vagrant') ? 'vagrant' : "environment"
       config_deploy_template = Tilt::ERBTemplate.new("#{templates_path}/project/config/deploy/#{template_name}.erb")
       File.open("#{project_root}/config/deploy/#{environment}.rb", 'w') do |f|
-        f.write config_deploy_template.render(nil, :nodes => nodes)
+        f.write config_deploy_template.render(nil, :nodes => nodes, :environment => environment)
       end
     end
 

@@ -141,10 +141,8 @@ module Bebox
           end
           # Node new command
           node_command.desc 'add a node to a environment'
-          #node_command.arg_name "[node]"
           node_command.command :new do |node_new_command|
             node_new_command.action do |global_options,options,args|
-              #help_now!('You don\'t supply a node') if args.count == 0
               environment = get_environment(options)
               say("\nEnvironment #{environment}.\n\n")
               creation_message = Bebox::NodeWizard.create_new_node(project_root, environment)
@@ -153,10 +151,8 @@ module Bebox
           end
           # Node remove command
           node_command.desc "remove a node in a environment"
-          # node_command.arg_name "[node_hostname]"
           node_command.command :remove do |node_remove_command|
             node_remove_command.action do |global_options,options,args|
-              # help_now!('You don\'t supply a node') if args.count == 0
               environment = get_environment(options)
               say("\nEnvironment #{environment}.\n\n")
               deletion_message = Bebox::NodeWizard.remove_node(project_root, environment, args.first)
@@ -165,30 +161,53 @@ module Bebox
           end
         end
 
-        if Bebox::NodeWizard.list_nodes(project_root, 'vagrant', 'nodes').count > 0
+        # These commands are available if there are at least one node configured in the project
+        if Bebox::NodeWizard.nodes_count(project_root) > 0
           # Prepare nodes phase commands
-          desc 'Prepare the nodes for vagrant environment.'
+          desc 'Prepare the nodes for the environment.'
           command :prepare do |prepare_command|
             prepare_command.flag :environment, :desc => 'Set the environment of node', default_value: default_environment
             prepare_command.action do |global_options,options,args|
-              return 'Vagrant is not installed in the system. Nothing done.' unless vagrant_installed?
-              #nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant')
               environment = get_environment(options)
+              # Check if vagrant is installed
+              return 'Vagrant is not installed in the system. Nothing done.' unless vagrant_installed?
               say("\nEnvironment #{environment}.\n")
-              Bebox::NodeWizard.prepare(project_root, environment)#, nodes)
+              Bebox::NodeWizard.prepare(project_root, environment)
             end
           end
-          desc 'Halt the nodes for vagrant environment.'
-          command :vagrant_halt do |vagrant_halt_command|
-            vagrant_halt_command.action do |global_options,options,args|
-              return 'Vagrant is not installed in the system. Nothing done.' unless vagrant_installed?
-              nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
-              environment = 'vagrant'
-              say("\nEnvironment #{environment}.\n")
-              say("\nHalting nodes: \n")
-              nodes.each{|node| say(node.hostname)}
-              say("\n")
-              Bebox::NodeWizard.vagrant_halt(project_root)
+          # These commands are available if there are at least one node in the vagrant environment
+          if Bebox::NodeWizard.list_nodes(project_root, 'vagrant', 'nodes').count > 0
+            desc 'Halt the nodes for vagrant environment.'
+            command :vagrant_halt do |vagrant_halt_command|
+              vagrant_halt_command.action do |global_options,options,args|
+                # Check if vagrant is installed
+                return 'Vagrant is not installed in the system. Nothing done.' unless vagrant_installed?
+                # List nodes in environment and notice message
+                nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
+                environment = 'vagrant'
+                say("\nEnvironment #{environment}.\n")
+                say("\nHalting nodes: \n")
+                nodes.each{|node| say(node.hostname)}
+                say("\n")
+                # Halt vagrant nodes
+                Bebox::NodeWizard.vagrant_halt(project_root)
+              end
+            end
+            desc 'Up the nodes for vagrant environment.'
+            command :vagrant_up do |vagrant_up_command|
+              vagrant_up_command.action do |global_options,options,args|
+                # Check if vagrant is installed
+                return 'Vagrant is not installed in the system. Nothing done.' unless vagrant_installed?
+                # List nodes in environment and notice message
+                nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
+                environment = 'vagrant'
+                say("\nEnvironment #{environment}.\n")
+                say("\nRunning up nodes: \n")
+                nodes.each{|node| say(node.hostname)}
+                say("\n")
+                # Up vagrant nodes
+                Bebox::NodeWizard.vagrant_halt(project_root)
+              end
             end
           end
         end
