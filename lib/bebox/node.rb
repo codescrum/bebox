@@ -20,7 +20,8 @@ module Bebox
 
     # Delete all files and directories related to an node
     def remove
-      remove_checkpoint
+      remove_vagrant_box if self.environment == 'vagrant' && prepared_nodes_count > 0
+      remove_checkpoints
     end
 
     # List existing nodes for environment and type (nodes, prepared_nodes)
@@ -159,9 +160,17 @@ module Bebox
       end
     end
 
-    # Remove checkpoint for node
-    def remove_checkpoint
-      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/{nodes,prepared-nodes,steps/step-{0..3}}/#{self.hostname}.yml`
+    # Remove checkpoints for node
+    def remove_checkpoints
+      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/{nodes,prepared_nodes,steps/step-{0..3}}/#{self.hostname}.yml`
+    end
+
+    # Remove the specified boxes from vagrant
+    def remove_vagrant_box
+      project_name = Bebox::Project.name_from_file(self.project_root)
+      vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(self.project_root)
+      `cd #{self.project_root} && vagrant destroy -f #{self.hostname}`
+      `cd #{self.project_root} && vagrant box remove #{project_name}-#{self.hostname} #{vagrant_box_provider}`
     end
 
     # Get the templates path inside the gem
@@ -188,6 +197,11 @@ module Bebox
     # @returns String
     def self.vagrant_nodes_status(project_root)
       `cd #{project_root} && vagrant status`
+    end
+
+    # Count the number of prepared nodes
+    def prepared_nodes_count
+      Bebox::NodeWizard.list_nodes(self.project_root, self.environment, 'prepared_nodes').count
     end
 
     # Install the common development dependecies with capistrano prepare (phase 4)
