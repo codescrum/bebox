@@ -172,5 +172,10 @@ module Bebox
       File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
+    # Obtain the ssh public key from file in environment
+    def self.public_ssh_key_from_file(project_root, environment)
+      File.read("#{project_root}/config/keys/environments/#{environment}/id_rsa.pub").strip
+    end
+
   end
 end

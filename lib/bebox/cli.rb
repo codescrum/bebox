@@ -77,6 +77,12 @@ module Bebox
       (`which vagrant`) == 'vagrant not found' ? false : true
     end
 
+    # Check if the step argument is valid
+    def valid_step?(step)
+      steps = %w{'step-0' 'step-1' 'step-2' 'step-3'}
+      steps.include?(step)
+    end
+
     # load project commands
     def load_project_commands
       # Environment management phase commands
@@ -206,7 +212,24 @@ module Bebox
                 nodes.each{|node| say(node.hostname)}
                 say("\n")
                 # Up vagrant nodes
-                Bebox::NodeWizard.vagrant_halt(project_root)
+                Bebox::NodeWizard.vagrant_up(project_root)
+              end
+            end
+          end
+
+          # These commands are available if there are at least one prepared_node
+          if Bebox::PuppetWizard.prepared_nodes_count(project_root) > 0
+            desc 'Apply the Puppet step for the nodes in a environment. (step-0: Fundamental, step-1: User layer, step-2: Service layer, step-3: Security layer)'
+            arg_name "[step]"
+            command :apply do |apply_command|
+              apply_command.flag :environment, :desc => 'Set the environment of nodes', default_value: default_environment
+              apply_command.action do |global_options,options,args|
+                environment = get_environment(options)
+                step = args.first
+                help_now!('You don\'t supply an step') if args.count == 0
+                help_now!('You don\'t supply a valid step') if valid_step?(step)
+                # Apply the step for the environment
+                Bebox::PuppetWizard.apply_step(project_root, environment, step)
               end
             end
           end

@@ -9,14 +9,9 @@ set :deploy_via, :remote_cache
 default_run_options[:pty] = true
 default_run_options[:shell] = '/bin/bash --login'
 set :normalize_asset_timestamps, false
-#set(:relative_puppet_deb_location){'lib/deb/puppet_3.6.0/'}
-# Remote location of the puppet_repo
-#set(:remote_puppet_repo_location) { "#{current_path}/#{relative_puppet_deb_location}" }
 set(:facter_variables) { {deploy_environment: stage, deploy_user: user, deploy_to: deploy_to} }
 
-#after 'deploy:setup', 'deploy'
 before 'puppet:apply', 'puppet:config_hiera'
-before 'puppet:apply_users', 'puppet:config_hiera_users'
 
 # evaluate if a file exists in a remote server, if this command is executed by a task that is executed for multiple
 # servers, then this command doesn't work due isn't designed to run in parallel on multiple servers, also This command
@@ -88,36 +83,21 @@ namespace :puppet do
 
   desc 'Bundle modules listed in the Puppetfile through librarian-puppet'
   task :bundle_modules do
-    run "cd #{current_path} && /home/puppet/.rbenv/shims/librarian-puppet install"
+    run "cd #{current_path}/steps/#{phase} && ~/.rbenv/shims/librarian-puppet install"
   end
 
   desc 'Applies puppet using the current path puppet repo uploaded through capistrano itself'
   task :apply do
     run 'touch puppet.log'
     run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
-    run "#{sudo} #{custom_facter_variables} puppet apply --debug --verbose --modulepath=/etc/puppet/modules:#{current_path}/modules --parser future --pluginsync #{current_path}/manifests/site.pp ; true"
+    run "#{sudo} #{custom_facter_variables} puppet apply --debug --verbose --modulepath=#{current_path}/steps/#{step_dir}/modules --parser future --pluginsync #{current_path}/steps/#{step_dir}/manifests/site.pp ; true"
   end
 
   desc 'Make a symlink to configure the hiera settings from hiera project directory'
   task :config_hiera do
     remote_hiera_path = "/etc/puppet/hiera.yaml"
-    local_hiera_path = "#{current_path}/hiera/hiera.yaml"
+    local_hiera_path = "#{current_path}/steps/#{step_dir}/hiera/hiera.yaml"
     puts 'Creating the symlink to hiera.yaml!'
-    run "#{sudo} ln -fs #{local_hiera_path} #{remote_hiera_path}"
-  end
-
-  desc 'Applies puppet using the current path puppet repo uploaded through capistrano itself'
-  task :apply_users do
-    run 'touch puppet.log'
-    run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
-    run "#{sudo} #{custom_facter_variables} puppet apply --modulepath=/etc/puppet/modules:#{current_path}/modules --parser future --pluginsync #{current_path}/manifests/site.pp ; true"
-  end
-
-  desc 'Make a symlink to configure the hiera settings from hiera project directory'
-  task :config_hiera_users do
-    remote_hiera_path = "/etc/puppet/hiera.yaml"
-    local_hiera_path = "#{current_path}/hiera/hiera.yaml"
-    puts 'Creating the symlink to initial hiera.yaml!'
     run "#{sudo} ln -fs #{local_hiera_path} #{remote_hiera_path}"
   end
 end

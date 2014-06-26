@@ -7,7 +7,7 @@ module Bebox
     # Create a new environment
     def self.create_new_environment(project_root, environment_name)
       # Check if the environment exist
-      return "The environment #{environment_name} already exist!." if environment_exists?(project_root, environment_name)
+      # return "The environment #{environment_name} already exist!." if environment_exists?(project_root, environment_name)
       # Environment creation
       environment = Bebox::Environment.new(environment_name, project_root)
       environment.create

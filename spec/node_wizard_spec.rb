@@ -18,7 +18,7 @@ describe 'test_04: Manage nodes with the wizard' do
 
   it 'should list no nodes' do
     current_nodes = []
-    nodes = subject.list_nodes(project_root, environment)
+    nodes = subject.list_nodes(project_root, environment, 'nodes')
     expect(nodes).to include(*current_nodes)
   end
 

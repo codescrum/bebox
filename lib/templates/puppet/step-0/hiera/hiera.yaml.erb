@@ -1,0 +1,11 @@
+# Important note: This file is empty.
+# /etc/puppet/hiera.yml is used by default.
+# deploy_user and deploy_environment is set in the puppet apply command executed by capistrano
+:backends: yaml
+:yaml:
+  :datadir: %{::deploy_to}/current/steps/<%=step_dir%>/hiera/data
+:hierarchy:
+  - %{::fqdn}
+  - %{::deploy_environment}
+  - common
+:logger: console

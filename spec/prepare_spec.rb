@@ -31,6 +31,7 @@ describe 'test_06: Bebox::Node' do
       describe 'Configure the hosts file' do
         it 'should create a hosts backup file' do
           node = nodes.first
+          puts 'Please provide your account password, if ask you, to configure the local hosts file.'
           original_hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
           nodes.each{|node| node.backup_local_hosts(project_name)}
           hosts_backup_file = "#{node.local_hosts_path}/hosts_before_bebox_#{project_name}"

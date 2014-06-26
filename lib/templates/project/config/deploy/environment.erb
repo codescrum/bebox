@@ -1,18 +1,19 @@
+set :ssh_key, '<%= "config/keys/environments/#{environment}/id_rsa" %>'
+set(:deploy_via, :copy_subdir)
+set(:deploy_subdir, 'puppet')
 # Select options accord to the phase parameter
 if phase == 'node_prepare'
   set :user, "root"
-  set :ssh_key, '<%= "config/keys/environments/#{environment}/id_rsa" %>'
-  set :copy_exclude, ['profiles', 'roles', 'steps']
-  set(:deploy_to) { "/home/vagrant/code" }
-  set(:deploy_via, :copy_subdir)
-  set(:deploy_subdir, 'puppet')
+  set :copy_exclude, ['/profiles', '/roles', '/steps']
+  set(:deploy_to) { "/root/code" }
+elsif phase == 'step-0'
+  set :user, "root"
+  set :copy_exclude, ['/lib', '/prepare', '/profiles', '/roles']
+  set(:deploy_to) { "/root/code" }
 else
   set :user, "puppet"
-  set :ssh_key, '<%= "keys/puppet.rsa" %>'
-  set :copy_exclude, [".git", ".gitignore", ".gitmodules", "*.box", "boxes", "keys"]
-  set(:deploy_to) { "/home/puppet/puppet" }
-  set(:deploy_via, :copy_subdir)
-  set(:deploy_subdir, 'puppet')
+  set :copy_exclude, ['/lib', '/prepare']
+  set(:deploy_to) { "/home/puppet/code" }
 end
 # set :deploy_via, :copy
 set :scm, :none

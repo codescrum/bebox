@@ -175,7 +175,6 @@ module Bebox
 
     # Get the templates path inside the gem
     def self.templates_path
-      # File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib/templates"))
       File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
@@ -230,20 +229,6 @@ module Bebox
     # def config_manifests
     #   `cp templates/initial_puppet/manifests/site.pp #{self.project.path}/initial_puppet/manifests`
     #   `cp -r templates/initial_puppet/modules/* #{self.project.path}/initial_puppet/modules`
-    # end
-
-    # # Remove the specified boxes from vagrant
-    # def remove_vagrant_boxes
-    #   self.project.servers.size.times do |i|
-    #     `cd #{self.project.path} && vagrant destroy -f node_#{i}`
-    #     `cd #{self.project.path} && vagrant box remove #{self.project.vagrant_box_base_name}_#{i} #{self.project.vagrant_box_provider}`
-    #   end
-    # end
-
-    # # return an String with the status of vagrant boxes
-    # # @returns String
-    # def vagrant_nodes_status
-    #   `cd #{self.project.path} && vagrant status`
     # end
 
     # # Restore the previous local hosts file

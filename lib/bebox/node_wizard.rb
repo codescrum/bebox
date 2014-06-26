@@ -45,10 +45,10 @@ module Bebox
     end
 
     # Prepare the nodes in a environment
-    def self.prepare(project_root, environment)#, nodes)
+    def self.prepare(project_root, environment)
       # Check already prepared nodes
       nodes_to_prepare = check_nodes_to_prepare(project_root, environment)
-      # Notify the nodes to be prepared
+      # Output the nodes to be prepared
       if nodes_to_prepare.count > 0
         say("\nPreparing nodes: \n")
         nodes_to_prepare.each{|node| say(node.hostname)}

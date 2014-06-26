@@ -17,9 +17,6 @@ describe 'test_07: Node prepared' do
 
     describe host('node0.server1.test') do
       it { should be_resolvable }
-    end
-
-    describe host('node0.server1.test') do
       it { should be_reachable }
       it { should be_reachable.with( :port => 22 ) }
     end

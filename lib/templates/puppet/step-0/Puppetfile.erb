@@ -1,0 +1,18 @@
+# Bebox modules for a basic security in the environment.
+
+forge "http://forge.puppetlabs.com"
+
+# For modules loaded from forge puppetlabs
+# mod 'organization/module_name', 'version'
+# example: mod "puppetlabs/nginx", '1.0.0'
+
+# For modules loaded from github releases tarball
+# mod "organization/module_name", :git => "git_url", :ref => 'v1.0.0'
+# mod "organization/module_name", :git => "git_url", :ref => 'branch_name'
+# example: mod "jfryman/nginx", :git => "git://github.com/jfryman/puppet-nginx.git", :ref => 'v0.0.9'
+# example: mod "jfryman/nginx", :git => "git://github.com/jfryman/puppet-nginx.git", :ref => 'master'
+
+mod "alup/rbenv", :git => 'git://github.com/alup/puppet-rbenv.git', :ref => 'master'
+mod "saz/sudo", '3.0.6'
+mod "puppetlabs/stdlib", '3.2.1'
+# mod "mthibaut/users", '1.0.11'

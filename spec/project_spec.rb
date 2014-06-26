@@ -113,9 +113,8 @@ describe 'test_01: Bebox::Project' do
 
       it 'should generate deploy files' do
         subject.environments.each do |environment|
-          template_name = (environment.name == 'vagrant') ? 'vagrant' : "environment"
           config_deploy_vagrant_content = File.read("#{subject.path}/config/deploy/#{environment.name}.rb").gsub(/\s+/, ' ').strip
-          config_deploy_vagrant_output_content = File.read("spec/fixtures/config/deploy/#{template_name}.test").gsub(/\s+/, ' ').strip
+          config_deploy_vagrant_output_content = File.read("spec/fixtures/config/deploy/#{environment.name}.test").gsub(/\s+/, ' ').strip
           expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
         end
       end
