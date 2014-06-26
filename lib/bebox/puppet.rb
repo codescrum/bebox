@@ -16,27 +16,31 @@ module Bebox
 
     # Puppet apply Fundamental step
     def apply
-      copy_step_0_modules if self.step == 'step-0'
-      generate_hiera
-      generate_puppetfile
+      if %w{step-0 step-1}.include?(self.step)
+        copy_step_modules
+        generate_hiera
+      end
+      # generate_puppetfile
       apply_step
       create_step_checkpoint
     end
 
-    def copy_step_0_modules
+    # Copy the static modules to the step-N modules path
+    def copy_step_modules
       `cp -r #{Bebox::Puppet::templates_path}/puppet/#{self.step}/modules/* #{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/modules/`
     end
 
     # Generate the hiera data for step from the template
     def generate_hiera
       ssh_key = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
+      project_name = Bebox::Project.name_from_file(self.project_root)
       hiera_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{self.step}/hiera/hiera.yaml.erb")
       File.open("#{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/hiera/hiera.yaml", 'w') do |f|
         f.write hiera_template.render(nil, :step_dir => Bebox::Puppet.step_name(self.step))
       end
       common_hiera_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{self.step}/hiera/data/common.yaml.erb")
       File.open("#{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/hiera/data/common.yaml", 'w') do |f|
-        f.write common_hiera_template.render(nil, :ssh_key => ssh_key)
+        f.write common_hiera_template.render(nil, :ssh_key => ssh_key, :project_name => project_name)
       end
     end
 

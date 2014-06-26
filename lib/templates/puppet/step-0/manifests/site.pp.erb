@@ -14,7 +14,6 @@ class install_sudo {
   }
 }
 
-
 class rbenv {
   $rbenv_install_hash = { 'rbenv_install' => hiera('rbenv::install', {}) }
   $rbenv_compile_hash = hiera('rbenv::compile', {})

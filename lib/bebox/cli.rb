@@ -79,7 +79,7 @@ module Bebox
 
     # Check if the step argument is valid
     def valid_step?(step)
-      steps = %w{'step-0' 'step-1' 'step-2' 'step-3'}
+      steps = %w{step-0 step-1 step-2 step-3}
       steps.include?(step)
     end
 
@@ -227,30 +227,13 @@ module Bebox
                 environment = get_environment(options)
                 step = args.first
                 help_now!('You don\'t supply an step') if args.count == 0
-                help_now!('You don\'t supply a valid step') if valid_step?(step)
+                help_now!('You don\'t supply a valid step') unless valid_step?(step)
                 # Apply the step for the environment
                 Bebox::PuppetWizard.apply_step(project_root, environment, step)
               end
             end
           end
         end
-        # # Phase 2: Installation of bundle gems and capistrano in project
-        # project.install_dependencies
-        # # Phase 3: Creation and run of Vagrant nodes for project
-        # environment = project.environment_by_name('vagrant')
-        # environment.up
-        # # Phase 4: Installation of minimal development packages in Vagrant nodes
-        # environment.install_common_dev
-        # # Phase 5: Installation of puppet in Vagrant nodes
-        # common_modules = Bebox::Wizard.setup_modules
-        # puppet = Bebox::Puppet.new(environment, common_modules)
-        # puppet.install
-        # # Phase 6: Creation and access setup for users (puppet, application_user) in Vagrant nodes
-        # puppet.apply_users
-        # # Phase 7: Setup common modules for puppet in Vagrant nodes
-        # puppet.setup_modules
-        # # Phase 8: Install common modules for puppet in Vagrant nodes
-        # puppet.apply_common_modules
       end
 
       pre do |global_options,command,options,args|
