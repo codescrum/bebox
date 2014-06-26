@@ -1,6 +1,7 @@
 require_relative 'puppet'
 require_relative 'node'
 require 'highline/import'
+require 'pry'
 
 module Bebox
   class PuppetWizard
@@ -14,13 +15,15 @@ module Bebox
         say("\nProvisioning #{step} in nodes: \n")
         nodes_to_step.each{|node| say(node.hostname)}
         say("\n")
-      end
-      # Generate the manifests for all the nodes ready for provisioning step-N
-      Bebox::Puppet.generate_manifests(project_root, step, nodes_to_step)
-      # Apply the nodes provisioning for step-N
-      nodes_to_step.each do |node|
-        puppet = Bebox::Puppet.new(project_root, environment, node, step)
-        puppet.apply
+        # Generate the manifests for all the nodes ready for provisioning step-N
+        Bebox::Puppet.generate_manifests(project_root, step, nodes_to_step)
+        # Apply the nodes provisioning for step-N
+        nodes_to_step.each do |node|
+          puppet = Bebox::Puppet.new(project_root, environment, node, step)
+          puppet.apply
+        end
+      else
+        say("\nThere are no nodes for provision in #{step}. Nothing done.\n\n")
       end
     end
 
@@ -31,7 +34,7 @@ module Bebox
       in_step_nodes = Bebox::Node.list(project_root, environment, "steps/#{step}")
       nodes.each do |node|
         if in_step_nodes.include?(node.hostname)
-          nodes_to_step << node if confirm_node_step?(node)
+          nodes_to_step << node if confirm_node_step?(node, step)
         else
           nodes_to_step << node
         end
@@ -41,7 +44,7 @@ module Bebox
 
     # Ask for confirmation of node step
     def self.confirm_node_step?(node, step)
-      say("The node #{node.hostname} is already in step #{step}. Do you want to re-prepare it?")
+      say("The node #{node.hostname} is already in #{step}. Do you want to re-provision it?")
       response =  ask("(y/n)")do |q|
         q.default = "n"
       end
