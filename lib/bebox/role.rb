@@ -12,8 +12,8 @@ module Bebox
 
     # Create all files and directories related to a role
     def create
-      `cd #{self.project_root} && mkdir -p puppet/roles/#{self.name}/manifests`
-      `cd #{self.project_root} && touch puppet/roles/#{self.name}/manifests/init.pp`
+      create_role_directory
+      generate_manifests_file
     end
 
     # Delete all files and directories related to a role
@@ -26,5 +26,27 @@ module Bebox
       Dir["#{project_root}/puppet/roles/*"].map { |f| File.basename(f) }
     end
 
+    # Create the directories for the role
+    def create_role_directory
+    `cd #{self.project_root} && mkdir -p puppet/roles/#{self.name}/manifests`
+    end
+
+    # Generate the manifests init.pp file
+    def generate_manifests_file
+      manifests_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/roles/manifests/init.pp.erb")
+      File.open("#{self.path}/manifests/init.pp", 'w') do |f|
+        f.write manifests_template.render(nil, :role => self)
+      end
+    end
+
+    # Path to the templates directory in the gem
+    def templates_path
+      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+    end
+
+    # Path to the role directory in the project
+    def path
+      "#{self.project_root}/puppet/roles/#{self.name}"
+    end
   end
 end

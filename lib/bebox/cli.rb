@@ -261,7 +261,7 @@ module Bebox
               role_command.arg_name "[name]"
               role_command.command :remove do |role_remove_command|
                 role_remove_command.action do |global_options,options,args|
-                  help_now!('You did not supply a name') if args.count == 0
+                  help_now!('You did not supply a role name') if args.count == 0
                   deletion_message = Bebox::RoleWizard.remove_role(project_root, args.first)
                   puts deletion_message
                 end
@@ -295,7 +295,7 @@ module Bebox
               profile_command.arg_name "[name]"
               profile_command.command :remove do |profile_remove_command|
                 profile_remove_command.action do |global_options,options,args|
-                  help_now!('You did not supply a name') if args.count == 0
+                  help_now!('You did not supply a profile name') if args.count == 0
                   deletion_message = Bebox::ProfileWizard.remove_profile(project_root, args.first)
                   puts deletion_message
                 end

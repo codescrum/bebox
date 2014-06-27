@@ -1,0 +1,14 @@
+# The role class can include many profiles
+# Example:
+# class role::example_role {
+#   include profile::example_profile_1
+#   include profile::example_profile_2
+#   ...
+#   include profile::example_profile_N
+# }
+# The profiles can be added/removed to the role manually or
+# through the 'bebox role add_profile' command.
+
+class role::<%=role.name%> {
+
+}

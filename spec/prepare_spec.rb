@@ -1,6 +1,5 @@
 require 'spec_helper'
 require_relative '../spec/factories/node.rb'
-require 'pry'
 
 describe 'test_06: Bebox::Node' do
 

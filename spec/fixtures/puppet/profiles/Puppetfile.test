@@ -1,0 +1,24 @@
+# Bebox template for the profiles.
+
+# For modules loaded from forge puppetlabs
+# mod 'organization/module_name', 'version'
+# example: mod "puppetlabs/nginx", '1.0.0'
+
+# For modules loaded from github releases tarball
+# mod "organization/module_name", :git => "git_url", :ref => 'v1.0.0'
+# mod "organization/module_name", :git => "git_url", :ref => 'branch_name'
+# example: mod "jfryman/nginx", :git => "git://github.com/jfryman/puppet-nginx.git", :ref => 'v0.0.9'
+# example: mod "jfryman/nginx", :git => "git://github.com/jfryman/puppet-nginx.git", :ref => 'master'
+
+
+# This are some common modules we have used and works well.
+# You can uncomment for use it or can add new ones.
+
+# mod "alup/rbenv", '1.2.0'
+# mod "jfryman/nginx", '0.0.9'
+# mod "dwerder/redis", '1.1.0'
+# mod "puppetlabs/mysql", '2.2.3'
+# mod "akumria/postgresql", '1.2.0'
+# mod "dwerder/mongodb", '3.3.1'
+# mod "mwillbanks/newrelic", '0.1.0'
+# mod "dhoppe/postfix", :git => "git://github.com/dhoppe/puppet-postfix.git", :ref => '3.0.x'

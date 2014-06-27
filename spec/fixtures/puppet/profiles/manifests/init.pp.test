@@ -1,0 +1,14 @@
+# The profile class include the classes instantiation or
+# puppet/modules type resource definitions.
+# It can include hiera calls for the parametter setting.
+# Example:
+# class profile::fooserver {
+#   $fooport = hiera("fooserver_port")
+#   class { "fooserver":
+#     port  => $fooport
+#   }
+# }
+
+class profile::profile_0 {
+
+}
