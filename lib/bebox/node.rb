@@ -1,5 +1,4 @@
 require 'tilt'
-require 'pry'
 
 module Bebox
   class Node
@@ -202,34 +201,6 @@ module Bebox
     def prepared_nodes_count
       Bebox::NodeWizard.list_nodes(self.project_root, self.environment, 'prepared_nodes').count
     end
-
-    # Install the common development dependecies with capistrano prepare (phase 4)
-    # def install_common_dev
-    #   config_initial_puppet
-    #   `cd #{self.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{name} deploy:prepare_common_dev -s phase='common_dev'`
-    # end
-
-    # def config_initial_puppet
-    #   config_initial_hiera
-    #   config_manifests
-    # end
-
-    # def config_initial_hiera
-    #   hiera_template = Tilt::ERBTemplate.new("templates/initial_puppet/hiera/hiera.yaml.erb")
-    #   File.open("#{self.project.path}/initial_puppet/hiera/hiera.yaml", 'w') do |f|
-    #     f.write hiera_template.render(nil)
-    #   end
-    #   common_hiera_template = Tilt::ERBTemplate.new("templates/initial_puppet/hiera/data/common.yaml.erb")
-    #   ssh_puppet_key = File.read("#{self.project.path}/keys/puppet.rsa.pub")
-    #   File.open("#{self.project.path}/initial_puppet/hiera/data/common.yaml", 'w') do |f|
-    #     f.write common_hiera_template.render(self, :puppet_key => ssh_puppet_key)
-    #   end
-    # end
-
-    # def config_manifests
-    #   `cp templates/initial_puppet/manifests/site.pp #{self.project.path}/initial_puppet/manifests`
-    #   `cp -r templates/initial_puppet/modules/* #{self.project.path}/initial_puppet/modules`
-    # end
 
     # # Restore the previous local hosts file
     # def restore_local_hosts

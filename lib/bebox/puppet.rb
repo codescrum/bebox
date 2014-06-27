@@ -1,6 +1,5 @@
 require 'tilt'
 # require 'bebox/puppet_module'
-require 'pry'
 module Bebox
   class Puppet
 

@@ -1,5 +1,4 @@
 require 'tilt'
-require 'bebox/server'
 require 'bebox/environment'
 
 module Bebox

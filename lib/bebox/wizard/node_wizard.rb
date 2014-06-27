@@ -1,4 +1,4 @@
-require_relative 'node'
+require_relative '../node'
 require 'highline/import'
 
 module Bebox

@@ -1,5 +1,5 @@
-require_relative 'puppet'
-require_relative 'node'
+require_relative '../puppet'
+require_relative '../node'
 require 'highline/import'
 require 'pry'
 

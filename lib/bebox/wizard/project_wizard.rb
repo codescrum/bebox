@@ -1,5 +1,5 @@
 # require_relative 'server'
-require_relative 'project'
+require_relative '../project'
 require 'highline/import'
 require 'net/http'
 require 'uri'
