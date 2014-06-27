@@ -57,5 +57,10 @@ module Bebox
     def path
       "#{self.project_root}/puppet/profiles/#{self.name}"
     end
+
+    # Counts existing profiles
+    def self.profiles_count(project_root)
+      Bebox::Profile.list(project_root).count
+    end
   end
 end

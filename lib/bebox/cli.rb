@@ -239,7 +239,7 @@ module Bebox
               role_command.desc 'list the roles in the project'
               role_command.command :list do |role_list_command|
                 role_list_command.action do |global_options,options,args|
-                  roles = Bebox::RoleWizard.list_roles(project_root)
+                  roles = Bebox::Role.list(project_root)
                   say("\nCurrent roles :\n\n")
                   roles.map{|role| say(role)}
                   say("There are not roles yet. You can create a new one with: 'bebox role new' command.") if roles.empty?
@@ -247,7 +247,7 @@ module Bebox
                 end
               end
               # Role new command
-              role_command.desc 'add a remote environment to the project'
+              role_command.desc 'add a role to the project'
               role_command.arg_name "[name]"
               role_command.command :new do |role_new_command|
                 role_new_command.action do |global_options,options,args|
@@ -257,13 +257,48 @@ module Bebox
                 end
               end
               # Role remove command
-              role_command.desc "remove a remote environment in the project"
+              role_command.desc "remove a role in the project"
               role_command.arg_name "[name]"
               role_command.command :remove do |role_remove_command|
                 role_remove_command.action do |global_options,options,args|
                   help_now!('You did not supply a role name') if args.count == 0
                   deletion_message = Bebox::RoleWizard.remove_role(project_root, args.first)
                   puts deletion_message
+                end
+              end
+
+              # These commands are available if there are at least one role and one profile
+              if Bebox::Role.roles_count(project_root) > 0 && Bebox::Profile.profiles_count(project_root) > 0
+                # Role list profiles command
+                role_command.desc 'list the profiles in a role'
+                role_command.arg_name "[role_name]"
+                role_command.command :list_profiles do |list_profiles_command|
+                  list_profiles_command.action do |global_options,options,args|
+                    help_now!('You did not supply a role name.') if args.count == 0
+                    role = args.first
+                    exit_now!('The supplied role do not exist.') unless Bebox::RoleWizard.role_exists?(project_root, role)
+                    profiles = Bebox::Role.list_profiles(project_root, role)
+                    say("\nCurrent profiles in role #{role}:\n\n")
+                    profiles.map{|profile| say(profile)}
+                    say("There are not profiles in role #{role}. You can add a new one with: 'bebox role add_profile' command.") if profiles.empty?
+                    say("\n")
+                  end
+                end
+                # Role add profile command
+                role_command.desc 'add a profile to a role'
+                role_command.command :add_profile do |add_profile_command|
+                  add_profile_command.action do |global_options,options,args|
+                    creation_message = Bebox::RoleWizard.add_profile(project_root)
+                    puts creation_message
+                  end
+                end
+                # Role remove profile command
+                role_command.desc "remove a profile in a role"
+                role_command.command :remove_profile do |remove_profile_command|
+                  remove_profile_command.action do |global_options,options,args|
+                    deletion_message = Bebox::RoleWizard.remove_profile(project_root)
+                    puts deletion_message
+                  end
                 end
               end
             end
@@ -278,6 +313,7 @@ module Bebox
                   say("\nCurrent profiles :\n\n")
                   profiles.map{|profile| say(profile)}
                   say("There are not profiles yet. You can create a new one with: 'bebox profile new' command.") if profiles.empty?
+                  say("\n")
                 end
               end
               # Profile new command

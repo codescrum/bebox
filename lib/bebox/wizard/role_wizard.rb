@@ -26,9 +26,53 @@ module Bebox
       "Role removed!."
     end
 
-    # Lists existing roles
-    def self.list_roles(project_root)
-      Role.list(project_root)
+    # Add a profile to a role
+    def self.add_profile(project_root)
+      roles = Bebox::Role.list(project_root)
+      profiles = Bebox::Profile.list(project_root)
+      role = choose_role(roles)
+      profile = choose_profile(profiles)
+      if Bebox::Role.profile_in_role?(project_root, role, profile)
+        return "Profile #{profile} already in the Role #{role}"
+      else
+        Bebox::Role.add_profile(project_root, role, profile)
+        return "Profile #{profile} added to Role #{role}."
+      end
+    end
+
+    # Remove a profile in a role
+    def self.remove_profile(project_root)
+      roles = Bebox::Role.list(project_root)
+      profiles = Bebox::Profile.list(project_root)
+      role = choose_role(roles)
+      profile = choose_profile(profiles)
+      if Bebox::Role.profile_in_role?(project_root, role, profile)
+        Bebox::Role.remove_profile(project_root, role, profile)
+        return "Profile #{profile} removed from Role #{role}."
+      else
+        return "Profile #{profile} is not in the Role #{role}"
+      end
+
+    end
+
+    # Asks to choose an existent role
+    def self.choose_role(roles)
+      choose do |menu|
+        menu.header = 'Choose an existent role:'
+        roles.each do |box|
+          menu.choice(box.split('/').last)
+        end
+      end
+    end
+
+    # Asks to choose an existent profile
+    def self.choose_profile(profiles)
+      choose do |menu|
+        menu.header = 'Choose the profile to add:'
+        profiles.each do |box|
+          menu.choice(box.split('/').last)
+        end
+      end
     end
 
     # Check if there's an existent role in the project

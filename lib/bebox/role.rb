@@ -1,4 +1,5 @@
 require 'tilt'
+require 'pry'
 
 module Bebox
   class Role
@@ -47,6 +48,51 @@ module Bebox
     # Path to the role directory in the project
     def path
       "#{self.project_root}/puppet/roles/#{self.name}"
+    end
+
+    # Counts existing roles
+    def self.roles_count(project_root)
+      Bebox::Role.list(project_root).count
+    end
+
+    # Add a profile to a role
+    def self.add_profile(project_root, role, profile)
+      tempfile_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp.tmp"
+      manifest_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp"
+      tempfile = File.open(tempfile_path, 'w')
+      manifest_file = File.new("#{project_root}/puppet/roles/#{role}/manifests/init.pp")
+      manifest_file.each do |line|
+        line << "\n\tinclude profile::#{profile}\n" if line.start_with?('class')
+        tempfile << line
+      end
+      manifest_file.close
+      tempfile.close
+      FileUtils.mv(tempfile_path, manifest_path)
+    end
+
+    # Remove a profile in a role
+    def self.remove_profile(project_root, role, profile)
+      manifest_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp"
+      regexp = /^\s*include\s+profile::#{profile}\s*$/
+      content = File.read(manifest_path).gsub(regexp, '')
+      File.open(manifest_path, 'wb') { |file| file.write(content) }
+    end
+
+    # List profiles in a role
+    def self.list_profiles(project_root, role)
+      profiles = []
+      File.readlines("#{project_root}/puppet/roles/#{role}/manifests/init.pp").each do |line|
+        row = line.strip
+        next if row.start_with?('#')
+        profiles << row.split('::').last if row.start_with?('include')
+      end
+      profiles
+    end
+
+    # Check if a profile is defined in a role
+    def self.profile_in_role?(project_root, role, profile)
+      role_profiles = Bebox::Role.list_profiles(project_root, role)
+      role_profiles.include?(profile) ? true : false
     end
   end
 end
