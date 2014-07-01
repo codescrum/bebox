@@ -15,12 +15,16 @@ module Bebox
     # Create all files and directories related to an node
     def create
       create_node_checkpoint
+      create_hiera_template
+      create_manifests_node
     end
 
     # Delete all files and directories related to an node
     def remove
       remove_vagrant_box if self.environment == 'vagrant' && prepared_nodes_count > 0
       remove_checkpoints
+      remove_hiera_template
+      remove_manifests_node
     end
 
     # List existing nodes for environment and type (nodes, prepared_nodes)
@@ -64,6 +68,16 @@ module Bebox
       File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/prepared_nodes/#{self.hostname}.yml", 'w') do |f|
         f.write node_template.render(nil, :node => self)
       end
+    end
+
+    # Create the puppet hiera template file
+    def create_hiera_template
+      Bebox::Puppet.generate_hiera_for_steps(self.project_root, "node.yaml.erb", self.hostname, nil)
+    end
+
+    # Create the node in the puppet manifests file
+    def create_manifests_node
+      Bebox::Puppet.add_node_to_step_manifests(self.project_root, self)
     end
 
     # Prepare the vagrant nodes
@@ -162,6 +176,16 @@ module Bebox
     # Remove checkpoints for node
     def remove_checkpoints
       `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/{nodes,prepared_nodes,steps/step-{0..3}}/#{self.hostname}.yml`
+    end
+
+    # Remove puppet hiera template file
+    def remove_hiera_template
+      Bebox::Puppet.remove_hiera_for_steps(self.project_root, self.hostname)
+    end
+
+    # Remove node from puppet manifests
+    def remove_manifests_node
+      Bebox::Puppet.remove_node_for_steps(self.project_root, self.hostname)
     end
 
     # Remove the specified boxes from vagrant

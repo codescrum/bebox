@@ -1,6 +1,9 @@
 require 'tilt'
 # require 'bebox/puppet_module'
 module Bebox
+
+  PUPPET_STEPS = %w{step-0 step-1 step-2 step-3}
+
   class Puppet
 
     attr_accessor :environment, :project_root, :node, :step#, :common_modules
@@ -51,6 +54,16 @@ module Bebox
       end
     end
 
+    def self.generate_hiera_for_steps(project_root, template_file, filename, options)
+      Bebox::PUPPET_STEPS.each do |step|
+        step_dir = Bebox::Puppet.step_name(step)
+        hiera_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{step}/hiera/data/#{template_file}")
+        File.open("#{project_root}/puppet/steps/#{step_dir}/hiera/data/#{filename}.yaml", 'w') do |f|
+          f.write hiera_template.render(nil, options)
+        end
+      end
+    end
+
     # Generate the Puppetfile from the template
     def generate_puppetfile
       puppetfile_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{self.step}/Puppetfile.erb", :trim => true)
@@ -67,8 +80,33 @@ module Bebox
         Bebox::Puppet.generate_manifests(project_root, self.step, nodes)
       end
       # Set the role for a node
-      Bebox::Puppet.remove_role(project_root, node_name)
+      Bebox::Puppet.remove_role(project_root, node_name, 'step-2')
       Bebox::Puppet.add_role(project_root, node_name, role_name)
+    end
+
+    # Add a node to site.pp
+    def self.add_node_to_step_manifests(project_root, node)
+      Bebox::PUPPET_STEPS.each do |step|
+        Bebox::Puppet.remove_node(project_root, node.hostname, step)
+        manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp"
+        content = File.read(manifest_path)
+        content += "\nnode #{node.hostname} {\n\n}\n"
+        File.open(manifest_path, 'wb') { |file| file.write(content) }
+      end
+    end
+
+    # Remove hiera data file for node
+    def self.remove_hiera_for_steps(project_root, node_name)
+      Bebox::PUPPET_STEPS.each do |step|
+        `cd #{project_root} && rm -rf #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{node_name}.yaml`
+      end
+    end
+
+    # Remove node in manifests file for each step
+    def self.remove_node_for_steps(project_root, node_name)
+      Bebox::PUPPET_STEPS.each do |step|
+        Bebox::Puppet.remove_node(project_root, node_name, step)
+      end
     end
 
     # Add a role to a node
@@ -87,10 +125,18 @@ module Bebox
     end
 
     # Remove the current role in a node
-    def self.remove_role(project_root, node_name)
-      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name('step-2')}/manifests/site.pp"
+    def self.remove_node(project_root, node_name, step)
+      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp"
       regexp = /^\s*node\s+#{node_name}\s*({.*?}\s*)/m
-      content = File.read(manifest_path).sub(regexp, "\nnode #{node_name} {\n\n}\n\n")
+      content = File.read(manifest_path).sub(regexp, '')
+      File.open(manifest_path, 'wb') { |file| file.write(content) }
+    end
+
+    # Remove the current role in a node
+    def self.remove_role(project_root, node_name, step)
+      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp"
+      regexp = /^\s*node\s+#{node_name}\s*({.*?}\s*)/m
+      content = File.read(manifest_path).sub(regexp, "node #{node_name} {\n\n}\n")
       File.open(manifest_path, 'wb') { |file| file.write(content) }
     end
 
