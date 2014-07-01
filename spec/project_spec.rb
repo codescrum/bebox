@@ -105,18 +105,12 @@ describe 'test_01: Bebox::Project' do
             expect(output).to eq(content)
           end
         end
-        it 'should generate hiera data templates' do
+        it 'should generate hiera data common' do
           puppet_steps = %w{step-0 step-1 step-2 step-3}
-          environments = %w{production staging vagrant}
           puppet_steps.each do |step|
             content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/common.yaml.test")
             output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/common.yaml")
             expect(output).to eq(content)
-            environments.each do |environment|
-              content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/#{environment}.yaml.test")
-              output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{environment}.yaml")
-              expect(output).to eq(content)
-            end
           end
         end
       end

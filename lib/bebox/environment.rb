@@ -15,6 +15,7 @@ module Bebox
       create_checkpoints
       create_capistrano_base
       generate_deploy_file
+      generate_hiera_template
     end
 
     # Delete all files and directories related to an environment
@@ -22,6 +23,7 @@ module Bebox
       remove_checkpoints
       remove_capistrano_base
       remove_deploy_file
+      remove_hiera_template
     end
 
     # Lists existing environments
@@ -62,9 +64,27 @@ module Bebox
       end
     end
 
+    # Generate the hiera data template for the environment
+    def generate_hiera_template
+      puppet_steps = %w{step-0 step-1 step-2 step-3}
+      puppet_steps.each do |step|
+        step_dir = Bebox::Puppet.step_name(step)
+        hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb")
+        File.open("#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", 'w') do |f|
+          f.write hiera_template.render(nil, :step_dir => step_dir)
+        end
+      end
+    end
+
     # Remove the deploy file for the environment
     def remove_deploy_file
       `cd #{self.project_root} && rm -rf config/deploy/#{self.name}.rb`
+    end
+
+    # Remove the hiera data template file for the environment
+    def remove_hiera_template
+      puppet_steps = %w{step-0 step-1 step-2 step-3}
+      puppet_steps.each {|step| `cd #{self.project_root} && rm -rf puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{self.name}.yaml` }
     end
 
     # Path to the templates directory in the gem

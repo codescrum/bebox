@@ -37,6 +37,16 @@ describe 'test_03: Bebox::Environment' do
         deploy_output_content = File.read("spec/fixtures/config/deploy/environment.test").gsub(/\s+/, ' ').strip
         expect(deploy_content).to eq(deploy_output_content)
       end
+
+      it 'should generate hiera data file' do
+        puppet_steps = %w{step-0 step-1 step-2 step-3}
+        subject.generate_hiera_template
+        puppet_steps.each do |step|
+          content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/#{subject.name}.yaml.test")
+          output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{subject.name}.yaml")
+          expect(output).to eq(content)
+        end
+      end
     end
 
     context 'environment deletion' do
@@ -60,6 +70,14 @@ describe 'test_03: Bebox::Environment' do
       it 'should remove deploy file' do
         subject.remove_deploy_file
         expect(File.exist?("#{subject.project_root}/config/deploy/#{subject.name}.rb")).to be (false)
+      end
+
+      it 'should remove deploy file' do
+        puppet_steps = %w{step-0 step-1 step-2 step-3}
+        subject.remove_hiera_template
+        puppet_steps.each do |step|
+          expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{subject.name}.yaml")).to be (false)
+        end
       end
     end
   end

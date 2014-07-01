@@ -146,13 +146,6 @@ module Bebox
         File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/data/common.yaml", 'w') do |f|
           f.write hiera_template.render(nil, :step_dir => step_dir)
         end
-        self.environments.each do |environment|
-          # Generate environment.yaml template
-          hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb")
-          File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/data/#{environment.name}.yaml", 'w') do |f|
-            f.write hiera_template.render(nil, :step_dir => step_dir)
-          end
-        end
       end
     end
 
