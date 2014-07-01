@@ -8,26 +8,32 @@ module Bebox
 
     # Apply a step for the nodes in a environment
     def self.apply_step(project_root, environment, step)
-      # Check already in step nodes
-      nodes_to_step = check_nodes_to_step(project_root, environment, step)
-      # Output the nodes that are ready for provisioning step-N
-      if nodes_to_step.count > 0
-        say("\nProvisioning #{step} in nodes: \n")
-        nodes_to_step.each{|node| say(node.hostname)}
-        say("\n")
-        # Generate the manifests for all the nodes ready for provisioning step-N
-        Bebox::Puppet.generate_manifests(project_root, step, nodes_to_step) unless step == 'step-2'
-        # Apply the nodes provisioning for step-N
-        nodes_to_step.each do |node|
-          puppet = Bebox::Puppet.new(project_root, environment, node, step)
-          puppet.apply
+      # Check if environment has configured the ssh keys
+      if check_environment_access(project_root, environment)
+        # Check already in step nodes
+        nodes_to_step = check_nodes_to_step(project_root, environment, step)
+        # Output the nodes that are ready for provisioning step-N
+        if nodes_to_step.count > 0
+          say("\nProvisioning #{step} in nodes: \n")
+          nodes_to_step.each{|node| say(node.hostname)}
+          say("\n")
+          # Generate the manifests for all the nodes ready for provisioning step-N
+          Bebox::Puppet.generate_manifests(project_root, step, nodes_to_step) unless step == 'step-2'
+          # Apply the nodes provisioning for step-N
+          nodes_to_step.each do |node|
+            puppet = Bebox::Puppet.new(project_root, environment, node, step)
+            puppet.apply
+          end
+        else
+          say("\nThere are no nodes for provision in #{step}. Nothing done.\n\n")
         end
       else
-        say("\nThere are no nodes for provision in #{step}. Nothing done.\n\n")
+        say("\nPlease add the ssh key pair (id_rsa, id_rsa.pub) in config/keys/environments/#{environment} to do this step.")
       end
     end
 
     # Check the nodes already in step and ask confirmation to re-do-it
+    # TODO: check prerequisite nodes completed
     def self.check_nodes_to_step(project_root, environment, step)
       nodes_to_step = []
       nodes = Bebox::Node.nodes_in_environment(project_root, environment, 'nodes')
@@ -59,6 +65,12 @@ module Bebox
         nodes_count += Bebox::NodeWizard.list_nodes(project_root, environment, 'prepared_nodes').count
       end
       nodes_count
+    end
+
+    # Check if the environment has ssh keys configured
+    def self.check_environment_access(project_root, environment)
+      key_exist = File.exist?("#{project_root}/config/keys/environments/#{environment}/id_rsa")
+      key_exist &&= File.exist?("#{project_root}/config/keys/environments/#{environment}/id_rsa.pub")
     end
   end
 end

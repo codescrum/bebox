@@ -9,6 +9,10 @@ require 'prepare_spec'
 require 'node0.server1.test/prepare_phase_spec'
 require 'node0.server1.test/puppet_step_0_spec'
 require 'node0.server1.test/puppet_step_1_spec'
+require 'role_spec'
+require 'profile_spec'
+require 'role_profiles_spec'
+require 'node_role_spec'
 
 describe 'Phase 99: ordered specs' do
 
