@@ -33,6 +33,15 @@ module Bebox
       Node.list(project_root, environment, node_type)
     end
 
+    # Associate a role with a node in a environment
+    def self.set_role(project_root, environment)
+      roles = Bebox::Role.list(project_root)
+      nodes = Bebox::Node.list(project_root, environment, 'nodes')
+      node = Bebox::NodeWizard.choose_node(nodes)
+      role = Bebox::RoleWizard.choose_role(roles)
+      Bebox::Puppet.associate_node_role(project_root, environment, node, role)
+    end
+
     # Lists nodes for all environments
     def self.list_all_nodes(project_root)
       environments = Bebox::EnvironmentWizard.list_environments(project_root)

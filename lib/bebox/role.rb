@@ -60,7 +60,7 @@ module Bebox
       tempfile_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp.tmp"
       manifest_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp"
       tempfile = File.open(tempfile_path, 'w')
-      manifest_file = File.new("#{project_root}/puppet/roles/#{role}/manifests/init.pp")
+      manifest_file = File.new(manifest_path)
       manifest_file.each do |line|
         line << "\n\tinclude profile::#{profile}\n" if line.start_with?('class')
         tempfile << line

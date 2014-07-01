@@ -16,7 +16,7 @@ module Bebox
         nodes_to_step.each{|node| say(node.hostname)}
         say("\n")
         # Generate the manifests for all the nodes ready for provisioning step-N
-        Bebox::Puppet.generate_manifests(project_root, step, nodes_to_step)
+        Bebox::Puppet.generate_manifests(project_root, step, nodes_to_step) unless step == 'step-2'
         # Apply the nodes provisioning for step-N
         nodes_to_step.each do |node|
           puppet = Bebox::Puppet.new(project_root, environment, node, step)

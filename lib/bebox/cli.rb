@@ -165,6 +165,19 @@ module Bebox
               puts deletion_message
             end
           end
+          # These commands are available if there is at least one role
+          if Bebox::Role.roles_count(project_root) > 0
+            # Associate node to role command
+            node_command.desc "Associate a node with a role in a environment"
+            node_command.command :set_role do |node_role_command|
+              node_role_command.action do |global_options,options,args|
+                environment = get_environment(options)
+                say("\nEnvironment #{environment}.\n\n")
+                creation_message = Bebox::NodeWizard.set_role(project_root, environment)
+                puts creation_message
+              end
+            end
+          end
         end
 
         # These commands are available if there are at least one node configured in the project

@@ -59,6 +59,46 @@ module Bebox
       end
     end
 
+    # Set a role for a node in the step-2 manifests file
+    def self.associate_node_role(project_root, environment, node_name, role_name)
+      # Create the manifests site.pp file for step-2 if not exist
+      unless Bebox::Puppet.manifests_exists?(project_root, 'step-2')
+        nodes = Bebox::Node.nodes_in_environment(project_root, environment, 'nodes')
+        Bebox::Puppet.generate_manifests(project_root, self.step, nodes)
+      end
+      # Set the role for a node
+      Bebox::Puppet.remove_role(project_root, node_name)
+      Bebox::Puppet.add_role(project_root, node_name, role_name)
+    end
+
+    # Add a role to a node
+    def self.add_role(project_root, node_name, role_name)
+      tempfile_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name('step-2')}/manifests/site.pp.tmp"
+      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name('step-2')}/manifests/site.pp"
+      tempfile = File.open(tempfile_path, 'w')
+      manifest_file = File.new(manifest_path)
+      manifest_file.each do |line|
+        line << "\n  include role::#{role_name}\n" if (line =~ /^\s*node\s+#{node_name}\s+{\s*$/)
+        tempfile << line
+      end
+      manifest_file.close
+      tempfile.close
+      FileUtils.mv(tempfile_path, manifest_path)
+    end
+
+    # Remove the current role in a node
+    def self.remove_role(project_root, node_name)
+      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name('step-2')}/manifests/site.pp"
+      regexp = /^\s*node\s+#{node_name}\s*({.*?}\s*)/m
+      content = File.read(manifest_path).sub(regexp, "\nnode #{node_name} {\n\n}\n\n")
+      File.open(manifest_path, 'wb') { |file| file.write(content) }
+    end
+
+    # Check if a manifests for a step exist
+    def self.manifests_exists?(project_root, step)
+      File.exist?("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp")
+    end
+
     # Apply step via capistrano
     def apply_step
       `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy:setup -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
@@ -92,21 +132,6 @@ module Bebox
       end
     end
 
-    # # Installation of puppet the machine (phase 5)
-    # def install
-    #   `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:install -s phase='puppet_install'`
-    # end
-
-    # # Creation and access setup for users (puppet, application_user) in machine (Phase 6)
-    # def apply_users
-    # 	`cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:apply_users -s phase='apply_users'`
-    # end
-
-    # # Prepare the puppet user for deploy
-    # def prepare_puppet_user
-    #   `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} deploy:prepare_puppet_user -s phase='deploy_puppet_user'`
-    # end
-
     # # Setup and apply security puppet modules in the machine (Phase 9)
     # def install_security
     #   # setup_security_modules
@@ -131,71 +156,9 @@ module Bebox
     #   bundle_modules
     # end
 
-    # # Puppet apply the common modules for puppet in the machine (Phase 8)
-    # def apply_common_modules
-    #   `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:apply -s phase='apply_modules'`
-    # end
-
-    # # Puppet apply the security modules for puppet in the machine
-    # def apply_security_modules
-    #   `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:apply -s phase='apply_security_modules'`
-    # end
-
     # # Download the modules in the puppet user machine through librarian puppet
     # def bundle_modules
     #   `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:bundle_modules -s phase='bundle_modules'`
-    # end
-
-    # # Generate the Puppetfile from the template
-    # def generate_puppetfile
-    #   puppetfile_template = Tilt::ERBTemplate.new("templates/Puppetfile.erb", :trim => true)
-    #   File.open("#{self.environment.project.path}/puppet/Puppetfile", 'w') do |f|
-    #     f.write puppetfile_template.render(self.common_modules)
-    #   end
-    # end
-
-    # # Generate the site.pp from the template
-    # def setup_manifest
-    #   manifest_template = Tilt::ERBTemplate.new("templates/puppet/manifests/site.pp.erb", :trim => true)
-    #   File.open("#{self.environment.project.path}/puppet/manifests/site.pp", 'w') do |f|
-    #     f.write manifest_template.render(self.common_modules)
-    #   end
-    # end
-
-    # # Generate the hiera data from the template
-    # def setup_common_hiera
-    #   hiera_template = Tilt::ERBTemplate.new("templates/puppet/hiera/hiera.yaml.erb")
-    #   File.open("#{self.environment.project.path}/puppet/hiera/hiera.yaml", 'w') do |f|
-    #     f.write hiera_template.render(self)
-    #   end
-    #   common_hiera_template = Tilt::ERBTemplate.new("templates/puppet/hiera/data/common.yaml.erb")
-    #   File.open("#{self.environment.project.path}/puppet/hiera/data/common.yaml", 'w') do |f|
-    #     f.write common_hiera_template.render(self)
-    #   end
-    # end
-
-    #     # Generate the security Puppetfile from the template
-    # def generate_security_puppetfile
-    #   puppetfile_template = Tilt::ERBTemplate.new("templates/Puppetfile_security.erb", :trim => true)
-    #   File.open("#{self.environment.project.path}/puppet/Puppetfile", 'w') do |f|
-    #     f.write puppetfile_template.render(self.common_modules)
-    #   end
-    # end
-
-    # # Generate the security site.pp from the template
-    # def setup_security_manifest
-    #   manifest_template = Tilt::ERBTemplate.new("templates/puppet/manifests/site_security.pp.erb", :trim => true)
-    #   File.open("#{self.environment.project.path}/puppet/manifests/site.pp", 'w') do |f|
-    #     f.write manifest_template.render(self.common_modules)
-    #   end
-    # end
-
-    # # Generate the security hiera data from the template
-    # def setup_security_common_hiera
-    #   common_hiera_template = Tilt::ERBTemplate.new("templates/puppet/hiera/data/common_security.yaml.erb")
-    #   File.open("#{self.environment.project.path}/puppet/hiera/data/common.yaml", 'w') do |f|
-    #     f.write common_hiera_template.render(self)
-    #   end
     # end
 
     # # Generate the PuppetModule objects array from the user module names choices array
