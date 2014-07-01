@@ -37,7 +37,7 @@ module Bebox
       File.open("#{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/hiera/hiera.yaml", 'w') do |f|
         f.write hiera_template.render(nil, :step_dir => Bebox::Puppet.step_name(self.step))
       end
-      common_hiera_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{self.step}/hiera/data/common.yaml.erb")
+      common_hiera_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{self.step}/hiera/data/common_apply.yaml.erb")
       File.open("#{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/hiera/data/common.yaml", 'w') do |f|
         f.write common_hiera_template.render(nil, :ssh_key => ssh_key, :project_name => project_name)
       end
@@ -45,7 +45,7 @@ module Bebox
 
     # Generate the site.pp for step
     def self.generate_manifests(project_root, step, nodes)
-      manifest_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{step}/manifests/site.pp.erb", :trim => true)
+      manifest_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{step}/manifests/site_apply.pp.erb", :trim => true)
       File.open("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp", 'w') do |f|
         f.write manifest_template.render(nil, :nodes => nodes)
       end

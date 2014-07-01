@@ -5,5 +5,7 @@
 :yaml:
   :datadir: %{::deploy_to}/current/steps/<%=step_dir%>/hiera/data
 :hierarchy:
+  - %{::fqdn}
+  - %{::deploy_environment}
   - common
 :logger: console

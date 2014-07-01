@@ -114,6 +114,8 @@ module Bebox
       copy_puppet_install_files
       # Generate steps directories
       generate_steps_directories
+      # Generate steps templates
+      generate_steps_templates
     end
 
     # Generate steps directories
@@ -121,6 +123,37 @@ module Bebox
       puppet_steps = %w{0-fundamental 1-users 2-services 3-security}
       puppet_steps.each{|step| `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`}
       `cd #{self.path} && mkdir -p puppet/{roles,profiles}`
+    end
+
+    # Generate steps templates for hiera and manifests files
+    def generate_steps_templates
+      puppet_steps = %w{step-0 step-1 step-2 step-3}
+      puppet_steps.each do |step|
+        step_dir = Bebox::Puppet.step_name(step)
+        templates_path = Bebox::Node::templates_path
+        # Generate site.pp template
+        manifest_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/manifests/site.pp.erb")
+        File.open("#{self.path}/puppet/steps/#{step_dir}/manifests/site.pp", 'w') do |f|
+          f.write manifest_template.render(nil, :nodes => [])
+        end
+        # Generate hiera.yaml template
+        hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/hiera.yaml.erb")
+        File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/hiera.yaml", 'w') do |f|
+          f.write hiera_template.render(nil, :step_dir => step_dir)
+        end
+        # Generate common.yaml template
+        hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/common.yaml.erb")
+        File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/data/common.yaml", 'w') do |f|
+          f.write hiera_template.render(nil, :step_dir => step_dir)
+        end
+        self.environments.each do |environment|
+          # Generate environment.yaml template
+          hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb")
+          File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/data/#{environment.name}.yaml", 'w') do |f|
+            f.write hiera_template.render(nil, :step_dir => step_dir)
+          end
+        end
+      end
     end
 
     # Copy puppet install files

@@ -84,6 +84,42 @@ describe 'test_01: Bebox::Project' do
         directories << Dir["#{subject.path}/puppet/*/*/*/*/"].map { |f| File.basename(f) }
         expect(directories.flatten).to include(*expected_directories)
       end
+
+      context 'generate steps templates' do
+        before :all do
+          subject.generate_steps_templates
+        end
+        it 'should generate manifests template' do
+          puppet_steps = %w{step-0 step-1 step-2 step-3}
+          puppet_steps.each do |step|
+            content = File.read("spec/fixtures/puppet/steps/#{step}/manifests/site.pp.test")
+            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp")
+            expect(output).to eq(content)
+          end
+        end
+        it 'should generate hiera template' do
+          puppet_steps = %w{step-0 step-1 step-2 step-3}
+          puppet_steps.each do |step|
+            content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/hiera.yaml.test")
+            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/hiera.yaml")
+            expect(output).to eq(content)
+          end
+        end
+        it 'should generate hiera data templates' do
+          puppet_steps = %w{step-0 step-1 step-2 step-3}
+          environments = %w{production staging vagrant}
+          puppet_steps.each do |step|
+            content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/common.yaml.test")
+            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/common.yaml")
+            expect(output).to eq(content)
+            environments.each do |environment|
+              content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/#{environment}.yaml.test")
+              output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{environment}.yaml")
+              expect(output).to eq(content)
+            end
+          end
+        end
+      end
     end
 
     context 'checkpoints' do

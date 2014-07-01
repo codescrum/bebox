@@ -8,6 +8,3 @@
 # The role can be set to the node manually or through the
 # 'bebox node set_role' command.
 
-node node0.server1.test {
-
-}

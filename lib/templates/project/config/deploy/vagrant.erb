@@ -29,7 +29,7 @@ set :ssh_options, {
 }
 
 # Start nodes definitions
-<% if nodes.present? %>
+<% if nodes %>
 <% nodes.each do |node| %>
   server "<%= node.hostname %>", :web, :app, :db
 <% end %>
