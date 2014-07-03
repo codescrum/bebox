@@ -1,0 +1,5 @@
+<% nodes.each do |node| %>
+node <%= node.hostname %> {
+  include roles::fundamental
+}
+<% end %>

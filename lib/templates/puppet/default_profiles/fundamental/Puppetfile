@@ -1,0 +1,5 @@
+
+mod "alup/rbenv", :git => 'git://github.com/alup/puppet-rbenv.git', :ref => 'master'
+mod "saz/sudo", '3.0.6'
+mod "puppetlabs/stdlib", '3.2.1'
+mod "mthibaut/users", '1.0.11'

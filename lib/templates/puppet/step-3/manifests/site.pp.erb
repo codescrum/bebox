@@ -8,3 +8,8 @@
 # The role can be set to the node manually or through the
 # 'bebox node set_role' command.
 
+<% nodes.each do |node| %>
+node <%= node.hostname %> {
+  include roles::security
+}
+<% end %>
