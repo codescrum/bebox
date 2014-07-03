@@ -1,0 +1,6 @@
+forge "https://forgeapi.puppetlabs.com"
+
+mod "alup/rbenv", '1.2.0'
+mod "jfryman/nginx", '0.0.9'
+mod "dwerder/redis", '1.1.0'
+

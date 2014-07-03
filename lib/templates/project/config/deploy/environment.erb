@@ -12,7 +12,7 @@ elsif phase == 'step-0'
   set(:deploy_to) { "/root/code" }
 else
   set :user, "puppet"
-  set :copy_exclude, ['/lib', '/prepare']
+  set :copy_exclude, ['/lib', '/prepare', '/profiles', '/roles']
   set(:deploy_to) { "/home/puppet/code" }
 end
 # set :deploy_via, :copy

@@ -9,6 +9,6 @@
 #   }
 # }
 
-class profiles::<%=profile.name%> {
+class profiles::profile_0 {
 
 }

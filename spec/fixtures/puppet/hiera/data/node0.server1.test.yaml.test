@@ -1,0 +1,4 @@
+packages:
+  - 'htop'
+  - 'wkhtmltopdf'
+  - 'imagemagick'

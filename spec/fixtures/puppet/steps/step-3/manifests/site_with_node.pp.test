@@ -1,7 +1,7 @@
 # This file associates nodes with roles
 # Example:
 # node node0.server1.test {
-#   include role::role_1
+#   include roles::role_1
 # }
 # The roles and profiles pattern recommends to associate one node with
 # one and only one role.

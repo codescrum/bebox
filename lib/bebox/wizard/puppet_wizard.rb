@@ -17,10 +17,19 @@ module Bebox
           say("\nProvisioning #{step} in nodes: \n")
           nodes_to_step.each{|node| say(node.hostname)}
           say("\n")
+          #
+          # TODO: Check step-2 configured
+          #
           # Generate the manifests for all the nodes ready for provisioning step-N
           Bebox::Puppet.generate_manifests(project_root, step, nodes_to_step) unless step == 'step-2'
           # Apply the nodes provisioning for step-N
           nodes_to_step.each do |node|
+            if step == 'step-2'
+              role = Bebox::Puppet.role_from_node(project_root, step, node.hostname)
+              profiles = Bebox::Puppet.profiles_from_role(project_root, role) unless role.nil?
+              Bebox::Puppet.generate_puppetfile(project_root, step, profiles) unless profiles.nil?
+              Bebox::Puppet.generate_roles_and_profiles(project_root, step, role, profiles)
+            end
             puppet = Bebox::Puppet.new(project_root, environment, node, step)
             puppet.apply
           end
@@ -33,7 +42,9 @@ module Bebox
     end
 
     # Check the nodes already in step and ask confirmation to re-do-it
-    # TODO: check prerequisite nodes completed
+    #
+    # TODO: check nodes prerequisite phases completed
+    #
     def self.check_nodes_to_step(project_root, environment, step)
       nodes_to_step = []
       nodes = Bebox::Node.nodes_in_environment(project_root, environment, 'nodes')

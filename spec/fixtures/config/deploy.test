@@ -13,14 +13,9 @@ set(:facter_variables) { {deploy_environment: stage, deploy_user: user, deploy_t
 
 before 'puppet:apply', 'puppet:config_hiera'
 
-# evaluate if a file exists in a remote server, if this command is executed by a task that is executed for multiple
-# servers, then this command doesn't work due isn't designed to run in parallel on multiple servers, also This command
-# behaves identically to the "invoke_command" command. for this reason is necesary the yield, if yield is not used,
-# then, the process would be inconsistent.
-def remote_file_exists?(path)
-  run("if [ -e '#{path}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |ch, stream, out|
-    yield ch, stream, out
-  end
+# evaluate if a file exists in a remote server
+def remote_file_exists?(full_path)
+  'true' ==  capture("if [ -e #{full_path} ]; then echo 'true'; fi").strip
 end
 
 # When using puppet apply for example, pass additional facts to Facter
@@ -83,7 +78,27 @@ namespace :puppet do
 
   desc 'Bundle modules listed in the Puppetfile through librarian-puppet'
   task :bundle_modules do
-    run "cd #{current_path}/steps/#{phase} && ~/.rbenv/shims/librarian-puppet install"
+    librarian_path = "#{shared_path}/librarian-puppet/#{step_dir}"
+    step_path = "#{current_path}/steps/#{step_dir}"
+    # Create shared directories for librarian-puppet
+    run "mkdir -p #{librarian_path}/{modules,.tmp}"
+    # Check if Puppetfile.lock and .tmp are created for librarian-puppet
+    puppetfile_lock = remote_file_exists?("#{librarian_path}/Puppetfile.lock")
+    librarian_tmp = remote_file_exists?("#{step_path}/.tmp")
+    # Move the Puppetfile.lock create the first time
+    run "ln -fs #{librarian_path}/Puppetfile.lock #{step_path}/Puppetfile.lock" if puppetfile_lock
+    # Link the modules directory from shared to the step directory
+    run "cp -rf #{step_path}/modules/* #{librarian_path}/modules/"
+    run "rm -rf #{step_path}/modules"
+    run "ln -fs #{librarian_path}/modules #{step_path}/modules"
+    # Link the .tmp directory from shared to the step directory
+    run "cp -rf #{step_path}/.tmp/* #{librarian_path}/.tmp/" if librarian_tmp
+    run "rm -rf #{step_path}/.tmp"
+    run "ln -fs #{librarian_path}/.tmp #{step_path}/.tmp"
+    # Execute librarian-puppet module installation
+    run "cd #{step_path} && librarian-puppet install"
+    # Move the Puppetfile.lock create the first time
+    run "mv -f #{step_path}/Puppetfile.lock #{librarian_path}/" unless puppetfile_lock
   end
 
   desc 'Applies puppet using the current path puppet repo uploaded through capistrano itself'

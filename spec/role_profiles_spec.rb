@@ -7,6 +7,11 @@ describe 'test_12: Associate roles and profiles' do
   let(:role) { build(:role) }
   let(:profile) { build(:profile) }
 
+  before :all do
+    role.create
+    profile.create
+  end
+
   context 'add profiles' do
     it 'should add a profile to a role' do
       role_content = "include profile::#{profile.name}"

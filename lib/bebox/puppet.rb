@@ -6,14 +6,13 @@ module Bebox
 
   class Puppet
 
-    attr_accessor :environment, :project_root, :node, :step#, :common_modules
+    attr_accessor :environment, :project_root, :node, :step
 
-    def initialize(project_root, environment, node, step)#, common_modules)
-      self.environment = environment
+    def initialize(project_root, environment, node, step)
       self.project_root = project_root
+      self.environment = environment
       self.node = node
       self.step = step
-      # self.common_modules = parse_common_modules(common_modules)
     end
 
     # Puppet apply Fundamental step
@@ -22,7 +21,7 @@ module Bebox
         copy_step_modules
         generate_hiera
       end
-      # generate_puppetfile
+      # generate_puppetfile if %w{step-2 step-3}.include?(self.step)
       apply_step
       create_step_checkpoint
     end
@@ -64,12 +63,54 @@ module Bebox
       end
     end
 
-    # Generate the Puppetfile from the template
-    def generate_puppetfile
-      puppetfile_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{self.step}/Puppetfile.erb", :trim => true)
-      File.open("#{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/Puppetfile", 'w') do |f|
-        f.write puppetfile_template.render(nil)
+    # Generate the roles and profiles modules for the step
+    def self.generate_roles_and_profiles(project_root, step, role, profiles)
+      # Re-create the roles and profiles module directories
+      `rm -rf #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/{roles,profiles}`
+      `mkdir -p #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/{roles,profiles}/manifests`
+      # Copy role to module
+      `cp #{project_root}/puppet/roles/#{role}/manifests/init.pp #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/roles/manifests/#{role}.pp`
+      # Copy profiles to module
+      profiles.each do |profile|
+        `cp #{project_root}/puppet/profiles/#{profile}/manifests/init.pp #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/profiles/manifests/#{profile}.pp`
       end
+    end
+
+    # Generate the Puppetfile from the role-profiles partial puppetfiles
+    def self.generate_puppetfile(project_root, step, profiles)
+      modules = []
+      puppetfile_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile"
+      profiles.each do |profile|
+        profile_puppetfile_path = "#{project_root}/puppet/profiles/#{profile}/Puppetfile"
+        puppetfile_content = File.read(profile_puppetfile_path)
+        modules << puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten
+      end
+      puppetfile_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{step}/Puppetfile.erb", :trim => true)
+      File.open("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile", 'w') do |f|
+        f.write puppetfile_template.render(nil, :profile_modules => modules.flatten)
+      end
+    end
+
+    # Get the role name associated with a node
+    def self.role_from_node(project_root, step, node)
+      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp"
+      manifest_content = File.read(manifest_path)
+      matching_nodes = manifest_content.match(/^\s*node\s+#{node}\s*({.*?}\s*)/m)
+      unless matching_nodes.nil?
+        matching_role = matching_nodes[0].strip.match(/roles::(.+?$)/)
+        role = matching_role[1] unless matching_role.nil?
+      end
+      role
+    end
+
+    # Get the profiles names array associated with a role
+    def self.profiles_from_role(project_root, role_name)
+      profiles = []
+      role_path = "#{project_root}/puppet/roles/#{role_name}/manifests/init.pp"
+      role_content = File.read(role_path)
+      matching_roles = role_content.match(/^\s*class\s+roles::#{role_name}\s*({.*?}\s*)/m)
+      profiles = matching_roles[0].strip.scan(/profiles::(.+?$)/).flatten unless matching_roles.nil?
+      profiles
     end
 
     # Set a role for a node in the step-2 manifests file
@@ -116,7 +157,7 @@ module Bebox
       tempfile = File.open(tempfile_path, 'w')
       manifest_file = File.new(manifest_path)
       manifest_file.each do |line|
-        line << "\n  include role::#{role_name}\n" if (line =~ /^\s*node\s+#{node_name}\s+{\s*$/)
+        line << "\n  include roles::#{role_name}\n" if (line =~ /^\s*node\s+#{node_name}\s+{\s*$/)
         tempfile << line
       end
       manifest_file.close
@@ -136,7 +177,7 @@ module Bebox
     def self.remove_role(project_root, node_name, step)
       manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp"
       regexp = /^\s*node\s+#{node_name}\s*({.*?}\s*)/m
-      content = File.read(manifest_path).sub(regexp, "node #{node_name} {\n\n}\n")
+      content = File.read(manifest_path).sub(regexp, "\nnode #{node_name} {\n\n}\n\n")
       File.open(manifest_path, 'wb') { |file| file.write(content) }
     end
 
@@ -149,6 +190,9 @@ module Bebox
     def apply_step
       `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy:setup -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
       `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
+      if self.step == 'step-2'
+        `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} puppet:bundle_modules -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
+      end
       `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} puppet:apply -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
     end
 
@@ -184,15 +228,6 @@ module Bebox
     #   apply_security_modules
     # end
 
-    # # Setup common modules (manifest, hiera, puppetfile, librarian_puppet) for puppet in the machine (Phase 7)
-    # def setup_modules
-    #   setup_manifest
-    #   setup_common_hiera
-    #   generate_puppetfile
-    #   prepare_puppet_user
-    #   bundle_modules
-    # end
-
     # # Setup security modules (manifest, hiera, puppetfile, librarian_puppet) for security in the machine
     # def setup_security_modules
     #   setup_security_manifest
@@ -205,17 +240,6 @@ module Bebox
     # # Download the modules in the puppet user machine through librarian puppet
     # def bundle_modules
     #   `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:bundle_modules -s phase='bundle_modules'`
-    # end
-
-    # # Generate the PuppetModule objects array from the user module names choices array
-    # def parse_common_modules(common_modules)
-    #   common_modules_array = []
-    #   yaml_modules = YAML.load(File.read('config/modules.yaml'))
-    #   yaml_modules['common_modules'].each do |puppet_module, options|
-    #     options = {} if options.nil?
-    #     common_modules_array << Bebox::PuppetModule.new(options) if common_modules.include?(puppet_module)
-    #   end
-    #   common_modules_array
     # end
   end
 end
