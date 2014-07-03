@@ -132,7 +132,7 @@ module Bebox
             node_list_command.switch :all
             node_list_command.action do |global_options,options,args|
               # Call to list nodes
-              if options[:all].present?
+              if options[:all]
                 Bebox::NodeWizard.list_all_nodes(project_root)
               else
                 environment = get_environment(options)

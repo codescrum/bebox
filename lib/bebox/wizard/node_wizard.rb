@@ -46,7 +46,7 @@ module Bebox
     def self.list_all_nodes(project_root)
       environments = Bebox::EnvironmentWizard.list_environments(project_root)
       environments.each do |environment|
-        nodes = Node.list(project_root, environment)
+        nodes = Node.list(project_root, environment, 'nodes')
         say("\nNodes for environment #{environment}:\n\n")
         nodes.map{|node| say(node)}
       end
