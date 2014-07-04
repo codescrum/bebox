@@ -66,12 +66,14 @@ module Bebox
 
     # Generate the hiera data template for the environment
     def generate_hiera_template
+      ssh_key = Bebox::Project.public_ssh_key_from_file(self.project_root, self.name)
+      project_name = Bebox::Project.name_from_file(self.project_root)
       puppet_steps = %w{step-0 step-1 step-2 step-3}
       puppet_steps.each do |step|
         step_dir = Bebox::Puppet.step_name(step)
         hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb")
         File.open("#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", 'w') do |f|
-          f.write hiera_template.render(nil, :step_dir => step_dir)
+          f.write hiera_template.render(nil, :step_dir => step_dir, :ssh_key => ssh_key, :project_name => project_name)
         end
       end
     end
@@ -95,7 +97,8 @@ module Bebox
 
     # Generate ssh keys for connection with puppet user in environment
     def generate_puppet_user_keys(environment)
-      `cd #{self.project_root}/config/keys/environments/#{environment} && ssh-keygen -f id_rsa -t rsa -N ''`
+      `rm #{self.project_root}/config/keys/environments/#{environment}/{id_rsa,id_rsa.pub}`
+      `cd #{self.project_root}/config/keys/environments/#{environment} && ssh-keygen -q -f id_rsa -t rsa -N ''`
     end
   end
 end
