@@ -332,3 +332,13 @@ cd PROJECT
 ```
 gem 'bebox', :path => "BEBOX_PATH_IN_YOUR_PC/pkg"
 ```
+
+Tests
+-----------
+
+By the project nature the specs must be run in order. To do this all specs has a 'Test XX:' naming convention. If you want to run all tests in order we have a ordered_phases_spec.rb file than you can run with.
+
+```
+rspec spec/ordered_phases_spec.rb
+```
+**Important: You need to have the [ubuntu-server-12042-x64-vbox4210-nocm.box](http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box) in the bebox root folder to run the tests**
