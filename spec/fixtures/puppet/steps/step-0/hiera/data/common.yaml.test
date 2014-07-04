@@ -1,0 +1,26 @@
+user_accounts:
+  - name:  'puppet'
+    email:  ''
+    key:  ''
+    uid:  7000
+sudo::configs:
+  'puppet':
+    ensure:  'present'
+    content:  '%puppet ALL=(ALL) NOPASSWD: ALL'
+    priority:  10
+rbenv::install:
+    user:  'puppet'
+    group:  'puppet'
+    home:  '/home/puppet'
+rbenv::compile:
+    "1.9.3-p327":
+        user:  "puppet"
+        home:  "/home/puppet"
+        global:  true
+rbenv::gem:
+    'puppet':
+        user:  'puppet'
+        ruby:  '1.9.3-p327'
+    'librarian-puppet':
+        user:  'puppet'
+        ruby:  '1.9.3-p327'

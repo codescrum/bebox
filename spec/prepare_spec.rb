@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/node.rb'
 
-describe 'test_06: Bebox::Node' do
+describe 'Test 06: Bebox::Node' do
 
   describe 'Prepare nodes' do
 
@@ -9,7 +9,7 @@ describe 'test_06: Bebox::Node' do
     let(:project_root) { "#{Dir.pwd}/tmp/pname" }
     let(:environment) { 'vagrant' }
     let(:project_name) {'pname'}
-    let(:vagrant_box_base) {'~/.bebox/boxes/ubuntu-server-12042-x64-vbox4210-nocm.box'}
+    let(:vagrant_box_base) {'ubuntu-server-12042-x64-vbox4210-nocm.box'}
 
     context 'pre vagrant prepare' do
       it 'should generate the Vagrantfile' do

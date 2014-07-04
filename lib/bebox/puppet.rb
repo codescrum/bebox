@@ -17,18 +17,22 @@ module Bebox
 
     # Puppet apply Fundamental step
     def apply
-      if %w{step-0 step-1}.include?(self.step)
-        copy_step_modules
-        generate_hiera
-      end
-      # generate_puppetfile if %w{step-2 step-3}.include?(self.step)
+      check_puppetfile_content
+      copy_static_modules
+      # generate_hiera
       apply_step
       create_step_checkpoint
     end
 
+    # Check if it's necessary a Puppetfile accord to it's content
+    def check_puppetfile_content
+      puppetfile_content = File.read("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile").strip
+      `rm "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile"` if puppetfile_content.empty?
+    end
+
     # Copy the static modules to the step-N modules path
-    def copy_step_modules
-      `cp -r #{Bebox::Puppet::templates_path}/puppet/#{self.step}/modules/* #{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/modules/`
+    def copy_static_modules
+      `cp -R #{Bebox::Puppet::templates_path}/puppet/#{self.step}/modules/* #{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/modules/`
     end
 
     # Generate the hiera data for step from the template
@@ -128,10 +132,12 @@ module Bebox
     # Add a node to site.pp
     def self.add_node_to_step_manifests(project_root, node)
       Bebox::PUPPET_STEPS.each do |step|
+        manifest_node_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{step}/manifests/node.erb", :trim => true)
+        manifest_node = manifest_node_template.render(nil, :node => node)
         Bebox::Puppet.remove_node(project_root, node.hostname, step)
         manifest_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp"
         content = File.read(manifest_path)
-        content += "\nnode #{node.hostname} {\n\n}\n"
+        content += "\n#{manifest_node}\n"
         File.open(manifest_path, 'wb') { |file| file.write(content) }
       end
     end
@@ -188,12 +194,11 @@ module Bebox
 
     # Apply step via capistrano
     def apply_step
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy:setup -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
-      if self.step == 'step-2'
-        `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} puppet:bundle_modules -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
-      end
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} puppet:apply -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
+      cap_command = "cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment}"
+      `#{cap_command} deploy:setup -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
+      `#{cap_command} deploy -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
+      `#{cap_command} puppet:bundle_modules -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
+      `#{cap_command} puppet:apply -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
     end
 
     # Create checkpoint for step

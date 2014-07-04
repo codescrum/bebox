@@ -72,7 +72,10 @@ module Bebox
 
     # Create the puppet hiera template file
     def create_hiera_template
-      Bebox::Puppet.generate_hiera_for_steps(self.project_root, "node.yaml.erb", self.hostname, nil)
+      options = {}
+      options[:ssh_key] = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
+      options[:project_name] = Bebox::Project.name_from_file(self.project_root)
+      Bebox::Puppet.generate_hiera_for_steps(self.project_root, "node.yaml.erb", self.hostname, options)
     end
 
     # Create the node in the puppet manifests file

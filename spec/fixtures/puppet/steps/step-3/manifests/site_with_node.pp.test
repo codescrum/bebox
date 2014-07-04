@@ -10,4 +10,6 @@
 
 node node0.server1.test {
 
+  include roles::security
+
 }

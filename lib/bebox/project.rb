@@ -6,7 +6,7 @@ module Bebox
 
 		attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path
 
-    def initialize(name, vagrant_box_base, parent_path, vagrant_box_provider, default_environments)
+    def initialize(name, vagrant_box_base, parent_path, vagrant_box_provider, default_environments = [])
       self.name = name
       self.vagrant_box_base = vagrant_box_base
       self.parent_path = parent_path
@@ -21,8 +21,8 @@ module Bebox
 		# Project creation phase
     def create
     	create_project_directory
-      create_project_config
       create_puppet_base
+      create_project_config
       create_checkpoints
       bundle_project
     end
@@ -47,6 +47,9 @@ module Bebox
       create_gemfile
       # Create the default environments
       create_default_environments
+      #
+      # TODO: Create .gitignore
+      #
     end
 
     # Get Project vagrant box provider from the .bebox file
@@ -80,6 +83,19 @@ module Bebox
       end
     end
 
+    # Create templates directories
+    def create_templates_directories
+      `cd #{self.path} && mkdir -p templates/{roles,profiles}`
+    end
+
+    # Create config deploy and keys directories
+    def copy_default_roles_profiles
+      `cp -R #{Bebox::Project.templates_path}/puppet/default_roles/* #{self.path}/templates/roles/`
+      `cp -R #{Bebox::Project.templates_path}/puppet/default_profiles/* #{self.path}/templates/profiles/`
+      `cp -R #{Bebox::Project.templates_path}/puppet/default_roles/* #{self.path}/puppet/roles/`
+      `cp -R #{Bebox::Project.templates_path}/puppet/default_profiles/* #{self.path}/puppet/profiles/`
+    end
+
     # Create config deploy and keys directories
     def create_config_deploy_directories
       `cd #{self.path} && mkdir -p config/{deploy,keys/environments}`
@@ -108,6 +124,8 @@ module Bebox
 
     # Create puppet base directories and files
     def create_puppet_base
+      # Create templates directories
+      create_templates_directories
       # Generate SO dependencies files
       generate_so_dependencies_files
       # Copy puppet install files
@@ -116,6 +134,8 @@ module Bebox
       generate_steps_directories
       # Generate steps templates
       generate_steps_templates
+      # Copy the default_roles and default_profiles to project
+      copy_default_roles_profiles
     end
 
     # Generate steps directories
@@ -129,6 +149,7 @@ module Bebox
     def generate_steps_templates
       puppet_steps = %w{step-0 step-1 step-2 step-3}
       puppet_steps.each do |step|
+        ssh_key = ''
         step_dir = Bebox::Puppet.step_name(step)
         templates_path = Bebox::Node::templates_path
         # Generate site.pp template
@@ -144,7 +165,7 @@ module Bebox
         # Generate common.yaml template
         hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/common.yaml.erb")
         File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/data/common.yaml", 'w') do |f|
-          f.write hiera_template.render(nil, :step_dir => step_dir)
+          f.write hiera_template.render(nil, :step_dir => step_dir, :ssh_key => ssh_key, :project_name => self.name)
         end
       end
     end
@@ -152,7 +173,7 @@ module Bebox
     # Copy puppet install files
     def copy_puppet_install_files
       `cd #{self.path} && mkdir -p puppet/lib/deb`
-      `cp -r #{lib_path}/deb/* #{self.path}/puppet/lib/deb/`
+      `cp -R #{lib_path}/deb/* #{self.path}/puppet/lib/deb/`
     end
 
     # Generate SO dependencies files
@@ -199,7 +220,8 @@ module Bebox
 
     # Obtain the ssh public key from file in environment
     def self.public_ssh_key_from_file(project_root, environment)
-      File.read("#{project_root}/config/keys/environments/#{environment}/id_rsa.pub").strip
+      ssh_key_path = "#{project_root}/config/keys/environments/#{environment}/id_rsa.pub"
+      return (File.exist?(ssh_key_path)) ? File.read(ssh_key_path).strip : ''
     end
 
   end

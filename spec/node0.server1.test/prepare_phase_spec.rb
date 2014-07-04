@@ -1,13 +1,13 @@
 require 'spec_helper'
-require_relative '../vagrant_spec_helper.rb'
 require_relative '../factories/node.rb'
+require_relative '../vagrant_spec_helper.rb'
 
-describe 'test_07: Node prepared' do
+describe 'Test 07: Node prepared' do
 
   let(:node) { build(:node) }
 
   before(:all) do
-     node.prepare
+    node.prepare
   end
 
   context 'vagrant prepared' do
@@ -17,7 +17,6 @@ describe 'test_07: Node prepared' do
 
     describe host('node0.server1.test') do
       it { should be_resolvable }
-      it { should be_reachable }
       it { should be_reachable.with( :port => 22 ) }
     end
 

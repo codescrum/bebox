@@ -1,0 +1,5 @@
+user_accounts:
+  - name:   'pname'
+    email:  ''
+    key:    ''
+    uid:    7001

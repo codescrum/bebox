@@ -10,5 +10,5 @@
 # }
 
 class profiles::users {
-  include users
+  include ::users
 }

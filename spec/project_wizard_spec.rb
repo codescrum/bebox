@@ -3,7 +3,7 @@ require 'spec_helper'
 
 require_relative '../spec/factories/project.rb'
 
-describe 'test_00: Create a new project with the wizard' do
+describe 'Test 00: Create a new project with the wizard' do
 
   describe 'Project data provision' do
 

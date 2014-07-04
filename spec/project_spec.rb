@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/project.rb'
 
-describe 'test_01: Bebox::Project' do
+describe 'Test 01: Bebox::Project' do
 
   describe 'Project creation' do
 
@@ -12,7 +12,17 @@ describe 'test_01: Bebox::Project' do
       expect(Dir.exist?(subject.path)).to be true
     end
 
-    context 'Project config files creation' do
+    context '00: Project config files creation' do
+      it 'should create the templates directories' do
+        directories_expected = ['templates', 'roles', 'profiles']
+        subject.create_templates_directories
+        directories = []
+        directories << Dir["#{subject.path}/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/*/*/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*directories_expected)
+      end
+
       it 'should create config deploy directories' do
         directories_expected = ['config', 'deploy', 'keys', 'environments']
         subject.create_config_deploy_directories
@@ -58,7 +68,7 @@ describe 'test_01: Bebox::Project' do
       end
     end
 
-    context 'Create puppet base' do
+    context '01: Create puppet base' do
       it 'should generate SO dependencies files' do
         subject.generate_so_dependencies_files
         content = File.read("#{subject.path}/puppet/prepare/dependencies/ubuntu/packages")
@@ -85,7 +95,16 @@ describe 'test_01: Bebox::Project' do
         expect(directories.flatten).to include(*expected_directories)
       end
 
-      context 'generate steps templates' do
+      it 'should copy the default roles and profiles' do
+        expected_directories = ['fundamental', 'security', 'users']
+        subject.copy_default_roles_profiles
+        directories = Dir["#{subject.path}/puppet/roles/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*expected_directories)
+        directories = Dir["#{subject.path}/puppet/profiles/*/"].map { |f| File.basename(f) }
+        expect(directories.flatten).to include(*expected_directories)
+      end
+
+      context '02: generate steps templates' do
         before :all do
           subject.generate_steps_templates
         end
@@ -116,7 +135,7 @@ describe 'test_01: Bebox::Project' do
       end
     end
 
-    context 'checkpoints' do
+    context '03: checkpoints' do
       it 'should create checkpoints directories' do
         expected_directories = ['.checkpoints', 'environments']
         subject.create_checkpoints
@@ -127,7 +146,7 @@ describe 'test_01: Bebox::Project' do
       end
     end
 
-    context 'bundle project' do
+    context '04: bundle project' do
       it 'should install dependencies' do
         subject.bundle_project
         expect(File).to exist("#{subject.path}/Gemfile.lock")
@@ -135,7 +154,7 @@ describe 'test_01: Bebox::Project' do
       end
     end
 
-    context 'create default environments' do
+    context '05: create default environments' do
 
       before(:all) do
         subject.create_default_environments

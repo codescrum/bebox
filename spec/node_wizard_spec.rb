@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../spec/factories/node.rb'
 
-describe 'test_04: Manage nodes with the wizard' do
+describe 'Test 04: Manage nodes with the wizard' do
 
   subject { Bebox::NodeWizard }
 

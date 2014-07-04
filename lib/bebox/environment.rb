@@ -97,7 +97,7 @@ module Bebox
 
     # Generate ssh keys for connection with puppet user in environment
     def generate_puppet_user_keys(environment)
-      `rm #{self.project_root}/config/keys/environments/#{environment}/{id_rsa,id_rsa.pub}`
+      `rm -f #{self.project_root}/config/keys/environments/#{environment}/{id_rsa,id_rsa.pub}`
       `cd #{self.project_root}/config/keys/environments/#{environment} && ssh-keygen -q -f id_rsa -t rsa -N ''`
     end
   end

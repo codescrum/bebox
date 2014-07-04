@@ -85,20 +85,22 @@ namespace :puppet do
     # Check if Puppetfile.lock and .tmp are created for librarian-puppet
     puppetfile_lock = remote_file_exists?("#{librarian_path}/Puppetfile.lock")
     librarian_tmp = remote_file_exists?("#{step_path}/.tmp")
-    # Move the Puppetfile.lock create the first time
-    run "ln -fs #{librarian_path}/Puppetfile.lock #{step_path}/Puppetfile.lock" if puppetfile_lock
     # Link the modules directory from shared to the step directory
-    run "cp -rf #{step_path}/modules/* #{librarian_path}/modules/"
+    run "cp -Rf #{step_path}/modules/* #{librarian_path}/modules/"
     run "rm -rf #{step_path}/modules"
     run "ln -fs #{librarian_path}/modules #{step_path}/modules"
-    # Link the .tmp directory from shared to the step directory
-    run "cp -rf #{step_path}/.tmp/* #{librarian_path}/.tmp/" if librarian_tmp
-    run "rm -rf #{step_path}/.tmp"
-    run "ln -fs #{librarian_path}/.tmp #{step_path}/.tmp"
-    # Execute librarian-puppet module installation
-    run "cd #{step_path} && librarian-puppet install"
-    # Move the Puppetfile.lock create the first time
-    run "mv -f #{step_path}/Puppetfile.lock #{librarian_path}/" unless puppetfile_lock
+    if remote_file_exists?("#{step_path}/Puppetfile")
+      # Move the Puppetfile.lock create the first time
+      run "ln -fs #{librarian_path}/Puppetfile.lock #{step_path}/Puppetfile.lock" if puppetfile_lock
+      # Link the .tmp directory from shared to the step directory
+      run "cp -Rf #{step_path}/.tmp/* #{librarian_path}/.tmp/" if librarian_tmp
+      run "rm -rf #{step_path}/.tmp"
+      run "ln -fs #{librarian_path}/.tmp #{step_path}/.tmp"
+      # Execute librarian-puppet module installation
+      run "cd #{step_path} && librarian-puppet install"
+      # Move the Puppetfile.lock create the first time
+      run "mv -f #{step_path}/Puppetfile.lock #{librarian_path}/" unless puppetfile_lock
+    end
   end
 
   desc 'Applies puppet using the current path puppet repo uploaded through capistrano itself'

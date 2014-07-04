@@ -75,6 +75,8 @@ From any directory:
 ```
 bebox new PROJECT_NAME
 ```
+In console appear a simple wizard to configure a vagrant box in the project. The vagrant box can be downloaded automatically with the wizard or linked with an existent local *.box file.
+
 This creates a subdirectory *PROJECT_NAME* with the initial skeleton of application.
 
 ###Manage Environments (Environment definition phase).
@@ -341,4 +343,7 @@ By the project nature the specs must be run in order. To do this all specs has a
 ```
 rspec spec/ordered_phases_spec.rb
 ```
+
+Maybe it would take a large time because it creates a vagrant machine and do a basic provision downloading packages and installing them in the machine.
+
 **Important: You need to have the [ubuntu-server-12042-x64-vbox4210-nocm.box](http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box) in the bebox root folder to run the tests**

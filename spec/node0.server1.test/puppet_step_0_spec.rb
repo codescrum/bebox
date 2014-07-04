@@ -1,13 +1,15 @@
 require 'spec_helper'
-require_relative '../vagrant_spec_helper.rb'
 require_relative '../factories/puppet.rb'
+require_relative '../vagrant_spec_helper.rb'
 
-describe 'test_08: Puppet apply Fundamental step-0' do
+describe 'Test 13: Puppet apply Fundamental step-0' do
 
   let(:puppet) { build(:puppet) }
 
   before(:all) do
-    Bebox::Puppet.generate_manifests(puppet.project_root, 'step-0', [puppet.node])
+    # Bebox::Puppet.generate_manifests(puppet.project_root, 'step-0', [puppet.node])
+    Bebox::Puppet.generate_puppetfile(puppet.project_root, puppet.step, ['fundamental'])
+    Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'fundamental', ['fundamental'])
     puppet.apply
   end
 

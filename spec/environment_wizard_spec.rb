@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../spec/factories/environment.rb'
 
-describe 'test_02: Manage environments with the wizard' do
+describe 'Test 02: Manage environments with the wizard' do
 
   subject { Bebox::EnvironmentWizard }
 

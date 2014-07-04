@@ -1,13 +1,15 @@
 require 'spec_helper'
-require_relative '../puppet_spec_helper.rb'
 require_relative '../factories/puppet.rb'
+require_relative '../puppet_spec_helper.rb'
 
-describe 'test_09: Puppet apply Users layer step-1' do
+describe 'test_14: Puppet apply Users layer step-1' do
 
   let(:puppet) { build(:puppet, step: 'step-1') }
 
   before(:all) do
-    Bebox::Puppet.generate_manifests(puppet.project_root, 'step-1', [puppet.node])
+    # Bebox::Puppet.generate_manifests(puppet.project_root, 'step-1', [puppet.node])
+    Bebox::Puppet.generate_puppetfile(puppet.project_root, puppet.step, ['users'])
+    Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'users', ['users'])
     puppet.apply
   end
 
