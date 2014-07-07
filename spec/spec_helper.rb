@@ -11,11 +11,11 @@ include Serverspec::Helper::Ssh
 include Serverspec::Helper::Debian
 
 require_relative '../lib/bebox/project'
-require_relative '../lib/bebox/wizard/project_wizard'
+require_relative '../lib/bebox/wizards/project_wizard'
 require_relative '../lib/bebox/environment'
-require_relative '../lib/bebox/wizard/environment_wizard'
+require_relative '../lib/bebox/wizards/environment_wizard'
 require_relative '../lib/bebox/node'
-require_relative '../lib/bebox/wizard/node_wizard'
+require_relative '../lib/bebox/wizards/node_wizard'
 require_relative '../lib/bebox/puppet'
 require_relative '../lib/bebox/role'
 require_relative '../lib/bebox/profile'
