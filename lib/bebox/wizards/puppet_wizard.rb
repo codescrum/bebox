@@ -11,7 +11,6 @@ module Bebox
       if Bebox::Environment.check_environment_access(project_root, environment)
         # Check already in step nodes
         nodes_to_step = check_nodes_to_step(project_root, environment, step)
-        binding.pry
         # Output the nodes that are ready for provisioning step-N
         if nodes_to_step.count > 0
           say("\nProvisioning #{step} in nodes: \n")

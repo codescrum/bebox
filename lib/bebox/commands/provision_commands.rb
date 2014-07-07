@@ -10,8 +10,8 @@ module Bebox
         apply_command.flag :environment, :desc => 'Set the environment of nodes', default_value: default_environment
         apply_command.action do |global_options,options,args|
           environment = get_environment(options)
-          puts "\nProvisioning all steps...\n\n"
           if options[:all]
+            puts "\nProvisioning all steps...\n\n"
             Bebox::PUPPET_STEPS.each do |step|
               puts "\nProvisioning step #{step}:\n\n"
               Bebox::PuppetWizard.apply_step(project_root, environment, step)
@@ -21,6 +21,7 @@ module Bebox
             help_now!('You did not specify an step') if args.count == 0
             help_now!('You did not specify a valid step') unless valid_step?(step)
             # Apply the step for the environment
+            puts "\nProvisioning step #{step}:\n\n"
             Bebox::PuppetWizard.apply_step(project_root, environment, step)
           end
         end
