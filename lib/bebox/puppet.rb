@@ -3,6 +3,7 @@ require 'tilt'
 module Bebox
 
   PUPPET_STEPS = %w{step-0 step-1 step-2 step-3}
+  PUPPET_STEP_NAMES = %w{0-fundamental 1-users 2-services 3-security}
 
   class Puppet
 
@@ -144,14 +145,14 @@ module Bebox
 
     # Remove hiera data file for node
     def self.remove_hiera_for_steps(project_root, node_name)
-      Bebox::PUPPET_STEPS.each do |step|
-        `cd #{project_root} && rm -rf #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{node_name}.yaml`
+      Bebox::PUPPET_STEP_NAMES.each do |step|
+        `cd #{project_root} && rm -rf #{project_root}/puppet/steps/#{step}/hiera/data/#{node_name}.yaml`
       end
     end
 
     # Remove node in manifests file for each step
     def self.remove_node_for_steps(project_root, node_name)
-      Bebox::PUPPET_STEPS.each do |step|
+      Bebox::PUPPET_STEP.each do |step|
         Bebox::Puppet.remove_node(project_root, node_name, step)
       end
     end

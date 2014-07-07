@@ -1,11 +1,12 @@
 PATH
   remote: .
   specs:
-    bebox (0.1.0)
+    bebox (0.5.0)
       active_attr (= 0.8.3)
       colorize (= 0.6.0)
       gli (= 2.10.0)
       highline (= 1.6.21)
+      jazz_hands
       progressbar (= 0.21.0)
       tilt (= 2.0.1)
 
@@ -151,7 +152,6 @@ GEM
     tilt (2.0.1)
     tzinfo (1.1.0)
       thread_safe (~> 0.1)
-    vcr (2.9.2)
     yard (0.8.7.4)
 
 PLATFORMS
@@ -172,4 +172,3 @@ DEPENDENCIES
   rspec (= 2.14.1)
   serverspec (= 1.6.0)
   tilt (= 2.0.1)
-  vcr

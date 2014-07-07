@@ -36,8 +36,9 @@ module Bebox
     def create_project_config
       # Create deploy directories
       create_config_deploy_directories
-      # Generate .bebox file
+      # Generate dot files
       generate_dot_bebox_file
+      generate_gitignore_file
       # Generate ruby version file
       generate_ruby_version
       # Generate Capfile and deploy files
@@ -47,9 +48,6 @@ module Bebox
       create_gemfile
       # Create the default environments
       create_default_environments
-      #
-      # TODO: Create .gitignore
-      #
     end
 
     # Get Project vagrant box provider from the .bebox file
@@ -80,6 +78,14 @@ module Bebox
       dotbebox_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/dot_bebox.erb")
       File.open("#{self.path}/.bebox", 'w') do |f|
         f.write dotbebox_template.render(nil, project: self)
+      end
+    end
+
+    # Generate .gitignore file
+    def generate_gitignore_file
+      gitignore_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/gitignore.erb")
+      File.open("#{self.path}/.gitignore", 'w') do |f|
+        f.write gitignore_template.render(nil, steps: Bebox::PUPPET_STEP_NAMES)
       end
     end
 
@@ -140,15 +146,13 @@ module Bebox
 
     # Generate steps directories
     def generate_steps_directories
-      puppet_steps = %w{0-fundamental 1-users 2-services 3-security}
-      puppet_steps.each{|step| `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`}
+      Bebox::PUPPET_STEP_NAMES.each{|step| `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`}
       `cd #{self.path} && mkdir -p puppet/{roles,profiles}`
     end
 
     # Generate steps templates for hiera and manifests files
     def generate_steps_templates
-      puppet_steps = %w{step-0 step-1 step-2 step-3}
-      puppet_steps.each do |step|
+      Bebox::PUPPET_STEPS.each do |step|
         ssh_key = ''
         step_dir = Bebox::Puppet.step_name(step)
         templates_path = Bebox::Node::templates_path

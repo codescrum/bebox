@@ -40,6 +40,13 @@ describe 'Test 01: Bebox::Project' do
         expect(output_file).to eq(expected_content)
       end
 
+      it 'should generate a .gitignore file' do
+        subject.generate_gitignore_file
+        expected_content = File.read("#{subject.path}/.gitignore")
+        output_file = File.read('spec/fixtures/dot_gitignore.test')
+        expect(output_file).to eq(expected_content)
+      end
+
       it 'should generate a .ruby-version file' do
         subject.generate_ruby_version
         version = File.read("#{subject.path}/.ruby-version").strip

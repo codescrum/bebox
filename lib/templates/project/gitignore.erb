@@ -1,0 +1,7 @@
+.vagrant/
+.bundle/
+.checkpoints/
+config/keys/
+<% steps.each do |step_name| %>
+puppet/steps/<%=step_name%>/hiera/data/
+<% end %>

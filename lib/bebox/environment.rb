@@ -68,8 +68,7 @@ module Bebox
     def generate_hiera_template
       ssh_key = Bebox::Project.public_ssh_key_from_file(self.project_root, self.name)
       project_name = Bebox::Project.name_from_file(self.project_root)
-      puppet_steps = %w{step-0 step-1 step-2 step-3}
-      puppet_steps.each do |step|
+      Bebox::PUPPET_STEPS.each do |step|
         step_dir = Bebox::Puppet.step_name(step)
         hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb")
         File.open("#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", 'w') do |f|
@@ -85,8 +84,7 @@ module Bebox
 
     # Remove the hiera data template file for the environment
     def remove_hiera_template
-      puppet_steps = %w{step-0 step-1 step-2 step-3}
-      puppet_steps.each {|step| `cd #{self.project_root} && rm -rf puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{self.name}.yaml` }
+      Bebox::PUPPET_STEP_NAMES.each {|step| `cd #{self.project_root} && rm -rf puppet/steps/#{step}/hiera/data/#{self.name}.yaml` }
     end
 
     # Path to the templates directory in the gem
