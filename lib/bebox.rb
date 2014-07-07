@@ -12,5 +12,7 @@ require 'bebox/puppet'
 require 'bebox/profile'
 require 'bebox/role'
 require 'bebox/cli'
+require 'bebox/commands/general_commands'
+require 'bebox/commands/project_commands'
 # Add requires for other files you add to your project here, so
 # you just need to require this one file in your bin file

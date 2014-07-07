@@ -1,7 +1,6 @@
 require_relative '../puppet'
 require_relative '../node'
 require 'highline/import'
-require 'pry'
 
 module Bebox
   class PuppetWizard
