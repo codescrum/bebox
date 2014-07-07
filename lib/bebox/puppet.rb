@@ -20,7 +20,6 @@ module Bebox
     def apply
       check_puppetfile_content
       copy_static_modules
-      # generate_hiera
       apply_step
       create_step_checkpoint
     end
@@ -227,25 +226,5 @@ module Bebox
           '3-security'
       end
     end
-
-    # # Setup and apply security puppet modules in the machine (Phase 9)
-    # def install_security
-    #   # setup_security_modules
-    #   apply_security_modules
-    # end
-
-    # # Setup security modules (manifest, hiera, puppetfile, librarian_puppet) for security in the machine
-    # def setup_security_modules
-    #   setup_security_manifest
-    #   setup_security_common_hiera
-    #   generate_security_puppetfile
-    #   prepare_puppet_user
-    #   bundle_modules
-    # end
-
-    # # Download the modules in the puppet user machine through librarian puppet
-    # def bundle_modules
-    #   `cd #{self.environment.project.path} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment.name} puppet:bundle_modules -s phase='bundle_modules'`
-    # end
   end
 end

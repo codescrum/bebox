@@ -1,9 +1,0 @@
-user_accounts:
-  - name: puppet
-    email: 'puppet@pname.com'
-    key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/IYCzqiTbvbC6rl5QecZ6g9d47p0fcC2h4EIwi/uvvMHU6QndkjKoDS6R3VSe+yhYpyxLii9uP1LHprxgnsoAgyXVtAZnNj2DA1Vt1L3Lt0GAQYgVLqI4Am1yo4pSMZL0GpK3faTBdOnPT8uWeRA1dEHyRmvrLpMpH7DPYzBXpmduk49R/e/KTGNBH7lWJf23X0DJr/F2Lu1PoQENJtDXcSgVgmsm4D8YuiS4O29ysD2/FtE17xPIwRXfDSsZNG+4oKZtB824wJt/gU/U45HKckF5Lnp7a0a4PSHLmPiyO5RTKrw2/xJmgse/Qzdjv851lHQtrnE1qYuYBOi+1gwv johan.tique@codescrums-iMac.local
-'
-    uid: 7000
-  - name: 'pname'
-    email: 'pname@pname.com'
-    uid: 7001
