@@ -1,10 +1,12 @@
 PATH
   remote: .
   specs:
-    bebox (0.0.1)
+    bebox (0.1.0)
       active_attr (= 0.8.3)
+      colorize (= 0.6.0)
       gli (= 2.10.0)
       highline (= 1.6.21)
+      progressbar (= 0.21.0)
       tilt (= 2.0.1)
 
 GEM
@@ -42,6 +44,7 @@ GEM
     childprocess (0.5.3)
       ffi (~> 1.0, >= 1.0.11)
     coderay (1.1.0)
+    colorize (0.6.0)
     columnize (0.8.9)
     coolline (0.4.3)
     cucumber (1.3.14)
@@ -72,8 +75,6 @@ GEM
       mime-types (~> 1.15)
       posix-spawn (~> 0.3.6)
     highline (1.6.21)
-    highline-test (0.0.1)
-      highline
     hirb (0.7.1)
     i18n (0.6.9)
     jazz_hands (0.5.2)
@@ -160,10 +161,10 @@ DEPENDENCIES
   active_attr (= 0.8.3)
   aruba
   bebox!
+  colorize
   factory_girl (= 4.3.0)
   fakeweb
   highline (= 1.6.21)
-  highline-test
   jazz_hands (= 0.5.2)
   progressbar (= 0.21.0)
   rake
