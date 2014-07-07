@@ -6,14 +6,23 @@ module Bebox
       desc 'Apply the Puppet step for the nodes in a environment. (step-0: Fundamental, step-1: User layer, step-2: Service layer, step-3: Security layer)'
       arg_name "[step]"
       command :apply do |apply_command|
+        apply_command.switch :all, :desc => 'Apply all steps in sequence.', :negatable => false
         apply_command.flag :environment, :desc => 'Set the environment of nodes', default_value: default_environment
         apply_command.action do |global_options,options,args|
           environment = get_environment(options)
-          step = args.first
-          help_now!('You did not specify an step') if args.count == 0
-          help_now!('You did not specify a valid step') unless valid_step?(step)
-          # Apply the step for the environment
-          Bebox::PuppetWizard.apply_step(project_root, environment, step)
+          puts "\nProvisioning all steps...\n\n"
+          if options[:all]
+            Bebox::PUPPET_STEPS.each do |step|
+              puts "\nProvisioning step #{step}:\n\n"
+              Bebox::PuppetWizard.apply_step(project_root, environment, step)
+            end
+          else
+            step = args.first
+            help_now!('You did not specify an step') if args.count == 0
+            help_now!('You did not specify a valid step') unless valid_step?(step)
+            # Apply the step for the environment
+            Bebox::PuppetWizard.apply_step(project_root, environment, step)
+          end
         end
       end
 
