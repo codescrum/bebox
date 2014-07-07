@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'project_wizard_spec'
 require 'project_spec'
-require 'environment_wizard_spec'
 require 'environment_spec'
 require 'node_wizard_spec'
 require 'node_spec'

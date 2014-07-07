@@ -6,12 +6,12 @@ module Bebox
       # Ask for environment of node if flag environment not set
       environment ||= Bebox::NodeWizard.choose_environment(Environment.list(project_root))
       # Check environment existence
-      Bebox::EnvironmentWizard.environment_exists?(project_root, environment) ? (return environment) : exit_now!('The specified environment don\'t exist.')
+      Bebox::Environment.environment_exists?(project_root, environment) ? (return environment) : exit_now!('The specified environment don\'t exist.')
     end
 
     # Obtain the default environment for a project
     def default_environment
-      environments = Bebox::EnvironmentWizard.list_environments(project_root)
+      environments = Bebox::Environment.list(project_root)
       if environments.count > 0
         return environments.include?('vagrant') ? 'vagrant' : environments.first
       else

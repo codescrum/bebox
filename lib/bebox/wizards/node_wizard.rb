@@ -28,11 +28,6 @@ module Bebox
       "Node removed!."
     end
 
-    # Lists existing nodes in a environment
-    def self.list_nodes(project_root, environment, node_type)
-      Node.list(project_root, environment, node_type)
-    end
-
     # Associate a role with a node in a environment
     def self.set_role(project_root, environment)
       roles = Bebox::Role.list(project_root)
@@ -40,17 +35,6 @@ module Bebox
       node = Bebox::NodeWizard.choose_node(nodes)
       role = Bebox::RoleWizard.choose_role(roles)
       Bebox::Puppet.associate_node_role(project_root, environment, node, role)
-    end
-
-    # Lists nodes for all environments
-    def self.list_all_nodes(project_root)
-      environments = Bebox::EnvironmentWizard.list_environments(project_root)
-      environments.each do |environment|
-        nodes = Node.list(project_root, environment, 'nodes')
-        say("\nNodes for environment #{environment}:\n\n")
-        nodes.map{|node| say(node)}
-      end
-      say("\n")
     end
 
     # Prepare the nodes in a environment
@@ -76,16 +60,6 @@ module Bebox
         say("\nThere are no nodes to prepare. Nothing done.\n\n")
       end
 
-    end
-
-    # Halt the vagrant nodes
-    def self.vagrant_halt(project_root)
-      Bebox::Node.halt_vagrant_nodes(project_root)
-    end
-
-    # Halt the vagrant nodes
-    def self.vagrant_up(project_root)
-      Bebox::Node.up_vagrant_nodes(project_root)
     end
 
     # Check the nodes already prepared and ask confirmation to re-do-it
@@ -201,16 +175,6 @@ module Bebox
     def self.free_ip?(ip)
       `ping -q -c 1 -W 3000 #{ip}`
       ($?.exitstatus == 0) ? false : true
-    end
-
-    # Count the number of nodes in all environments
-    def self.nodes_count(project_root)
-      nodes_count = 0
-      environments = Bebox::EnvironmentWizard.list_environments(project_root)
-      environments.each do |environment|
-        nodes_count += Bebox::NodeWizard.list_nodes(project_root, environment, 'nodes').count
-      end
-      nodes_count
     end
   end
 end

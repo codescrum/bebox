@@ -170,6 +170,7 @@ module Bebox
 
     # Create checkpoint for node
     def create_node_checkpoint
+
       node_template = Tilt::ERBTemplate.new("#{Bebox::Node::templates_path}/node/node.yml.erb")
       File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/nodes/#{self.hostname}.yml", 'w') do |f|
         f.write node_template.render(nil, :node => self)
@@ -226,7 +227,46 @@ module Bebox
 
     # Count the number of prepared nodes
     def prepared_nodes_count
-      Bebox::NodeWizard.list_nodes(self.project_root, self.environment, 'prepared_nodes').count
+      Bebox::Node.list(self.project_root, self.environment, 'prepared_nodes').count
+    end
+
+    # Return a description string for the node provision state
+    def self.node_provision_state(project_root, environment, node)
+      provision_state = ''
+      checkpoint_directories = %w{nodes prepared_nodes steps/step-0 steps/step-1 steps/step-2 steps/step-3}
+      checkpoint_directories.each do |checkpoint_directory|
+        checkpoint_directory_path = "#{project_root}/.checkpoints/environments/#{environment}/#{checkpoint_directory}/#{node}.yml"
+        provision_state = state_from_checkpoint(checkpoint_directory) if File.exist?(checkpoint_directory_path)
+      end
+      provision_state
+    end
+
+    # Get the corresponding state from checkpoint directory
+    def self.state_from_checkpoint(checkpoint)
+      case checkpoint
+        when 'nodes'
+          'Allocated'
+        when 'prepared_nodes'
+          'Prepared'
+        when 'steps/step-0'
+          'Provisioned Fundamental step-0'
+        when 'steps/step-1'
+          'Provisioned Users layer step-1'
+        when 'steps/step-2'
+          'Provisioned Services layer step-2'
+        when 'steps/step-3'
+          'Provisioned Security layer step-3'
+      end
+    end
+
+    # Count the number of nodes in all environments
+    def self.count_all_nodes_by_type(project_root, node_type)
+      nodes_count = 0
+      environments = Bebox::Environment.list(project_root)
+      environments.each do |environment|
+        nodes_count += Bebox::Node.list(project_root, environment, node_type).count
+      end
+      nodes_count
     end
 
     # # Restore the previous local hosts file

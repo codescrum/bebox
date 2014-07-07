@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../factories/puppet.rb'
 require_relative '../puppet_spec_helper.rb'
 
-describe 'test_14: Puppet apply Users layer step-1' do
+describe 'test_13: Puppet apply Users layer step-1' do
 
   let(:puppet) { build(:puppet, step: 'step-1') }
 

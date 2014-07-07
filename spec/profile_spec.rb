@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/profile.rb'
 
-describe 'Test 09: Bebox::Profile' do
+describe 'Test 08: Bebox::Profile' do
 
   describe 'Manage profiles' do
 

@@ -16,7 +16,7 @@ module Bebox
         end
       end
       # These commands are available if there are at least one node in the vagrant environment
-      if Bebox::NodeWizard.list_nodes(project_root, 'vagrant', 'nodes').count > 0
+      if Bebox::Node.list(project_root, 'vagrant', 'nodes').count > 0
         desc 'Halt the nodes for vagrant environment.'
         command :vagrant_halt do |vagrant_halt_command|
           vagrant_halt_command.action do |global_options,options,args|
@@ -30,7 +30,7 @@ module Bebox
             nodes.each{|node| say(node.hostname)}
             say("\n")
             # Halt vagrant nodes
-            Bebox::NodeWizard.vagrant_halt(project_root)
+            Bebox::Node.halt_vagrant_nodes(project_root)
           end
         end
         desc 'Up the nodes for vagrant environment.'
@@ -46,7 +46,7 @@ module Bebox
             nodes.each{|node| say(node.hostname)}
             say("\n")
             # Up vagrant nodes
-            Bebox::NodeWizard.vagrant_up(project_root)
+            Bebox::Node.up_vagrant_nodes(project_root)
           end
         end
       end

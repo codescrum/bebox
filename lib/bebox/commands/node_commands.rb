@@ -13,17 +13,13 @@ module Bebox
           node_list_command.switch :all
           node_list_command.action do |global_options,options,args|
             # Call to list nodes
-            if options[:all]
-              Bebox::NodeWizard.list_all_nodes(project_root)
-            else
-              environment = get_environment(options)
-              say("\nEnvironment #{environment}.\n\n")
-              nodes = Bebox::NodeWizard.list_nodes(project_root, environment, 'nodes')
-              say("Nodes :\n\n")
-              nodes.map{|node| say(node)}
-              say("There are not nodes yet. You can create a new one with: 'bebox node new' command.") if nodes.empty?
-              say("\n")
+            environments = options[:all] ? Bebox::Environment.list(project_root) : [get_environment(options)]
+            environments.each do |environment|
+              nodes = Node.list(project_root, environment, 'nodes')
+              say("\nNodes for environment #{environment}:\n\n")
+              nodes.map{|node| say("#{node}     (#{Bebox::Node.node_provision_state(project_root, environment, node)})")}
             end
+            say("\n")
           end
         end
         # Node new command

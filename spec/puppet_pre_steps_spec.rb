@@ -3,7 +3,7 @@ require_relative '../spec/factories/role.rb'
 require_relative '../spec/factories/profile.rb'
 require_relative '../spec/factories/puppet.rb'
 
-describe 'Test 12: Puppet pre apply step' do
+describe 'Test 11: Puppet pre apply step' do
 
   let(:puppet) { build(:puppet, step: 'step-2') }
   let(:role) { build(:role) }

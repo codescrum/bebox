@@ -13,7 +13,6 @@ include Serverspec::Helper::Debian
 require_relative '../lib/bebox/project'
 require_relative '../lib/bebox/wizards/project_wizard'
 require_relative '../lib/bebox/environment'
-require_relative '../lib/bebox/wizards/environment_wizard'
 require_relative '../lib/bebox/node'
 require_relative '../lib/bebox/wizards/node_wizard'
 require_relative '../lib/bebox/puppet'

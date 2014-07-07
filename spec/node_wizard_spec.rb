@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../spec/factories/node.rb'
 
-describe 'Test 04: Manage nodes with the wizard' do
+describe 'Test 03: Manage nodes with the wizard' do
 
   subject { Bebox::NodeWizard }
 
@@ -14,12 +14,6 @@ describe 'Test 04: Manage nodes with the wizard' do
   it 'should check node existence' do
     output = subject.node_exists?(project_root, environment, node_hostname)
     expect(output).to eq(false)
-  end
-
-  it 'should list no nodes' do
-    current_nodes = []
-    nodes = subject.list_nodes(project_root, environment, 'nodes')
-    expect(nodes).to include(*current_nodes)
   end
 
   it 'the ip should be free' do

@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../factories/puppet.rb'
 require_relative '../vagrant_spec_helper.rb'
 
-describe 'Test 13: Puppet apply Fundamental step-0' do
+describe 'Test 12: Puppet apply Fundamental step-0' do
 
   let(:puppet) { build(:puppet) }
 

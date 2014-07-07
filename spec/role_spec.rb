@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/role.rb'
 
-describe 'Test 08: Bebox::Role' do
+describe 'Test 07: Bebox::Role' do
 
   describe 'Manage roles' do
 

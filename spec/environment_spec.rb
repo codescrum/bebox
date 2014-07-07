@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/environment.rb'
 
-describe 'Test 03: Bebox::Environment' do
+describe 'Test 02: Bebox::Environment' do
 
   describe 'Environment management' do
 

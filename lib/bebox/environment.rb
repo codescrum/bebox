@@ -98,5 +98,16 @@ module Bebox
       `rm -f #{self.project_root}/config/keys/environments/#{environment}/{id_rsa,id_rsa.pub}`
       `cd #{self.project_root}/config/keys/environments/#{environment} && ssh-keygen -q -f id_rsa -t rsa -N ''`
     end
+
+    # Check if the environment has ssh keys configured
+    def self.check_environment_access(project_root, environment)
+      key_exist = File.exist?("#{project_root}/config/keys/environments/#{environment}/id_rsa")
+      key_exist &&= File.exist?("#{project_root}/config/keys/environments/#{environment}/id_rsa.pub")
+    end
+
+    # Check if there's an existent environment in the project
+    def self.environment_exists?(project_root, environment_name)
+      Dir.exists?("#{project_root}/.checkpoints/environments/#{environment_name}")
+    end
   end
 end
