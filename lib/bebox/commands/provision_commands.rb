@@ -11,18 +11,18 @@ module Bebox
         apply_command.action do |global_options,options,args|
           environment = get_environment(options)
           if options[:all]
-            puts "\nProvisioning all steps...\n\n"
+            title "Provisioning all steps..."
             Bebox::PUPPET_STEPS.each do |step|
-              puts "\nProvisioning step #{step}:\n\n"
-              Bebox::PuppetWizard.apply_step(project_root, environment, step)
+              title "Provisioning #{step}:"
+              Bebox::PuppetWizard.new.apply_step(project_root, environment, step)
             end
           else
             step = args.first
-            help_now!('You did not specify an step') if args.count == 0
-            help_now!('You did not specify a valid step') unless valid_step?(step)
+            help_now!(error('You did not specify an step')) if args.count == 0
+            help_now!(error('You did not specify a valid step')) unless valid_step?(step)
             # Apply the step for the environment
-            puts "\nProvisioning step #{step}:\n\n"
-            Bebox::PuppetWizard.apply_step(project_root, environment, step)
+            title "Provisioning #{step}:"
+            Bebox::PuppetWizard.new.apply_step(project_root, environment, step)
           end
         end
       end
@@ -34,11 +34,11 @@ module Bebox
         profile_command.desc 'list the profiles in the project'
         profile_command.command :list do |profile_list_command|
           profile_list_command.action do |global_options,options,args|
-            profiles = Bebox::ProfileWizard.list_profiles(project_root)
-            say("\nCurrent profiles :\n\n")
-            profiles.map{|profile| say(profile)}
-            say("There are not profiles yet. You can create a new one with: 'bebox profile new' command.") if profiles.empty?
-            say("\n")
+            profiles = Bebox::ProfileWizard.new.list_profiles(project_root)
+            title 'Current profiles :'
+            profiles.map{|profile| msg(profile)}
+            warn('There are not profiles yet. You can create a new one with: \'bebox profile new\' command.') if profiles.empty?
+            linebreak
           end
         end
         # Profile new command
@@ -46,9 +46,8 @@ module Bebox
         profile_command.arg_name "[name]"
         profile_command.command :new do |profile_new_command|
           profile_new_command.action do |global_options,options,args|
-            help_now!('You did not supply a name') if args.count == 0
-            creation_message = Bebox::ProfileWizard.create_new_profile(project_root, args.first)
-            puts creation_message
+            help_now!(error('You did not supply a name')) if args.count == 0
+            Bebox::ProfileWizard.new.create_new_profile(project_root, args.first)
           end
         end
         # Profile remove command
@@ -56,9 +55,8 @@ module Bebox
         profile_command.arg_name "[name]"
         profile_command.command :remove do |profile_remove_command|
           profile_remove_command.action do |global_options,options,args|
-            help_now!('You did not supply a profile name') if args.count == 0
-            deletion_message = Bebox::ProfileWizard.remove_profile(project_root, args.first)
-            puts deletion_message
+            help_now!(error('You did not supply a profile name')) if args.count == 0
+            Bebox::ProfileWizard.new.remove_profile(project_root, args.first)
           end
         end
       end
@@ -71,10 +69,10 @@ module Bebox
         role_command.command :list do |role_list_command|
           role_list_command.action do |global_options,options,args|
             roles = Bebox::Role.list(project_root)
-            say("\nCurrent roles :\n\n")
-            roles.map{|role| say(role)}
-            say("There are not roles yet. You can create a new one with: 'bebox role new' command.") if roles.empty?
-            say("\n")
+            title 'Current roles :'
+            roles.map{|role| msg(role)}
+            warn('There are not roles yet. You can create a new one with: \'bebox role new\' command.') if roles.empty?
+            linebreak
           end
         end
         # Role new command
@@ -82,9 +80,8 @@ module Bebox
         role_command.arg_name "[name]"
         role_command.command :new do |role_new_command|
           role_new_command.action do |global_options,options,args|
-            help_now!('You did not supply a name') if args.count == 0
-            creation_message = Bebox::RoleWizard.create_new_role(project_root, args.first)
-            puts creation_message
+            help_now!(error('You did not supply a name')) if args.count == 0
+            Bebox::RoleWizard.new.create_new_role(project_root, args.first)
           end
         end
         # Role remove command
@@ -92,9 +89,8 @@ module Bebox
         role_command.arg_name "[name]"
         role_command.command :remove do |role_remove_command|
           role_remove_command.action do |global_options,options,args|
-            help_now!('You did not supply a role name') if args.count == 0
-            deletion_message = Bebox::RoleWizard.remove_role(project_root, args.first)
-            puts deletion_message
+            help_now!(error('You did not supply a role name')) if args.count == 0
+            Bebox::RoleWizard.new.remove_role(project_root, args.first)
           end
         end
 
@@ -105,30 +101,28 @@ module Bebox
           role_command.arg_name "[role_name]"
           role_command.command :list_profiles do |list_profiles_command|
             list_profiles_command.action do |global_options,options,args|
-              help_now!('You did not supply a role name.') if args.count == 0
+              help_now!(error('You did not supply a role name.')) if args.count == 0
               role = args.first
-              exit_now!('The supplied role do not exist.') unless Bebox::RoleWizard.role_exists?(project_root, role)
+              exit_now!(error('The supplied role do not exist.')) unless Bebox::RoleWizard.new.role_exists?(project_root, role)
               profiles = Bebox::Role.list_profiles(project_root, role)
-              say("\nCurrent profiles in role #{role}:\n\n")
-              profiles.map{|profile| say(profile)}
-              say("There are not profiles in role #{role}. You can add a new one with: 'bebox role add_profile' command.") if profiles.empty?
-              say("\n")
+              title "Current profiles in role #{role}:"
+              profiles.map{|profile| msg(profile)}
+              warn("There are not profiles in role #{role}. You can add a new one with: 'bebox role add_profile' command.") if profiles.empty?
+              linebreak
             end
           end
           # Role add profile command
           role_command.desc 'add a profile to a role'
           role_command.command :add_profile do |add_profile_command|
             add_profile_command.action do |global_options,options,args|
-              creation_message = Bebox::RoleWizard.add_profile(project_root)
-              puts creation_message
+              Bebox::RoleWizard.new.add_profile(project_root)
             end
           end
           # Role remove profile command
           role_command.desc "remove a profile in a role"
           role_command.command :remove_profile do |remove_profile_command|
             remove_profile_command.action do |global_options,options,args|
-              deletion_message = Bebox::RoleWizard.remove_profile(project_root)
-              puts deletion_message
+              Bebox::RoleWizard.new.remove_profile(project_root)
             end
           end
         end

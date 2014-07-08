@@ -151,7 +151,7 @@ module Bebox
 
     # Remove node in manifests file for each step
     def self.remove_node_for_steps(project_root, node_name)
-      Bebox::PUPPET_STEP.each do |step|
+      Bebox::PUPPET_STEPS.each do |step|
         Bebox::Puppet.remove_node(project_root, node_name, step)
       end
     end

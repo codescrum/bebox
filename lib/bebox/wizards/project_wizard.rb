@@ -1,21 +1,21 @@
-# require_relative 'server'
 require_relative '../project'
 require 'highline/import'
 require 'net/http'
 require 'uri'
 require 'progressbar'
 require 'digest'
+require 'bebox/logger'
 
 module Bebox
   class ProjectWizard
-
+    include Bebox::Logger
     # Bebox boxes directory
     BEBOX_BOXES_PATH = '~/.bebox/boxes'
 
     # Asks for the project parameters and create the project skeleton
-    def self.create_new_project(project_name)
+    def create_new_project(project_name)
       # Check project existence
-      return 'Project not created. There\'s already a project with that name in the current directory.!' if project_exists?(Dir.pwd, project_name)
+      return error('Project not created. There is already a project with that name in the current directory.!') if project_exists?(Dir.pwd, project_name)
       # Setup the bebox boxes directory
       bebox_boxes_setup
       # Asks to choose an existent box
@@ -43,24 +43,24 @@ module Bebox
       # Project creation
       project = Bebox::Project.new(project_name, vagrant_box_base, Dir.pwd, vagrant_box_provider, default_environments)
       project.create
-      return "Project #{project_name} created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
+      ok "Project #{project_name} created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
     end
 
     # Check if there's an existent project in that dir
-    def self.project_exists?(parent_path, project_name)
+    def project_exists?(parent_path, project_name)
       Dir.exists?("#{parent_path}/#{project_name}")
     end
 
     # Menu to choose vagrant box provider
-    def self.ask_box_provider
+    def ask_box_provider
       choose do |menu|
-        menu.header = 'Choose the vagrant box provider'
+        menu.header = title('Choose the vagrant box provider')
         menu.choices('virtualbox', 'vmware')
       end
     end
 
     # Setup the bebox boxes directory
-    def self.bebox_boxes_setup
+    def bebox_boxes_setup
       # Create user project directories
       `mkdir -p #{BEBOX_BOXES_PATH}/tmp`
       # Clear partial downloaded boxes
@@ -68,8 +68,8 @@ module Bebox
     end
 
     # Asks vagrant box location to user until is valid
-    def self.ask_uri
-      vbox_uri =  ask('Write the URI (http, local_path) for the vagrant box to be used in the project:') do |q|
+    def ask_uri
+      vbox_uri =  ask(highline_quest('Write the URI (http, local_path) for the vagrant box to be used in the project:')) do |q|
         q.default = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
       end
       # If valid return uri if not keep asking for uri
@@ -77,7 +77,7 @@ module Bebox
     end
 
     # Setup the box in the bebox boxes directory
-    def self.set_box(box_uri)
+    def set_box(box_uri)
       uri = URI.parse(box_uri)
       if uri.scheme == ('http' || 'https')
         download_box(uri)
@@ -88,7 +88,7 @@ module Bebox
     end
 
     # Validate uri download or local box existence
-    def self.uri_valid?(vbox_uri)
+    def uri_valid?(vbox_uri)
       uri = URI.parse(vbox_uri)
       if uri.scheme == ('http' || 'https')
         request = Net::HTTP.new uri.host
@@ -98,30 +98,30 @@ module Bebox
           request = Net::HTTP.new uri.host
           response = request.request_head uri.path
         end
-        ( response.code.to_i == 200) ? (return true) : say('Download link not valid!.')
+        ( response.code.to_i == 200) ? (return true) : error('Download link not valid!.')
       else
-        File.file?(uri.path) ? (return true) : say('File path not exist!.')
+        File.file?(uri.path) ? (return true) : error('File path not exist!.')
       end
     end
 
     # Ask for confirmation of overwrite a box
-    def self.confirm_overwrite?
-      say('There\'s already a box with that name, do you want to overwrite it?')
-      response =  ask("(y/n)")do |q|
-        q.default = "n"
+    def confirm_overwrite?
+      quest 'There is already a box with that name, do you want to overwrite it?'
+      response =  ask(highline_quest('(y/n)')) do |q|
+        q.default = 'n'
       end
       return response == 'y' ? true : false
     end
 
     # Check if a box with the same name already exist
-    def self.box_exists?(valid_box_uri)
+    def box_exists?(valid_box_uri)
       box_name = valid_box_uri.split('/').last
       boxes = get_existent_boxes
       boxes.any? { |val| /#{box_name}/ =~ val }
     end
 
     # Obtain the current boxes downloaded or linked in the bebox user home
-    def self.get_existent_boxes
+    def get_existent_boxes
       # Converts the bebox boxes directory to an absolute pathname
       expanded_directory = File.expand_path("#{BEBOX_BOXES_PATH}")
       # Get an array of bebox boxes paths
@@ -129,11 +129,11 @@ module Bebox
     end
 
     # Asks to choose an existent box in the bebox boxes directory
-    def self.choose_box(boxes)
+    def choose_box(boxes)
       # Menu to choose vagrant box provider
       other_box_message = 'Download/Select a new box'
       current_box = choose do |menu|
-        menu.header = 'Choose an existent box or download/select a new box'
+        menu.header = title('Choose an existent box or download/select a new box')
         boxes.each do |box|
           menu.choice(box.split('/').last)
         end
@@ -143,8 +143,8 @@ module Bebox
     end
 
     # Download a box by the specified uri
-    def self.download_box(uri)
-      say('Downloading box ...')
+    def download_box(uri)
+      info 'Downloading box ...'
       @counter = 0
       # Manage redirections
       request = Net::HTTP.new uri.host

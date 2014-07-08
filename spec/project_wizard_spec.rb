@@ -7,7 +7,7 @@ describe 'Test 00: Create a new project with the wizard' do
 
   describe 'Project data provision' do
 
-    subject { Bebox::ProjectWizard }
+    subject { Bebox::ProjectWizard.new }
 
     let(:project_name) { 'pname' }
     let(:parent_path) { "#{Dir.pwd}/tmp" }

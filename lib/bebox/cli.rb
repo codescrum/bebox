@@ -1,13 +1,14 @@
 require 'gli'
 require 'highline/import'
-require 'colorize'
 require 'bebox/commands/general_commands'
 require 'bebox/commands/project_commands'
+require 'bebox/logger'
 
 module Bebox
   class Cli
     include Bebox::GeneralCommands
     include Bebox::ProjectCommands
+    include Bebox::Logger
 
     attr_accessor :project_root
 

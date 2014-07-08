@@ -11,9 +11,9 @@ module Bebox
         environment_command.command :list do |environment_list_command|
           environment_list_command.action do |global_options,options,args|
             environments = Bebox::Environment.list(project_root)
-            say("\nCurrent environments :\n\n")
-            environments.map{|environment| say(environment)}
-            say("There are not environments yet. You can create a new one with: 'bebox environment new' command.") if environments.empty?
+            title 'Current environments :'
+            environments.map{|environment| msg(environment)}
+            warn('There are not environments yet. You can create a new one with: \'bebox environment new\' command.') if environments.empty?
           end
         end
         # Environment new command
@@ -21,9 +21,8 @@ module Bebox
         environment_command.arg_name "[environment]"
         environment_command.command :new do |environment_new_command|
           environment_new_command.action do |global_options,options,args|
-            help_now!('You don\'t supply an environment') if args.count == 0
-            creation_message = Bebox::EnvironmentWizard.create_new_environment(project_root, args.first)
-            puts creation_message
+            help_now!(error('You don\'t supply an environment')) if args.count == 0
+            Bebox::EnvironmentWizard.new.create_new_environment(project_root, args.first)
           end
         end
         # Environment remove command
@@ -31,9 +30,8 @@ module Bebox
         environment_command.arg_name "[environment]"
         environment_command.command :remove do |environment_remove_command|
           environment_remove_command.action do |global_options,options,args|
-            help_now!('You don\'t supply an environment') if args.count == 0
-            deletion_message = Bebox::EnvironmentWizard.remove_environment(project_root, args.first)
-            puts deletion_message
+            help_now!(error('You don\'t supply an environment')) if args.count == 0
+            Bebox::EnvironmentWizard.new.remove_environment(project_root, args.first)
           end
         end
       end

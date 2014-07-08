@@ -1,7 +1,10 @@
 require 'tilt'
+require 'bebox/logger'
 
 module Bebox
   class Node
+
+    include Bebox::Logger
 
     attr_accessor :environment, :project_root, :hostname, :ip
 
@@ -95,7 +98,7 @@ module Bebox
     def add_vagrant_node(project_name, vagrant_box_base)
       already_installed_boxes = installed_vagrant_box_names
       box_name = "#{project_name}-#{self.hostname}"
-      puts "  Adding server to vagrant: #{self.hostname}..."
+      info "Adding server to vagrant: #{self.hostname}..."
       `cd #{self.project_root} && vagrant box add #{box_name} #{vagrant_box_base}` unless already_installed_boxes.include? box_name
     end
 
@@ -141,7 +144,7 @@ module Bebox
 
     # Backup and add the vagrant hosts to local hosts file
     def configure_local_hosts(project_name)
-      puts 'Please provide your account password, if ask you, to configure the local hosts file.'
+      info 'Please provide your account password, if ask you, to configure the local hosts file.'
       backup_local_hosts(project_name)
       add_to_local_hosts
     end

@@ -4,7 +4,7 @@ require_relative '../spec/factories/node.rb'
 
 describe 'Test 03: Manage nodes with the wizard' do
 
-  subject { Bebox::NodeWizard }
+  subject { Bebox::NodeWizard.new }
 
   let(:project_root) { "#{Dir.pwd}/tmp/pname" }
   let(:environment) { "vagrant" }

@@ -4,9 +4,9 @@ module Bebox
     def get_environment(options)
       environment = options[:environment]
       # Ask for environment of node if flag environment not set
-      environment ||= Bebox::NodeWizard.choose_environment(Environment.list(project_root))
+      environment ||= Bebox::EnvironmentWizard.new.choose_environment(Environment.list(project_root))
       # Check environment existence
-      Bebox::Environment.environment_exists?(project_root, environment) ? (return environment) : exit_now!('The specified environment don\'t exist.')
+      Bebox::Environment.environment_exists?(project_root, environment) ? (return environment) : exit_now!(error('The specified environment do not exist.'))
     end
 
     # Obtain the default environment for a project
