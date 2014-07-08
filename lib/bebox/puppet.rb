@@ -1,5 +1,5 @@
 require 'tilt'
-# require 'bebox/puppet_module'
+
 module Bebox
 
   PUPPET_STEPS = %w{step-0 step-1 step-2 step-3}
@@ -27,7 +27,7 @@ module Bebox
     # Check if it's necessary a Puppetfile accord to it's content
     def check_puppetfile_content
       puppetfile_content = File.read("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile").strip
-      `rm "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile"` if puppetfile_content.empty?
+      `rm "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile"` if puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten.empty?
     end
 
     # Copy the static modules to the step-N modules path
