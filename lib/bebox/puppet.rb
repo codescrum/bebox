@@ -1,4 +1,5 @@
 require 'tilt'
+require 'pry'
 
 module Bebox
 
@@ -20,8 +21,9 @@ module Bebox
     def apply
       check_puppetfile_content
       copy_static_modules
-      apply_step
-      create_step_checkpoint
+      process_status = apply_step
+      create_step_checkpoint if process_status.success?
+      process_status
     end
 
     # Check if it's necessary a Puppetfile accord to it's content
@@ -194,11 +196,16 @@ module Bebox
 
     # Apply step via capistrano
     def apply_step
-      cap_command = "cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment}"
-      `#{cap_command} deploy:setup -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
-      `#{cap_command} deploy -S phase='#{self.step}' HOSTS=#{self.node.hostname}`
-      `#{cap_command} puppet:bundle_modules -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
-      `#{cap_command} puppet:apply -S phase='#{self.step}' -S step_dir='#{Bebox::Puppet.step_name(self.step)}' HOSTS=#{self.node.hostname}`
+      cap 'deploy:setup'
+      $?.success? ? (cap 'deploy') : (return $?)
+      $?.success? ? (cap 'puppet:bundle_modules') : (return $?)
+      $?.success? ? (cap 'puppet:apply') : (return $?)
+      $?
+    end
+
+    # Executes capistrano commands
+    def cap(command)
+      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} #{command} -S phase='#{self.step}' -S step_dir='#{step_name}' HOSTS=#{self.node.hostname}`
     end
 
     # Create checkpoint for step
@@ -212,6 +219,10 @@ module Bebox
     # Get the templates path inside the gem
     def self.templates_path
       File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+    end
+
+    def step_name
+      Bebox::Puppet.step_name(self.step)
     end
 
     def self.step_name(step)

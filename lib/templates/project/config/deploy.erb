@@ -107,7 +107,7 @@ namespace :puppet do
   task :apply do
     run 'touch puppet.log'
     run "echo 'Running puppet at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}...' >> puppet.log"
-    run "#{sudo} #{custom_facter_variables} puppet apply --debug --verbose --modulepath=#{current_path}/steps/#{step_dir}/modules --parser future --pluginsync #{current_path}/steps/#{step_dir}/manifests/site.pp ; true"
+    run "#{sudo} #{custom_facter_variables} puppet apply --debug --verbose --modulepath=#{current_path}/steps/#{step_dir}/modules --parser future --pluginsync #{current_path}/steps/#{step_dir}/manifests/site.pp"
   end
 
   desc 'Make a symlink to configure the hiera settings from hiera project directory'

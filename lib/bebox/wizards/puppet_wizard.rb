@@ -25,8 +25,7 @@ module Bebox
             Bebox::Puppet.generate_puppetfile(project_root, step, profiles) unless profiles.nil?
             Bebox::Puppet.generate_roles_and_profiles(project_root, step, role, profiles)
             puppet = Bebox::Puppet.new(project_root, environment, node, step)
-            puppet.apply
-            ok "Node #{node.hostname} provisioned to #{step}."
+            puppet.apply.success? ? (ok "Node #{node.hostname} provisioned to #{step}.") : (error "An error ocurred in the provision of #{step} for #{node.hostname}")
           end
         else
           warn "There are no nodes for provision in #{step}. Nothing done."
