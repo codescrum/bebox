@@ -3,3 +3,9 @@ user_accounts:
     email:  ''
     key:    '<%= ssh_key %>'
     uid:    7001
+# Add rules to permit ssh forward agent to github repositories
+ssh::client_rules:
+  'Host github.com':
+    'User' : '<%= project_name %>'
+    'ForwardAgent': 'yes'
+    'StrictHostKeyChecking': 'no'
