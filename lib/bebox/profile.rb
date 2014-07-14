@@ -62,5 +62,12 @@ module Bebox
     def self.profiles_count(project_root)
       Bebox::Profile.list(project_root).count
     end
+
+    # Check if the profile has a valid name
+    def self.valid_name?(name)
+      valid_name = (name =~ /\A[a-z][a-z0-9_]*\Z/).nil? ? false : true
+      valid_name && !Bebox::RESERVED_WORDS.include?(name)
+    end
+
   end
 end

@@ -7,6 +7,14 @@ module Bebox
     include Bebox::Logger
     # Create a new role
     def create_new_role(project_root, role_name)
+      # Check if the role name is valid
+      return error "The role name can only contain:\n
+      \n* Lowercase letters
+      \n* Numbers
+      \n* Underscores
+      \n* Must begin with an Lowercase letter
+      \n* Can not be any of: #{Bebox::RESERVED_WORDS.join(', ')}
+      \n\nNothing done!." unless Bebox::Role.valid_name?(role_name)
       # Check if the role exist
       return error("The role #{role_name} already exist!.") if role_exists?(project_root, role_name)
       # Role creation

@@ -1,10 +1,10 @@
 require 'tilt'
-require 'pry'
 
 module Bebox
 
   PUPPET_STEPS = %w{step-0 step-1 step-2 step-3}
   PUPPET_STEP_NAMES = %w{0-fundamental 1-users 2-services 3-security}
+  RESERVED_WORDS = %w{and case class default define else elsif false if in import inherits node or true undef unless main settings}
 
   class Puppet
 

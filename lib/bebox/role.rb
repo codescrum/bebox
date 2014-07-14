@@ -93,5 +93,11 @@ module Bebox
       role_profiles = Bebox::Role.list_profiles(project_root, role)
       role_profiles.include?(profile) ? true : false
     end
+
+    # Check if the role has a valid name
+    def self.valid_name?(name)
+      valid_name = (name =~ /\A[a-z][a-z0-9_]*\Z/).nil? ? false : true
+      valid_name && !Bebox::RESERVED_WORDS.include?(name)
+    end
   end
 end
