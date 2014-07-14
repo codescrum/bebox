@@ -8,5 +8,5 @@ gem 'active_attr', '0.8.3'
 gem 'highline', '1.6.21'
 gem 'tilt', '2.0.1'
 gem 'progressbar', '0.21.0'
-gem 'colorize'
+gem 'colorize', '0.6.0'
 gemspec

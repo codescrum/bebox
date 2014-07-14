@@ -75,6 +75,9 @@ From any directory:
 ```
 bebox new PROJECT_NAME
 ```
+
+**Important: If it output some like: The `bebox' command exists in these Ruby versions: 2.1.0, then you need to do: ```rbenv global 2.1.0```**
+
 In console appear a simple wizard to configure a vagrant box in the project. The vagrant box can be downloaded automatically with the wizard or linked with an existent local *.box file.
 
 This creates a subdirectory *PROJECT_NAME* with the initial skeleton of application.
