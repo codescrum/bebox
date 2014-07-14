@@ -1,21 +1,23 @@
 require 'spec_helper'
+require 'tilt'
 require_relative '../spec/factories/node.rb'
 
 describe 'Test 05: Bebox::Node' do
 
   describe 'Prepare nodes' do
 
-    let(:nodes) { 1.times.map{|index| build(:node, :created, hostname: "node#{index}.server1.test", ip: "192.168.0.7#{index}")} }
+    let(:nodes) { 1.times.map{|index| build(:node, :created, hostname: "node#{index}.server1.test")} }
     let(:project_root) { "#{Dir.pwd}/tmp/pname" }
     let(:environment) { 'vagrant' }
     let(:project_name) {'pname'}
-    let(:vagrant_box_base) {'ubuntu-server-12042-x64-vbox4210-nocm.box'}
+    let(:vagrant_box_base) {"#{Dir.pwd}/ubuntu-server-12042-x64-vbox4210-nocm.box"}
 
     context 'pre vagrant prepare' do
       it 'should generate the Vagrantfile' do
         Bebox::Node.generate_vagrantfile(project_root, nodes)
         vagrantfile_content = File.read("#{project_root}/Vagrantfile").gsub(/\s+/, ' ').strip
-        vagrantfile_output_content = File.read("spec/fixtures/node/Vagrantfile.test").gsub(/\s+/, ' ').strip
+        ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/Vagrantfile.test.erb')
+        vagrantfile_output_content = ouput_template.render(nil, ip_address: nodes.first.ip).gsub(/\s+/, ' ').strip
         expect(vagrantfile_content).to eq(vagrantfile_output_content)
       end
       it 'should regenerate the vagrant deploy file' do
@@ -31,6 +33,7 @@ describe 'Test 05: Bebox::Node' do
         it 'should create a hosts backup file' do
           node = nodes.first
           puts 'Please provide your account password, if ask you, to configure the local hosts file.'
+          `sudo rm -rf #{node.local_hosts_path}/hosts_before_bebox_#{project_name}`
           original_hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
           nodes.each{|node| node.backup_local_hosts(project_name)}
           hosts_backup_file = "#{node.local_hosts_path}/hosts_before_bebox_#{project_name}"

@@ -12,7 +12,8 @@ describe 'Test 04: Bebox::Node' do
         subject.create_node_checkpoint
         expect(File.exist?("#{subject.project_root}/.checkpoints/environments/#{subject.environment}/nodes/#{subject.hostname}.yml")).to be (true)
         node_content = File.read("#{subject.project_root}/.checkpoints/environments/#{subject.environment}/nodes/#{subject.hostname}.yml").gsub(/\s+/, ' ').strip
-        node_output_content = File.read("spec/fixtures/node/node_0.test").gsub(/\s+/, ' ').strip
+        ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/node_0.test.erb')
+        node_output_content = ouput_template.render(nil, ip_address: subject.ip).gsub(/\s+/, ' ').strip
         expect(node_content).to eq(node_output_content)
       end
 
