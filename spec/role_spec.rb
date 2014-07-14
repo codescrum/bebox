@@ -13,10 +13,24 @@ describe 'Test 07: Bebox::Role' do
 
     context '00: role creation' do
 
+      it 'should validate the role name' do
+        # Test not valid reserved words
+        Bebox::RESERVED_WORDS.each{|reserved_word| expect(Bebox::Role.valid_name?(reserved_word)).to be (false)}
+        # Test not valid start by undescore
+        expect(Bebox::Role.valid_name?('_role_0')).to be (false)
+        # Test not valid contain Upper letter
+        expect(Bebox::Role.valid_name?('Role_0')).to be (false)
+        # Test not valid contain dash character
+        expect(Bebox::Role.valid_name?('role-0')).to be (false)
+        # Test valid name not contains reserved words, start with letter, contains only downcase letters, numbers and undescores
+        expect(Bebox::Role.valid_name?(subject.name)).to be (true)
+      end
+
       it 'should create role directories' do
         expect(Dir.exist?("#{subject.path}")).to be (true)
         expect(Dir.exist?("#{subject.path}/manifests")).to be (true)
       end
+
       it 'should generate the manifests file' do
         output_file = File.read("#{subject.path}/manifests/init.pp").strip
         expected_content = File.read('spec/fixtures/puppet/roles/manifests/init.pp.test').strip
