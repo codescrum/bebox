@@ -69,3 +69,4 @@ puppet/hiera/data/new_production.yaml
 config/modules.yaml
 pkg/
 TODO
+spec/support/config_specs.yaml
