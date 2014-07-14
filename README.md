@@ -338,7 +338,9 @@ gem 'bebox', :path => "BEBOX_PATH_IN_YOUR_PC/pkg"
 Tests
 -----------
 
-By the project nature the specs must be run in order. To do this all specs has a 'Test XX:' naming convention. If you want to run all tests in order we have a ordered_phases_spec.rb file than you can run with.
+Before run tests you need to configure the IP address for vagrant machine. To do this create the file *spec/support/config_specs.yaml* from the *spec/support/config_specs.yaml.example* and configure a local newtwork IP free address to use.
+
+By project's nature the specs must be run in order. To do this all specs has a 'Test XX:' naming convention. If you want to run all tests in order we have a ordered_phases_spec.rb file than you can run with.
 
 ```
 rspec spec/ordered_phases_spec.rb

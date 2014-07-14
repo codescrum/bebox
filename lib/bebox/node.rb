@@ -144,7 +144,7 @@ module Bebox
 
     # Backup and add the vagrant hosts to local hosts file
     def configure_local_hosts(project_name)
-      info 'Please provide your account password, if ask you, to configure the local hosts file.'
+      info "\nPlease provide your account password, if ask you, to configure the local hosts file."
       backup_local_hosts(project_name)
       add_to_local_hosts
     end
