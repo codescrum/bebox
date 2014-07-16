@@ -1,5 +1,0 @@
-#- checking puppet class and gli options valid names
-#- add ssh module to change ForwardAgent in /etc/ssh_config
-- fix newrelic module
-#- fix nginx module
-#- must know when capistrano commands failed
