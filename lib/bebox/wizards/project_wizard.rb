@@ -1,10 +1,6 @@
-require_relative '../project'
-require 'highline/import'
+require 'bebox/project'
 require 'net/http'
 require 'uri'
-require 'progressbar'
-require 'digest'
-require 'bebox/logger'
 
 module Bebox
   class ProjectWizard
@@ -144,6 +140,7 @@ module Bebox
 
     # Download a box by the specified uri
     def download_box(uri)
+      require 'progressbar'
       info 'Downloading box ...'
       @counter = 0
       # Manage redirections

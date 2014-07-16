@@ -1,8 +1,14 @@
-require 'bebox/commands/commands_helper'
+require 'bebox/role'
+require 'bebox/node'
 
 module Bebox
   module NodeCommands
-    def load_node_commands
+
+    def self.extended(base)
+      base.load_commands
+    end
+
+    def load_commands
       # Nodes management phase commands
       desc 'Manage nodes for a environment in the project.'
       command :node do |node_command|
@@ -29,6 +35,7 @@ module Bebox
           node_new_command.action do |global_options,options,args|
             environment = get_environment(options)
             info "Environment #{environment}."
+            require 'bebox/wizards/node_wizard'
             Bebox::NodeWizard.new.create_new_node(project_root, environment)
           end
         end
@@ -38,6 +45,7 @@ module Bebox
           node_remove_command.action do |global_options,options,args|
             environment = get_environment(options)
             info "Environment #{environment}."
+            require 'bebox/wizards/node_wizard'
             Bebox::NodeWizard.new.remove_node(project_root, environment, args.first)
           end
         end
@@ -49,6 +57,7 @@ module Bebox
             node_role_command.action do |global_options,options,args|
               environment = get_environment(options)
               info "Environment #{environment}."
+              require 'bebox/wizards/node_wizard'
               Bebox::NodeWizard.new.set_role(project_root, environment)
             end
           end

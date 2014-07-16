@@ -1,7 +1,3 @@
-require_relative '../node'
-require 'highline/import'
-require 'bebox/logger'
-
 module Bebox
   class NodeWizard
     include Bebox::Logger
@@ -34,6 +30,7 @@ module Bebox
       roles = Bebox::Role.list(project_root)
       nodes = Bebox::Node.list(project_root, environment, 'nodes')
       node = choose_node(nodes)
+      require 'bebox/wizards/role_wizard'
       role = Bebox::RoleWizard.new.choose_role(roles)
       Bebox::Puppet.associate_node_role(project_root, environment, node, role)
       ok 'Role associated to node!.'
@@ -61,7 +58,6 @@ module Bebox
           node.prepare
           ok 'Node prepared!.'
         end
-
       else
         warn 'There are no nodes to prepare. Nothing done.'
       end

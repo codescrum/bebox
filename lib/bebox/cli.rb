@@ -1,13 +1,9 @@
 require 'gli'
 require 'highline/import'
-require 'bebox/commands/general_commands'
-require 'bebox/commands/project_commands'
 require 'bebox/logger'
 
 module Bebox
   class Cli
-    include Bebox::GeneralCommands
-    include Bebox::ProjectCommands
     include Bebox::Logger
 
     attr_accessor :project_root
@@ -19,7 +15,13 @@ module Bebox
       program_desc 'Create basic provisioning of remote servers.'
       version Bebox::VERSION
 
-      inside_project? ? load_project_commands : load_general_commands
+      if inside_project?
+        require 'bebox/commands/project_commands'
+        self.extend Bebox::ProjectCommands
+      else
+        require 'bebox/commands/general_commands'
+        self.extend Bebox::GeneralCommands
+      end
       exit run(*args)
     end
 

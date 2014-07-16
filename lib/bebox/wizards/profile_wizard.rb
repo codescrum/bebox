@@ -1,6 +1,4 @@
-require_relative '../profile'
-require 'highline/import'
-require 'bebox/logger'
+require 'bebox/profile'
 
 module Bebox
   class ProfileWizard

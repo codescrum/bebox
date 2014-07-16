@@ -1,4 +1,5 @@
 require 'tilt'
+require 'bebox/project'
 
 module Bebox
   class Environment

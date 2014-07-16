@@ -1,8 +1,13 @@
-require 'bebox/commands/commands_helper'
+require 'bebox/profile'
 
 module Bebox
   module ProvisionCommands
-    def load_provision_commands
+
+    def self.extended(base)
+      base.load_commands
+    end
+
+    def load_commands
       desc 'Apply the Puppet step for the nodes in a environment. (step-0: Fundamental, step-1: User layer, step-2: Service layer, step-3: Security layer)'
       arg_name "[step]"
       command :apply do |apply_command|
@@ -10,6 +15,7 @@ module Bebox
         apply_command.flag :environment, :desc => 'Set the environment of nodes', default_value: default_environment
         apply_command.action do |global_options,options,args|
           environment = get_environment(options)
+          require 'bebox/wizards/puppet_wizard'
           if options[:all]
             title "Provisioning all steps..."
             Bebox::PUPPET_STEPS.each do |step|
@@ -34,6 +40,7 @@ module Bebox
         profile_command.desc 'list the profiles in the project'
         profile_command.command :list do |profile_list_command|
           profile_list_command.action do |global_options,options,args|
+            require 'bebox/wizards/profile_wizard'
             profiles = Bebox::ProfileWizard.new.list_profiles(project_root)
             title 'Current profiles :'
             profiles.map{|profile| msg(profile)}
@@ -47,6 +54,7 @@ module Bebox
         profile_command.command :new do |profile_new_command|
           profile_new_command.action do |global_options,options,args|
             help_now!(error('You did not supply a name')) if args.count == 0
+            require 'bebox/wizards/profile_wizard'
             Bebox::ProfileWizard.new.create_new_profile(project_root, args.first)
           end
         end
@@ -56,6 +64,7 @@ module Bebox
         profile_command.command :remove do |profile_remove_command|
           profile_remove_command.action do |global_options,options,args|
             help_now!(error('You did not supply a profile name')) if args.count == 0
+            require 'bebox/wizards/profile_wizard'
             Bebox::ProfileWizard.new.remove_profile(project_root, args.first)
           end
         end
@@ -81,6 +90,7 @@ module Bebox
         role_command.command :new do |role_new_command|
           role_new_command.action do |global_options,options,args|
             help_now!(error('You did not supply a name')) if args.count == 0
+            require 'bebox/wizards/role_wizard'
             Bebox::RoleWizard.new.create_new_role(project_root, args.first)
           end
         end
@@ -90,6 +100,7 @@ module Bebox
         role_command.command :remove do |role_remove_command|
           role_remove_command.action do |global_options,options,args|
             help_now!(error('You did not supply a role name')) if args.count == 0
+            require 'bebox/wizards/role_wizard'
             Bebox::RoleWizard.new.remove_role(project_root, args.first)
           end
         end
@@ -103,6 +114,7 @@ module Bebox
             list_profiles_command.action do |global_options,options,args|
               help_now!(error('You did not supply a role name.')) if args.count == 0
               role = args.first
+              require 'bebox/wizards/role_wizard'
               exit_now!(error('The supplied role do not exist.')) unless Bebox::RoleWizard.new.role_exists?(project_root, role)
               profiles = Bebox::Role.list_profiles(project_root, role)
               title "Current profiles in role #{role}:"
@@ -115,6 +127,7 @@ module Bebox
           role_command.desc 'add a profile to a role'
           role_command.command :add_profile do |add_profile_command|
             add_profile_command.action do |global_options,options,args|
+              require 'bebox/wizards/role_wizard'
               Bebox::RoleWizard.new.add_profile(project_root)
             end
           end
@@ -122,6 +135,7 @@ module Bebox
           role_command.desc "remove a profile in a role"
           role_command.command :remove_profile do |remove_profile_command|
             remove_profile_command.action do |global_options,options,args|
+              require 'bebox/wizards/role_wizard'
               Bebox::RoleWizard.new.remove_profile(project_root)
             end
           end

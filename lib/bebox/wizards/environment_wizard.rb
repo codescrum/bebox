@@ -1,7 +1,3 @@
-require_relative '../environment'
-require 'highline/import'
-require 'bebox/logger'
-
 module Bebox
   class EnvironmentWizard
     include Bebox::Logger

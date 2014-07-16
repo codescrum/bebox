@@ -69,8 +69,8 @@ describe 'Test 01: Bebox::Project' do
 
       it 'should create Gemfile' do
         subject.create_gemfile
-        content = File.read("#{subject.path}/Gemfile")
-        output = File.read("spec/fixtures/Gemfile.test")
+        content = File.read("#{subject.path}/Gemfile").gsub(/\s+/, ' ').strip
+        output = File.read("spec/fixtures/Gemfile.test").gsub(/\s+/, ' ').strip
         expect(output).to eq(content)
       end
     end
@@ -157,7 +157,6 @@ describe 'Test 01: Bebox::Project' do
       it 'should install dependencies' do
         subject.bundle_project
         expect(File).to exist("#{subject.path}/Gemfile.lock")
-        expect(Dir).to exist("#{subject.path}/.bundle")
       end
     end
 

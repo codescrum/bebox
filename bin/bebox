@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
-require 'bebox'
+require 'bebox/cli'
+require 'bebox/version'
 
 Bebox::Cli.new(ARGV)

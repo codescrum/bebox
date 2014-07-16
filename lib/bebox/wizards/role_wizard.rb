@@ -1,6 +1,4 @@
-require_relative '../role'
-require 'highline/import'
-require 'bebox/logger'
+require 'bebox/role'
 
 module Bebox
   class RoleWizard
@@ -40,6 +38,7 @@ module Bebox
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
       role = choose_role(roles)
+      require 'bebox/wizards/profile_wizard'
       profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to add:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
         return warn("Profile #{profile} already in the Role #{role}. Nothing done!.")
@@ -54,6 +53,7 @@ module Bebox
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
       role = choose_role(roles)
+      require 'bebox/wizards/profile_wizard'
       profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to remove:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
         Bebox::Role.remove_profile(project_root, role, profile)

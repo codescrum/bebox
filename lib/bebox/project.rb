@@ -1,5 +1,7 @@
 require 'tilt'
 require 'bebox/environment'
+require 'bebox/puppet'
+require 'bebox/logger'
 
 module Bebox
   class Project
@@ -24,6 +26,7 @@ module Bebox
       create_puppet_base
       create_project_config
       create_checkpoints
+      info "Bundle project ..."
       bundle_project
     end
 
@@ -70,7 +73,9 @@ module Bebox
 
     # Create rbenv local
     def generate_ruby_version
-      `cd #{self.path} && rbenv local 2.1.0`
+      File.open("#{self.path}/.ruby-version", 'w') do |f|
+        f.write RUBY_VERSION
+      end
     end
 
     # Generate .bebox file
@@ -155,7 +160,7 @@ module Bebox
       Bebox::PUPPET_STEPS.each do |step|
         ssh_key = ''
         step_dir = Bebox::Puppet.step_name(step)
-        templates_path = Bebox::Node::templates_path
+        templates_path = Bebox::Project::templates_path
         # Generate site.pp template
         manifest_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/manifests/site.pp.erb")
         File.open("#{self.path}/puppet/steps/#{step_dir}/manifests/site.pp", 'w') do |f|
@@ -200,7 +205,7 @@ module Bebox
 
     # Bundle install packages for project
     def bundle_project
-      `cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install 1>/dev/null`
+      `cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install`
     end
 
     # Generate the deploy file for the project

@@ -1,7 +1,5 @@
-require_relative '../puppet'
-require_relative '../node'
-require 'highline/import'
-require 'bebox/logger'
+require 'bebox/puppet'
+require 'bebox/node'
 
 module Bebox
   class PuppetWizard
