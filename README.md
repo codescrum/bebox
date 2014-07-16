@@ -61,7 +61,7 @@ Pre-requisites
 
 The following must be installed for bebox to works well:
 * rbenv
-* ruby version 2.1.0
+* ruby version >= 1.9.2 (2.1.0 recommended)
 * vagrant
 
 Install bebox:
@@ -146,11 +146,14 @@ Also if the nodes are in the vagrant environment you can up/halt the vagrant mac
 
 **Take in account that this phase would take some time while it download and configure the base packages in all the nodes to be prepared.**
 
-```
-bebox vagrant_up
-```
+For vagrant nodes already prepared you can stop/start the vagrant machines with:
+
 ```
 bebox vagrant_halt
+```
+
+```
+bebox vagrant_up
 ```
 
 ###Puppet (Provisioning phase)
@@ -333,9 +336,17 @@ bundle exec bebox new PROJECT
 ```
 cd PROJECT
 ```
-* Change the gem 'bebox' line to:
+* Change in the **Gemfile** the line
+```
+gem 'bebox'
+```
+to:
 ```
 gem 'bebox', :path => "BEBOX_PATH_IN_YOUR_PC/pkg"
+```
+* Execute any project commands preceded by **bundle exec**
+```
+bundle exec bebox environment
 ```
 
 Tests
