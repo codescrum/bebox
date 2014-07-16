@@ -328,7 +328,7 @@ rake package
 mkdir tmp
 cd tmp
 ```
-* Execute the commands preceded by **bundle exec**
+* Execute the project creation command preceded by **bundle exec**
 ```
 bundle exec bebox new PROJECT
 ```
@@ -336,11 +336,7 @@ bundle exec bebox new PROJECT
 ```
 cd PROJECT
 ```
-* Change in the **Gemfile** the line
-```
-gem 'bebox'
-```
-to:
+* Add to the **Gemfile** the line
 ```
 gem 'bebox', :path => "BEBOX_PATH_IN_YOUR_PC/pkg"
 ```
