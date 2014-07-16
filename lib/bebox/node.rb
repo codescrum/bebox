@@ -156,7 +156,7 @@ module Bebox
       # Put the node lines in hosts file if not exist
       line = "#{self.ip} #{self.hostname}"
       node_present = (hosts_content =~ /#{self.ip}\s+#{self.hostname}/) ? true : false
-      `sudo echo '#{line}     # Added by bebox' | sudo tee -a #{local_hosts_path}/hosts` unless node_present
+      `echo '#{line}     # Added by bebox' >> #{local_hosts_path}/hosts` unless node_present
     end
 
     # Backup the local hosts file
