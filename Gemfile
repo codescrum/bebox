@@ -1,12 +1,3 @@
 source 'https://rubygems.org'
-gem 'serverspec', '1.6.0'
-gem 'rspec', '2.14.1'
-gem 'fakeweb'
-gem 'factory_girl', '4.3.0'
-gem 'jazz_hands', '0.5.2'
-gem 'active_attr', '0.8.3'
-gem 'highline', '1.6.21'
-gem 'tilt', '2.0.1'
-gem 'progressbar', '0.21.0'
-gem 'colorize', '0.6.0'
+
 gemspec
