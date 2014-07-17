@@ -75,7 +75,7 @@ module Bebox
       choose do |menu|
         menu.header = title(question)
         profiles.each do |box|
-          menu.choice(box.split('/').last)
+          menu.choice(box)
         end
       end
     end

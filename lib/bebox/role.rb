@@ -61,7 +61,7 @@ module Bebox
       tempfile = File.open(tempfile_path, 'w')
       manifest_file = File.new(manifest_path)
       manifest_file.each do |line|
-        line << "\n\tinclude profiles::#{profile}\n" if line.start_with?('class')
+        line << "\n\tinclude profiles::#{profile.gsub('/','::')}\n" if line.start_with?('class')
         tempfile << line
       end
       manifest_file.close
@@ -72,7 +72,7 @@ module Bebox
     # Remove a profile in a role
     def self.remove_profile(project_root, role, profile)
       manifest_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp"
-      regexp = /^\s*include\s+profiles::#{profile}\s*$/
+      regexp = /^\s*include\s+profiles::#{profile.gsub('/','::')}\s*$/
       content = File.read(manifest_path).gsub(regexp, '')
       File.open(manifest_path, 'wb') { |file| file.write(content) }
     end
@@ -83,7 +83,7 @@ module Bebox
       File.readlines("#{project_root}/puppet/roles/#{role}/manifests/init.pp").each do |line|
         row = line.strip
         next if row.start_with?('#')
-        profiles << row.split('::').last if row.start_with?('include')
+        profiles << row.split('::').drop(1).join('/') if row.start_with?('include')
       end
       profiles
     end
