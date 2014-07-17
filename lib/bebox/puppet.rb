@@ -72,13 +72,16 @@ module Bebox
     # Generate the roles and profiles modules for the step
     def self.generate_roles_and_profiles(project_root, step, role, profiles)
       # Re-create the roles and profiles module directories
-      `rm -rf #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/{roles,profiles}`
-      `mkdir -p #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/{roles,profiles}/manifests`
+      `rm -rf #{project_root}/puppet/steps/#{step_name(step)}/modules/{roles,profiles}`
+      `mkdir -p #{project_root}/puppet/steps/#{step_name(step)}/modules/{roles,profiles}/manifests`
       # Copy role to module
-      `cp #{project_root}/puppet/roles/#{role}/manifests/init.pp #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/roles/manifests/#{role}.pp`
+      `cp #{project_root}/puppet/roles/#{role}/manifests/init.pp #{project_root}/puppet/steps/#{step_name(step)}/modules/roles/manifests/#{role}.pp`
       # Copy profiles to module
       profiles.each do |profile|
-        `cp #{project_root}/puppet/profiles/#{profile}/manifests/init.pp #{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/modules/profiles/manifests/#{profile}.pp`
+        profile_tree = profile.gsub('::','/')
+        profile_tree_parent = profile_tree.split('/')[0...-1].join('/')
+        `mkdir -p #{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree_parent}`
+        `cp #{project_root}/puppet/profiles/#{profile_tree}/manifests/init.pp #{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree}.pp`
       end
     end
 
@@ -87,7 +90,7 @@ module Bebox
       modules = []
       puppetfile_path = "#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile"
       profiles.each do |profile|
-        profile_puppetfile_path = "#{project_root}/puppet/profiles/#{profile}/Puppetfile"
+        profile_puppetfile_path = "#{project_root}/puppet/profiles/#{profile.gsub('::','/')}/Puppetfile"
         puppetfile_content = File.read(profile_puppetfile_path)
         modules << puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten
       end
