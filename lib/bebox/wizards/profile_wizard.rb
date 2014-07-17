@@ -35,13 +35,16 @@ module Bebox
     end
 
     # Removes an existing profile
-    def remove_profile(project_root, profile_name)
-      # Check if the profile exist
-      return error("The profile #{profile_name} did not exist!.") unless profile_exists?(project_root, profile_name)
+    def remove_profile(project_root)
+      # Choose a profile from the availables
+      profiles = Bebox::Profile.list(project_root)
+      profile = choose_profile(profiles, 'Choose the profile to remove:')
       # Confirm deletion
       return warn('Nothing done!.') unless confirm_profile_deletion?
       # Profile deletion
-      profile = Bebox::Profile.new(profile_name, project_root)
+      profile_name = profile.split('/').last
+      profile_base_path = profile.split('/')[0...-1].join('/')
+      profile = Bebox::Profile.new(profile_name, project_root, profile_base_path)
       profile.remove
       ok 'Profile removed!.'
     end

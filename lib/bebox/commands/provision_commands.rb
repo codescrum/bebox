@@ -63,12 +63,12 @@ module Bebox
         end
         # Profile remove command
         profile_command.desc "remove a profile in the project"
-        profile_command.arg_name "[name]"
+        # profile_command.arg_name "[name]"
         profile_command.command :remove do |profile_remove_command|
           profile_remove_command.action do |global_options,options,args|
-            help_now!(error('You did not supply a profile name')) if args.count == 0
+            # help_now!(error('You did not supply a profile name')) if args.count == 0
             require 'bebox/wizards/profile_wizard'
-            Bebox::ProfileWizard.new.remove_profile(project_root, args.first)
+            Bebox::ProfileWizard.new.remove_profile(project_root)
           end
         end
       end
