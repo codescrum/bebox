@@ -20,7 +20,7 @@ module Bebox
 
     # Delete all files and directories related to a profile
     def remove
-      `cd #{self.project_root} && rm -r puppet/profiles/#{self.name}`
+      `cd #{self.project_root} && rm -r puppet/profiles/#{relative_path}`
     end
 
     # Lists existing profiles
