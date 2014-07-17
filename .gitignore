@@ -66,7 +66,13 @@ puppet/hiera/data/vagrant.yaml
 puppet/hiera/data/development.yaml
 puppet/hiera/data/new_production.yaml
 
-config/modules.yaml
+# Gem generation
 pkg/
-TODO
+
+# Spec tests
 spec/support/config_specs.yaml
+
+# Local
+TODO
+.project
+.timetracker-project

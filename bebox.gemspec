@@ -10,14 +10,12 @@ spec = Gem::Specification.new do |s|
   s.summary = 'Create basic provisioning of remote servers.'
   s.files = `git ls-files`.split("\n") - ['.ruby-version']
   s.require_paths << 'lib'
-  s.has_rdoc = true
-  s.extra_rdoc_files = ['README.rdoc','bebox.rdoc']
+  s.has_rdoc = false
   s.rdoc_options << '--title' << 'bebox' << '--main' << 'README.rdoc' << '-ri'
   s.bindir = 'bin'
   s.executables << 'bebox'
   s.required_ruby_version = '>= 1.9.2'
   s.add_development_dependency('rake')
-  s.add_development_dependency('rdoc')
   s.add_development_dependency('aruba')
   s.add_development_dependency('rspec', '2.14.1')
   s.add_development_dependency('jazz_hands', '0.5.2')

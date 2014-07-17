@@ -1,5 +1,0 @@
-= bebox
-
-Generate this with
-    bebox rdoc
-After you have described your command line interface

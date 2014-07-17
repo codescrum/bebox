@@ -128,8 +128,6 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (10.3.1)
-    rdoc (4.1.1)
-      json (~> 1.4)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
@@ -161,6 +159,5 @@ DEPENDENCIES
   factory_girl (= 4.3.0)
   jazz_hands (= 0.5.2)
   rake
-  rdoc
   rspec (= 2.14.1)
   serverspec (= 1.6.0)

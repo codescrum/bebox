@@ -1,6 +1,0 @@
-= bebox
-
-Describe your project here
-
-:include:bebox.rdoc
-

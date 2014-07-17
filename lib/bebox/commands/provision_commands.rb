@@ -1,5 +1,4 @@
 require 'bebox/profile'
-require 'pry'
 
 module Bebox
   module ProvisionCommands
