@@ -76,8 +76,6 @@ From any directory:
 bebox new PROJECT_NAME
 ```
 
-**Important: If it output some like: The `bebox' command exists in these Ruby versions: 2.1.0, then you need to do: ```rbenv global 2.1.0```**
-
 In console appear a simple wizard to configure a vagrant box in the project. The vagrant box can be downloaded automatically with the wizard or linked with an existent local *.box file.
 
 This creates a subdirectory *PROJECT_NAME* with the initial skeleton of application.
@@ -202,28 +200,50 @@ bebox role list
 To add a profile:
 
 ```
-bebox profile new PROFILE
+bebox profile new PROFILE [-p PATH]
 ```
 
 This command creates a file structure for the profile with templates that you need to edit for the profile do something.
 The structure is like:
 ```
 ── profiles/
-    └── <profile-name>/
-        ├── manifests/
-        │   └── init.pp
-        └── Puppetfile
+    └── <category1>/
+        └── <category2>/
+            ...
+            └── <categoryN>/
+                └── <profile-name>/
+                    ├── manifests/
+                    │   └── init.pp
+                    └── Puppetfile
+```
+The *categories (category1, category2, ... categoryN)* are set if the argument *-p PATH* is passed; and are useful better organization of profiles.
+
+For example:
+```
+bebox profile new iptables -p basic/security
+```
+would create the profiles directories structure:
+```
+── profiles/
+    └── basic/
+        └── security/
+            └── iptables/
+                ├── manifests/
+                │   └── init.pp
+                └── Puppetfile
 ```
 
-You need to modify the init.pp file to as usuarl add puppet calls to classes, resources, modules, hiera.
+You need to modify the init.pp file adding usual puppet calls to classes, resources, modules, hiera.
 You need to modify the Puppetfile to set the modules that the manifest file will use.
 Also you need to modify the hiera data that the manifest will use (See Hiera part below).
 
 To remove a profile:
 
 ```
-bebox profile remove PROFILE
+bebox profile remove
 ```
+
+Then in the console a simple wizard appear for selecting the profile to remove from the profiles available.
 
 To list profiles:
 
