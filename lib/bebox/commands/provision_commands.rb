@@ -1,4 +1,5 @@
 require 'bebox/profile'
+require 'pry'
 
 module Bebox
   module ProvisionCommands
@@ -52,10 +53,12 @@ module Bebox
         profile_command.desc 'add a profile in the project'
         profile_command.arg_name "[name]"
         profile_command.command :new do |profile_new_command|
+          profile_new_command.flag :p, :arg_name => 'path', :desc => 'A relative path of the category folders tree to store the profile. Ex. basic/security/iptables'
           profile_new_command.action do |global_options,options,args|
+            path = options[:p] || ''
             help_now!(error('You did not supply a name')) if args.count == 0
             require 'bebox/wizards/profile_wizard'
-            Bebox::ProfileWizard.new.create_new_profile(project_root, args.first)
+            Bebox::ProfileWizard.new.create_new_profile(project_root, args.first, path)
           end
         end
         # Profile remove command
