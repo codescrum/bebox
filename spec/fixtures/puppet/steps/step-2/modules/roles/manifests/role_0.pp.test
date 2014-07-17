@@ -11,6 +11,6 @@
 
 class roles::role_0 {
 
-  include profiles::profile_0
+  include profiles::test::profile_0
 
 }

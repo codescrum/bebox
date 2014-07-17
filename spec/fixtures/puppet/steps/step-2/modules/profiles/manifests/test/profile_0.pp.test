@@ -9,6 +9,6 @@
 #   }
 # }
 
-class profiles::profile_0 {
+class profiles::test::profile_0 {
 
 }

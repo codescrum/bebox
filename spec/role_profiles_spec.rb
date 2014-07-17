@@ -14,8 +14,8 @@ describe 'Test 09: Associate roles and profiles' do
 
   context 'add profiles' do
     it 'should add a profile to a role' do
-      role_content = "include profiles::#{profile.name}"
-      Bebox::Role.add_profile(role.project_root, role.name, profile.name)
+      role_content = "include profiles::#{profile.namespace_name}"
+      Bebox::Role.add_profile(role.project_root, role.name, profile.relative_path)
       output_file = File.read("#{role.path}/manifests/init.pp").strip
       expect(output_file).to include(role_content)
     end
@@ -23,7 +23,7 @@ describe 'Test 09: Associate roles and profiles' do
 
   context 'list profiles' do
     it 'should list profiles' do
-      current_profiles = [profile.name]
+      current_profiles = [profile.relative_path]
       profiles = Bebox::Role.list_profiles(role.project_root, role.name)
       expect(profiles).to include(*current_profiles)
     end
@@ -31,8 +31,8 @@ describe 'Test 09: Associate roles and profiles' do
 
   context 'remove profiles' do
     it 'should delete profile in a role' do
-      role_content = "include profiles::#{profile.name}"
-      Bebox::Role.remove_profile(role.project_root, role.name, profile.name)
+      role_content = "include profiles::#{profile.namespace_name}"
+      Bebox::Role.remove_profile(role.project_root, role.name, profile.relative_path)
       output_file = File.read("#{role.path}/manifests/init.pp").strip
       expect(output_file).to_not include(role_content)
     end

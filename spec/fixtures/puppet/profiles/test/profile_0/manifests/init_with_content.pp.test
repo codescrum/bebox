@@ -9,6 +9,11 @@
 #   }
 # }
 
-class profiles::profile_0 {
-
+class profiles::test::profile_0 {
+  $packages = hiera("packages")
+  each($packages) |$package| {
+    package { $package:
+      ensure => present
+    }
+  }
 }

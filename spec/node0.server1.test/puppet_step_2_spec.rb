@@ -1,5 +1,7 @@
 require 'spec_helper'
 require_relative '../factories/puppet.rb'
+require_relative '../factories/role.rb'
+require_relative '../factories/profile.rb'
 require_relative '../puppet_spec_helper.rb'
 
 describe 'test_14: Puppet apply Service layer step-2' do
@@ -11,13 +13,13 @@ describe 'test_14: Puppet apply Service layer step-2' do
   before :all do
     role.create
     profile.create
-    Bebox::Role.add_profile(role.project_root, role.name, profile.name)
-    `cp spec/fixtures/puppet/profiles/profile_0/manifests/init_with_content.pp.test #{puppet.project_root}/puppet/profiles/profile_0/manifests/init.pp`
+    Bebox::Role.add_profile(role.project_root, role.name, profile.relative_path)
+    `cp spec/fixtures/puppet/profiles/#{profile.relative_path}/manifests/init_with_content.pp.test #{profile.absolute_path}/manifests/init.pp`
     `cp spec/fixtures/puppet/hiera/data/#{puppet.node.hostname}.yaml.test #{puppet.project_root}/puppet/steps/#{Bebox::Puppet.step_name(puppet.step)}/hiera/data/#{puppet.node.hostname}.yaml`
-    `cp spec/fixtures/puppet/profiles/profile_0/Puppetfile_with_modules.test #{puppet.project_root}/puppet/profiles/profile_0/Puppetfile`
+    `cp spec/fixtures/puppet/profiles/#{profile.relative_path}/Puppetfile_with_modules.test #{profile.absolute_path}/Puppetfile`
     profiles = Bebox::Puppet.profiles_from_role(puppet.project_root, role.name)
     Bebox::Puppet.generate_puppetfile(puppet.project_root, puppet.step, profiles)
-    Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'role_0', ['profile_0'])
+    Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'role_0', [profile.relative_path])
     puppet.apply
   end
 

@@ -7,7 +7,6 @@ describe 'Test 12: Puppet apply Fundamental step-0' do
   let(:puppet) { build(:puppet) }
 
   before(:all) do
-    # Bebox::Puppet.generate_manifests(puppet.project_root, 'step-0', [puppet.node])
     Bebox::Puppet.generate_puppetfile(puppet.project_root, puppet.step, ['fundamental'])
     Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'fundamental', ['fundamental'])
     puppet.apply
