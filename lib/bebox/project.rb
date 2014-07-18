@@ -99,10 +99,12 @@ module Bebox
       `cd #{self.path} && mkdir -p templates/{roles,profiles}`
     end
 
-    # Create config deploy and keys directories
+    # Create the default base roles and profiles in the project
     def copy_default_roles_profiles
+      # Copy default roles and profiles to project templates directory
       `cp -R #{Bebox::Project.templates_path}/puppet/default_roles/* #{self.path}/templates/roles/`
       `cp -R #{Bebox::Project.templates_path}/puppet/default_profiles/* #{self.path}/templates/profiles/`
+      # Copy default roles and profiles to project roles and profiles available
       `cp -R #{Bebox::Project.templates_path}/puppet/default_roles/* #{self.path}/puppet/roles/`
       `cp -R #{Bebox::Project.templates_path}/puppet/default_profiles/* #{self.path}/puppet/profiles/`
     end
@@ -233,5 +235,9 @@ module Bebox
       return (File.exist?(ssh_key_path)) ? File.read(ssh_key_path).strip : ''
     end
 
+    # Delete all files referent to a project
+    def destroy
+      `cd #{self.parent_path} && rm -rf #{self.name}`
+    end
   end
 end

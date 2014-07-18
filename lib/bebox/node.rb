@@ -200,7 +200,7 @@ module Bebox
       project_name = Bebox::Project.name_from_file(self.project_root)
       vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(self.project_root)
       `cd #{self.project_root} && vagrant destroy -f #{self.hostname}`
-      `cd #{self.project_root} && vagrant box remove #{project_name}-#{self.hostname} #{vagrant_box_provider}`
+      `cd #{self.project_root} && vagrant box remove #{project_name}-#{self.hostname} --provider #{vagrant_box_provider}`
     end
 
     # Get the templates path inside the gem
@@ -222,10 +222,18 @@ module Bebox
       end
     end
 
-    # return an String with the status of vagrant boxes
-    # @returns String
-    def self.vagrant_nodes_status(project_root)
-      `cd #{project_root} && vagrant status`
+    # Return the running status of vagrant node
+    def vagrant_box_running?
+      status = `cd #{self.project_root} && vagrant status`
+      (status =~ /#{self.hostname}\s+running/) ? true : false
+    end
+
+    # Return the existence status of vagrant node
+    def vagrant_box_exist?
+      vagrant_boxes = `cd #{project_root} && vagrant box list`
+      project_name = Bebox::Project.name_from_file(self.project_root)
+      vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(self.project_root)
+      (vagrant_boxes =~ /#{project_name}-#{self.hostname}\s+\(#{vagrant_box_provider}/) ? true : false
     end
 
     # Count the number of prepared nodes
@@ -272,11 +280,10 @@ module Bebox
       nodes_count
     end
 
-    # # Restore the previous local hosts file
-    # def restore_local_hosts
-    #   `sudo cp #{self.hosts_backup_file} #{self.local_hosts_path}/hosts`
-    #   `sudo rm #{self.hosts_backup_file}`
-    #   self.hosts_backup_file = ''
-    # end
+    # Restore the previous local hosts file
+    def restore_local_hosts(project_name)
+      `sudo cp #{local_hosts_path}/hosts_before_bebox_#{project_name} #{local_hosts_path}/hosts`
+      `sudo rm #{local_hosts_path}/hosts_before_bebox_#{project_name}`
+    end
   end
 end

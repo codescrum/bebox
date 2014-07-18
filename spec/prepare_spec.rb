@@ -60,11 +60,8 @@ describe 'Test 05: Bebox::Node' do
         end
 
         it 'should up the vagrant boxes' do
-          nodes_running = true
           Bebox::Node.up_vagrant_nodes(project_root)
-          vagrant_status = Bebox::Node.vagrant_nodes_status(project_root)
-          nodes.each{|node| nodes_running &= (vagrant_status =~ /#{node.hostname}\s+running/).nil? ? false : true}
-          expect(nodes_running).to eq(true)
+          nodes.each{|node| expect(node.vagrant_box_running?).to eq(true)}
         end
 
         it 'should connect to vagrant box through ssh' do
