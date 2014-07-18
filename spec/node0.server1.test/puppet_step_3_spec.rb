@@ -5,10 +5,11 @@ require_relative '../puppet_spec_helper.rb'
 describe 'test_15: Puppet apply Security layer step-3' do
 
   let(:puppet) { build(:puppet, step: 'step-3') }
+  let(:security_profiles) {['base/security/fail2ban', 'base/security/iptables', 'base/security/ssh', 'base/security/sysctl']}
 
   before(:all) do
-    Bebox::Puppet.generate_puppetfile(puppet.project_root, puppet.step, ['security'])
-    Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'security', ['security'])
+    Bebox::Puppet.generate_puppetfile(puppet.project_root, puppet.step, security_profiles)
+    Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'security', security_profiles)
     puppet.apply
   end
 

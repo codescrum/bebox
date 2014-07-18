@@ -12,6 +12,9 @@
 #   }
 # }
 
-class profiles::test::profile_0 {
-
+class profiles::base::security::sysctl {
+  # Obtain sysctl rules from hiera
+  $sysctl_values_hash = hiera('sysctl', {})
+  # Set sysctl rules
+  create_resources('sysctl', $sysctl_values_hash)
 }

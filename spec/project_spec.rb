@@ -103,12 +103,13 @@ describe 'Test 01: Bebox::Project' do
       end
 
       it 'should copy the default roles and profiles' do
-        expected_directories = ['fundamental', 'security', 'users']
+        expected_roles_directories = ['fundamental', 'security', 'users']
+        expected_profiles_directories = ['profiles', 'base', 'fundamental', 'ruby', 'manifests', 'sudo', 'users', 'security', 'fail2ban', 'iptables', 'ssh', 'sysctl']
         subject.copy_default_roles_profiles
-        directories = Dir["#{subject.path}/puppet/roles/*/"].map { |f| File.basename(f) }
-        expect(directories.flatten).to include(*expected_directories)
-        directories = Dir["#{subject.path}/puppet/profiles/*/"].map { |f| File.basename(f) }
-        expect(directories.flatten).to include(*expected_directories)
+        directories = Dir["#{subject.path}/puppet/roles/*/"].map { |f| File.basename(f) }.uniq
+        expect(directories).to include(*expected_roles_directories)
+        directories = Dir["#{subject.path}/puppet/profiles/**/"].map { |f| File.basename(f) }.uniq
+        expect(directories).to include(*expected_profiles_directories)
       end
 
       context '02: generate steps templates' do

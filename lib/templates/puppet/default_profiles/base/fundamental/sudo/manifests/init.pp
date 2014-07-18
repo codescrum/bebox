@@ -12,6 +12,11 @@
 #   }
 # }
 
-class profiles::test::profile_0 {
-
+class profiles::base::fundamental::sudo {
+  include stdlib
+  # Module takes sudo users from hiera
+  class { '::sudo':
+    purge               => false,
+    config_file_replace => false,
+  }
 }

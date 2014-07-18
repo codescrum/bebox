@@ -2,19 +2,20 @@
 # puppet/modules type resource definitions.
 # It can include hiera calls for the parametter setting.
 # Example:
-# class profiles::fooserver {
-#   $fooport = hiera("fooserver_port")
-#   class { "fooserver":
-#     port  => $fooport
+# class profiles::category::technology {
+#   $technology_parameters = hiera("technology")
+#   $parameter1 = technology_parameters[parameter1]
+#   ...
+#   class { "technology_resource":
+#     parameter1  => $parameter1
+#     ...
 #   }
 # }
 
-class profiles::users {
-  include ::users
-
+class profiles::base::users::ssh {
   # Configure agent forwarding for application user
   $ssh_forwarding_hash = hiera_hash('ssh::client_rules', {})
-  class { 'ssh::client':
+  class { '::ssh::client':
     storeconfigs_enabled => false,
     options => $ssh_forwarding_hash
   }

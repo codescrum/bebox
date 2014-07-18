@@ -12,6 +12,7 @@
 #   }
 # }
 
-class profiles::test::profile_0 {
-
+class profiles::base::fundamental::users {
+  # Module users internally load parameters from hiera
+  include ::users
 }

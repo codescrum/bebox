@@ -19,8 +19,11 @@ module Bebox
 
     # Puppet apply Fundamental step
     def apply
+      # Check if a Puppetfile is neccesary for use/not use librarian-puppet
       check_puppetfile_content
+      # Copy static modules that are not downloaded by librarian-puppet
       copy_static_modules
+      # Apply step and if the process is succesful create the checkpoint.
       process_status = apply_step
       create_step_checkpoint if process_status.success?
       process_status
@@ -51,7 +54,7 @@ module Bebox
       end
     end
 
-    # Generate the site.pp for step
+    # Generate the site.pp manifests file for step
     def self.generate_manifests(project_root, step, nodes)
       manifest_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{step}/manifests/site_apply.pp.erb", :trim => true)
       File.open("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp", 'w') do |f|
@@ -59,6 +62,7 @@ module Bebox
       end
     end
 
+    # Generate the hiera templates for each step
     def self.generate_hiera_for_steps(project_root, template_file, filename, options)
       Bebox::PUPPET_STEPS.each do |step|
         step_dir = Bebox::Puppet.step_name(step)
@@ -71,12 +75,12 @@ module Bebox
 
     # Generate the roles and profiles modules for the step
     def self.generate_roles_and_profiles(project_root, step, role, profiles)
-      # Re-create the roles and profiles module directories
+      # Re-create the roles and profiles puppet module directories
       `rm -rf #{project_root}/puppet/steps/#{step_name(step)}/modules/{roles,profiles}`
       `mkdir -p #{project_root}/puppet/steps/#{step_name(step)}/modules/{roles,profiles}/manifests`
-      # Copy role to module
+      # Copy role to puppet roles module
       `cp #{project_root}/puppet/roles/#{role}/manifests/init.pp #{project_root}/puppet/steps/#{step_name(step)}/modules/roles/manifests/#{role}.pp`
-      # Copy profiles to module
+      # Copy profiles to puppet profiles module
       profiles.each do |profile|
         profile_tree = profile.gsub('::','/')
         profile_tree_parent = profile_tree.split('/')[0...-1].join('/')
@@ -92,7 +96,7 @@ module Bebox
       profiles.each do |profile|
         profile_puppetfile_path = "#{project_root}/puppet/profiles/#{profile.gsub('::','/')}/Puppetfile"
         puppetfile_content = File.read(profile_puppetfile_path)
-        modules << puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten
+        modules << puppetfile_content.scan(/^\s*(mod\s*.+?)$/).uniq
       end
       puppetfile_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{step}/Puppetfile.erb", :trim => true)
       File.open("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/Puppetfile", 'w') do |f|
@@ -197,11 +201,15 @@ module Bebox
       File.exist?("#{project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp")
     end
 
-    # Apply step via capistrano
+    # Apply step via capistrano in the machine
     def apply_step
+      # Create deploy directories
       cap 'deploy:setup'
+      # Deploy the configured step
       $?.success? ? (cap 'deploy') : (return $?)
+      # Download dynamic step modules through librarian-puppet
       $?.success? ? (cap 'puppet:bundle_modules') : (return $?)
+      # Install the step provision through puppet
       $?.success? ? (cap 'puppet:apply') : (return $?)
       $?
     end
@@ -224,10 +232,12 @@ module Bebox
       File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
+    # Translate step name to directory name
     def step_name
       Bebox::Puppet.step_name(self.step)
     end
 
+    # Translate step name to directory name
     def self.step_name(step)
       case step
         when 'step-0'

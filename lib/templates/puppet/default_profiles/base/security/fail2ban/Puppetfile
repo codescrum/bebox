@@ -1,0 +1,2 @@
+
+mod "netmanagers/fail2ban", '1.4.0'
