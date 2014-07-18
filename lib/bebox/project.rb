@@ -6,7 +6,9 @@ require 'bebox/logger'
 module Bebox
   class Project
 
-		attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path
+    include Bebox::Logger
+
+    attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path
 
     def initialize(name, vagrant_box_base, parent_path, vagrant_box_provider, default_environments = [])
       self.name = name
@@ -207,7 +209,7 @@ module Bebox
 
     # Bundle install packages for project
     def bundle_project
-      `cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install`
+      system("cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install")
     end
 
     # Generate the deploy file for the project
