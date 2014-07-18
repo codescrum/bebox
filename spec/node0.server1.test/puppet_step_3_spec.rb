@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../factories/puppet.rb'
 require_relative '../puppet_spec_helper.rb'
 
-describe 'test_15: Puppet apply Security layer step-3' do
+describe 'Test 15: Puppet apply Security layer step-3' do
 
   let(:puppet) { build(:puppet, step: 'step-3') }
   let(:security_profiles) {['base/security/fail2ban', 'base/security/iptables', 'base/security/ssh', 'base/security/sysctl']}
