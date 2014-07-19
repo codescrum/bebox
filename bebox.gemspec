@@ -6,8 +6,18 @@ spec = Gem::Specification.new do |s|
   s.author = 'Codescrum'
   s.email = 'team@codescrum.com'
   s.homepage = 'http://www.codescrum.com'
+  s.licenses    = ['MIT']
   s.platform = Gem::Platform::RUBY
   s.summary = 'Create basic provisioning of remote servers.'
+  s.description = <<-EOF
+    Bebox is a project born from the necessity of organizing a way to deal with the provisioning of remote servers.
+    Bebox is based on puppet and much like another quite known project Boxen,
+    the idea is to have a good agreement on how to manage a puppet repo for a remote environment.
+    It is also a good idea to have a standard approach on dealing with the provisioning problem,
+    including how to write modules, integrate them into the projects,
+    a directory structure for the projects to follow,
+    how to have a replicated 'development/test' environment into virtual machines, etc.
+  EOF
   s.files = `git ls-files`.split("\n") - ['.ruby-version']
   s.require_paths << 'lib'
   s.has_rdoc = false
@@ -15,8 +25,8 @@ spec = Gem::Specification.new do |s|
   s.bindir = 'bin'
   s.executables << 'bebox'
   s.required_ruby_version = '>= 1.9.2'
-  s.add_development_dependency('rake')
-  s.add_development_dependency('aruba')
+  s.add_development_dependency('rake', '10.3.1')
+  s.add_development_dependency('aruba', '0.5.4')
   s.add_development_dependency('rspec', '2.14.1')
   s.add_development_dependency('jazz_hands', '0.5.2')
   s.add_development_dependency('serverspec', '1.6.0')

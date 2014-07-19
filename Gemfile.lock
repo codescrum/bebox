@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bebox (0.5.0)
+    bebox (0.0.1)
       active_attr (= 0.8.3)
       colorize (= 0.6.0)
       gli (= 2.10.0)
@@ -154,10 +154,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aruba
+  aruba (= 0.5.4)
   bebox!
   factory_girl (= 4.3.0)
   jazz_hands (= 0.5.2)
-  rake
+  rake (= 10.3.1)
   rspec (= 2.14.1)
   serverspec (= 1.6.0)
