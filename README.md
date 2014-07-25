@@ -16,7 +16,7 @@ Bebox uses many great tools for its workflow, but essentially is based on the fo
 * Uses Capistrano for deployment of the puppet files and running the commands to provision the remote machines.
 
 Workflow
---------------
+--------
 
 Bebox’s workflow can be better understood if we take into account that there are some defined phases which are:
 
@@ -165,11 +165,12 @@ At project creation a set of default roles, profiles and hiera data are configur
 To provision the nodes:
 
 ```
-bebox apply [STEP] [--environment ENVIRONMENT]
+bebox apply [STEP] [--environment ENVIRONMENT] [--all]
 ```
 
 The STEP option must be one of: *step-0*, *step-1*, *step-2*, *step-3*
 By default if an *ENVIRONMENT* is not specified the default will be **vagrant**.
+The *--all* switch allows to run all steps in order without specify the STEP option.
 
 **We recommend to configure the roles, profiles and hiera data previously to apply any step.**
 
@@ -366,7 +367,7 @@ bundle exec bebox environment
 ```
 
 Tests
------------
+-----
 
 Before run tests you need to configure the IP address for vagrant machine. To do this create the file *spec/support/config_specs.yaml* from the *spec/support/config_specs.yaml.example* and configure a local newtwork IP free address to use.
 
