@@ -8,9 +8,9 @@ describe 'Test 05: Bebox::Node' do
   describe 'Prepare nodes' do
 
     let(:nodes) { 1.times.map{|index| build(:node, :created, hostname: "node#{index}.server1.test")} }
-    let(:project_root) { "#{Dir.pwd}/tmp/pname" }
+    let(:project_root) { "#{Dir.pwd}/tmp/bebox_pname" }
     let(:environment) { 'vagrant' }
-    let(:project_name) {'pname'}
+    let(:project_name) {'bebox_pname'}
     let(:vagrant_box_base) {"#{Dir.pwd}/ubuntu-server-12042-x64-vbox4210-nocm.box"}
 
     context 'pre vagrant prepare' do
@@ -34,10 +34,10 @@ describe 'Test 05: Bebox::Node' do
         it 'should create a hosts backup file' do
           node = nodes.first
           puts "\nPlease provide your account password, if ask you, to configure the local hosts file.".yellow
-          `sudo rm -rf #{node.local_hosts_path}/hosts_before_bebox_#{project_name}`
+          `sudo rm -rf #{node.local_hosts_path}/hosts_before_#{project_name}`
           original_hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
           nodes.each{|node| node.backup_local_hosts(project_name)}
-          hosts_backup_file = "#{node.local_hosts_path}/hosts_before_bebox_#{project_name}"
+          hosts_backup_file = "#{node.local_hosts_path}/hosts_before_#{project_name}"
           expect(File).to exist(hosts_backup_file)
           hosts_backup_content = File.read(hosts_backup_file).gsub(/\s+/, ' ').strip
           expect(original_hosts_content).to eq(hosts_backup_content)

@@ -43,11 +43,11 @@ describe 'Test 99: ordered specs' do
       expect(Dir.exist?("#{project.path}")).to be(false)
       # Test that the local hosts file was restored
       puts "\nPlease provide your account password, if ask you, to restore the local hosts file.".yellow
-      hosts_backup_content = File.read("#{node.local_hosts_path}/hosts_before_bebox_#{project.name}").gsub(/\s+/, ' ').strip
+      hosts_backup_content = File.read("#{node.local_hosts_path}/hosts_before_#{project.name}").gsub(/\s+/, ' ').strip
       node.restore_local_hosts(project.name)
       hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
       expect(hosts_content).to eq(hosts_backup_content)
-      expect(File.exist?("#{node.local_hosts_path}/hosts_before_bebox_#{project.name}")).to be(false)
+      expect(File.exist?("#{node.local_hosts_path}/hosts_before_#{project.name}")).to be(false)
     end
   end
 

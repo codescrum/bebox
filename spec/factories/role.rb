@@ -1,6 +1,6 @@
 FactoryGirl.define do
   factory :role, :class => Bebox::Role do
-    project_root  "#{Dir.pwd}/tmp/pname"
+    project_root  "#{Dir.pwd}/tmp/bebox_pname"
     name          'role_0'
 
     initialize_with { new(name, project_root) }

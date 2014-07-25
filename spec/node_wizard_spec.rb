@@ -6,7 +6,7 @@ describe 'Test 03: Manage nodes with the wizard' do
 
   subject { Bebox::NodeWizard.new }
 
-  let(:project_root) { "#{Dir.pwd}/tmp/pname" }
+  let(:project_root) { "#{Dir.pwd}/tmp/bebox_pname" }
   let(:environment) { "vagrant" }
   let(:node_hostname) { "node_0.server1.test" }
   let(:node_ip) { YAML.load_file('spec/support/config_specs.yaml')['test_ip'] }

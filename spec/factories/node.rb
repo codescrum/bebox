@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :node, :class => Bebox::Node do
     environment   'vagrant'
-    project_root  "#{Dir.pwd}/tmp/pname"
+    project_root  "#{Dir.pwd}/tmp/bebox_pname"
     hostname      'node0.server1.test'
     ip            YAML.load_file('spec/support/config_specs.yaml')['test_ip']
 

@@ -4,7 +4,7 @@
 Vagrant.configure("2") do |config|
 
     config.vm.define :'node0.server1.test' do |node|
-      node.vm.box = "pname-node0.server1.test"
+      node.vm.box = "bebox_pname-node0.server1.test"
       node.vm.hostname = "node0.server1.test"
       node.vm.network :public_network, :bridge => 'en0: Ethernet', :auto_config => false
       node.vm.provision :shell, :inline => "sudo ifconfig eth1 <%=ip_address%> netmask 255.255.255.0 up"
