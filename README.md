@@ -78,7 +78,11 @@ bebox new PROJECT_NAME
 
 In console appear a simple wizard to configure a vagrant box in the project. The vagrant box can be downloaded automatically with the wizard or linked with an existent local *.box file.
 
-This creates a subdirectory *PROJECT_NAME* with the initial skeleton of application.
+This creates a subdirectory *bebox_[PROJECT_NAME]* with the initial skeleton of application. To access new bebox commands do:
+
+```
+cd bebox_[PROJECT_NAME]
+```
 
 ###Manage Environments (Environment definition phase).
 Then you can add/remove/list environments. By default: the production, staging and vagrant environments are already created.

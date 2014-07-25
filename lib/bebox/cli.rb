@@ -25,7 +25,8 @@ module Bebox
       exit run(*args)
     end
 
-    # do the recursive stuff directory searchivn .gboobex
+    # Search recursively for .bebox file to see
+    # if current directory is a bebox project or not
     def inside_project?
       project_found = false
       cwd = Pathname(Dir.pwd)
