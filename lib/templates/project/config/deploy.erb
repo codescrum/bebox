@@ -1,6 +1,6 @@
 require 'capistrano/ext/multistage'
 
-set :application, "<%= project.name %>"
+set :application, "<%= project.shortname %>"
 set :stages, Dir[".checkpoints/*/*"].map{|f| File.basename(f)}
 set :default_stage, 'vagrant'
 set :use_sudo, false

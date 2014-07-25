@@ -77,7 +77,7 @@ module Bebox
     def create_hiera_template
       options = {}
       options[:ssh_key] = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
-      options[:project_name] = Bebox::Project.name_from_file(self.project_root)
+      options[:project_name] = Bebox::Project.shortname_from_file(self.project_root)
       Bebox::Puppet.generate_hiera_for_steps(self.project_root, "node.yaml.erb", self.hostname, options)
     end
 
@@ -162,7 +162,7 @@ module Bebox
     # Backup the local hosts file
     def backup_local_hosts(project_name)
       # Make a backup of hosts file
-      hosts_backup_file = "#{local_hosts_path}/hosts_before_bebox_#{project_name}"
+      hosts_backup_file = "#{local_hosts_path}/hosts_before_#{project_name}"
       `sudo cp #{local_hosts_path}/hosts #{hosts_backup_file}` unless File.exist?(hosts_backup_file)
     end
 
@@ -282,8 +282,8 @@ module Bebox
 
     # Restore the previous local hosts file
     def restore_local_hosts(project_name)
-      `sudo cp #{local_hosts_path}/hosts_before_bebox_#{project_name} #{local_hosts_path}/hosts`
-      `sudo rm #{local_hosts_path}/hosts_before_bebox_#{project_name}`
+      `sudo cp #{local_hosts_path}/hosts_before_#{project_name} #{local_hosts_path}/hosts`
+      `sudo rm #{local_hosts_path}/hosts_before_#{project_name}`
     end
   end
 end

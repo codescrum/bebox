@@ -43,7 +43,7 @@ module Bebox
     # Generate the hiera data for step from the template
     def generate_hiera
       ssh_key = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
-      project_name = Bebox::Project.name_from_file(self.project_root)
+      project_name = Bebox::Project.shortname_from_file(self.project_root)
       hiera_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/puppet/#{self.step}/hiera/hiera.yaml.erb")
       File.open("#{self.project_root}/puppet/steps/#{Bebox::Puppet.step_name(self.step)}/hiera/hiera.yaml", 'w') do |f|
         f.write hiera_template.render(nil, :step_dir => Bebox::Puppet.step_name(self.step))

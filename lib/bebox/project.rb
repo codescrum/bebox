@@ -32,6 +32,11 @@ module Bebox
       bundle_project
     end
 
+    # Obtain the project name without 'bebox_' prefix
+    def shortname
+      self.name.gsub("bebox_", "")
+    end
+
     # Create project directory
     def create_project_directory
       `mkdir -p #{self.parent_path}/#{self.name}`
@@ -65,6 +70,12 @@ module Bebox
     def self.vagrant_box_base_from_file(project_root)
       project_config = YAML.load_file("#{project_root}/.bebox")
       project_config['vagrant_box_base']
+    end
+
+    # Get short project name from the .bebox file
+    def self.shortname_from_file(project_root)
+      project_name = self.name_from_file(project_root)
+      project_name.gsub("bebox_", "")
     end
 
     # Get Project name from the .bebox file
@@ -178,7 +189,7 @@ module Bebox
         # Generate common.yaml template
         hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/common.yaml.erb")
         File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/data/common.yaml", 'w') do |f|
-          f.write hiera_template.render(nil, :step_dir => step_dir, :ssh_key => ssh_key, :project_name => self.name)
+          f.write hiera_template.render(nil, :step_dir => step_dir, :ssh_key => ssh_key, :project_name => self.shortname)
         end
       end
     end
