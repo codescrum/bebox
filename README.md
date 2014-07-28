@@ -120,7 +120,7 @@ To remove a node:
 bebox node remove
 ```
 
-Then in the console a simple wizard appear asking the node parameters.
+Then in the console a simple wizard appear for selecting the node to remove from the available nodes.
 
 To list nodes:
 
@@ -192,6 +192,8 @@ To remove a role:
 bebox role remove ROLE
 ```
 
+Then in the console a simple wizard appear for selecting the role to remove from the available roles.
+
 To list roles:
 
 ```
@@ -248,7 +250,7 @@ To remove a profile:
 bebox profile remove
 ```
 
-Then in the console a simple wizard appear for selecting the profile to remove from the profiles available.
+Then in the console a simple wizard appear for selecting the profile to remove from the available profiles.
 
 To list profiles:
 
