@@ -1,8 +1,8 @@
-require 'bebox/puppet'
+require 'bebox/provision'
 require 'bebox/node'
 
 module Bebox
-  class PuppetWizard
+  class ProvisionWizard
     include Bebox::Logger
     # Apply a step for the nodes in a environment
     def apply_step(project_root, environment, step)
@@ -18,17 +18,17 @@ module Bebox
           # Apply the nodes provisioning for step-N
           nodes_to_step.each do |node|
             title "Applying #{step} in node #{node.hostname}:"
-            role = Bebox::Puppet.role_from_node(project_root, step, node.hostname)
-            profiles = Bebox::Puppet.profiles_from_role(project_root, role) unless role.nil?
+            role = Bebox::Provision.role_from_node(project_root, step, node.hostname)
+            profiles = Bebox::Provision.profiles_from_role(project_root, role) unless role.nil?
             # Before apply generate the Puppetfile with modules from all associated profiles
-            Bebox::Puppet.generate_puppetfile(project_root, step, profiles) unless profiles.nil?
+            Bebox::Provision.generate_puppetfile(project_root, step, profiles) unless profiles.nil?
             # Before apply generate the roles and profiles modules structure for puppet step
-            Bebox::Puppet.generate_roles_and_profiles(project_root, step, role, profiles)
-            puppet = Bebox::Puppet.new(project_root, environment, node, step)
-            puppet.apply.success? ? (ok "Node #{node.hostname} provisioned to #{step}.") : (error "An error ocurred in the provision of #{step} for #{node.hostname}")
+            Bebox::Provision.generate_roles_and_profiles(project_root, step, role, profiles)
+            provision = Bebox::Provision.new(project_root, environment, node, step)
+            provision.apply.success? ? (ok "Node '#{node.hostname}' provisioned to #{step}.") : (error "An error ocurred in the provision of #{step} for node '#{node.hostname}'")
           end
         else
-          warn "There are no nodes for provision in #{step}. Nothing done."
+          warn "There are no nodes for provision in #{step}. No changes were made."
         end
       else
         warn "Please add a ssh key pair (id_rsa, id_rsa.pub) in config/keys/environments/#{environment} to do this step."
@@ -70,7 +70,7 @@ module Bebox
     def confirm_node_step?(node, step)
       node_type = "steps/#{step}"
       checkpoint_status = "(start: #{node.checkpoint_parameter_from_file(node_type, 'started_at')} - end: #{node.checkpoint_parameter_from_file(node_type, 'finished_at')})"
-      quest "The node #{node.hostname} was already provisioned in #{step} #{checkpoint_status}.\nDo you want to re-provision it?"
+      quest "The node '#{node.hostname}' was already provisioned in #{step} #{checkpoint_status}.\nDo you want to re-provision it?"
       response =  ask(highline_quest('(y/n)')) do |q|
         q.default = "n"
       end

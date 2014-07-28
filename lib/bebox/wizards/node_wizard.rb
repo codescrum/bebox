@@ -1,4 +1,3 @@
-require 'pry'
 module Bebox
   class NodeWizard
     include Bebox::Logger
@@ -16,10 +15,15 @@ module Bebox
 
     # Removes an existing node
     def remove_node(project_root, environment, hostname)
-      # Ask for a hostname/node to remove
-      hostname = ask_existing_hostname(project_root, environment)
-      # Confirm deletion
-      return warn('Nothing done!.') unless confirm_node_deletion?
+      # Ask for a node to remove
+      nodes = Bebox::Node.list(project_root, environment, 'nodes')
+      if nodes.count > 0
+        hostname = choose_node(nodes, 'Choose the node to remove:')
+      else
+        return error "There are no nodes in the '#{environment}' environment to remove. No changes were made."
+      end
+      # Ask for deletion confirmation
+      return warn('No changes were made.') unless confirm_node_deletion?
       # Node deletion
       node = Bebox::Node.new(environment, project_root, hostname, nil)
       node.remove
@@ -30,10 +34,10 @@ module Bebox
     def set_role(project_root, environment)
       roles = Bebox::Role.list(project_root)
       nodes = Bebox::Node.list(project_root, environment, 'nodes')
-      node = choose_node(nodes)
+      node = choose_node(nodes, 'Choose an existent node:')
       require 'bebox/wizards/role_wizard'
-      role = Bebox::RoleWizard.new.choose_role(roles)
-      Bebox::Puppet.associate_node_role(project_root, environment, node, role)
+      role = Bebox::RoleWizard.new.choose_role(roles, 'Choose an existent role:')
+      Bebox::Provision.associate_node_role(project_root, environment, node, role)
       ok 'Role associated to node!.'
     end
 
@@ -60,7 +64,7 @@ module Bebox
           ok 'Node prepared!.'
         end
       else
-        warn 'There are no nodes to prepare. Nothing done.'
+        warn 'There are no nodes to prepare. No changes were made.'
       end
     end
 
@@ -87,7 +91,7 @@ module Bebox
     # Ask for confirmation of node preparation
     def confirm_node_preparation?(node)
       checkpoint_status = "(start: #{node.checkpoint_parameter_from_file('prepared_nodes', 'started_at')} - end: #{node.checkpoint_parameter_from_file('prepared_nodes', 'finished_at')})"
-      quest "The node #{node.hostname} was already prepared #{checkpoint_status}.\nDo you want to re-prepare it?"
+      quest "The node '#{node.hostname}' was already prepared #{checkpoint_status}.\nDo you want to re-prepare it?"
       response =  ask(highline_quest('(y/n)')) do |q|
         q.default = "n"
       end
@@ -104,9 +108,9 @@ module Bebox
     end
 
     # Asks to choose an existent node
-    def choose_node(nodes)
+    def choose_node(nodes, question)
       choose do |menu|
-        menu.header = title('Choose an existent node:')
+        menu.header = title(question)
         nodes.each do |box|
           menu.choice(box.split('/').last)
         end
@@ -118,22 +122,10 @@ module Bebox
       hostname = ask_hostname(project_root, environment)
       # Check if the node not exist
       if node_exists?(project_root, environment, hostname)
-        error 'A hostname with that name already exist!. Try a new one.'
+        error 'A hostname with that name already exist. Try a new one.'
         ask_hostname(project_root, environment)
       else
         return hostname
-      end
-    end
-
-    # Keep asking for a hostname that exist
-    def ask_existing_hostname(project_root, environment)
-      hostname = ask_hostname(project_root, environment)
-      # Check if the node exist
-      if node_exists?(project_root, environment, hostname)
-        return hostname
-      else
-        error "The node #{hostname} don't exist!. Try a new one."
-        ask_hostname(project_root, environment)
       end
     end
 
@@ -157,7 +149,7 @@ module Bebox
       if free_ip?(ip)
         return ip
       else
-        error 'The IP address is not free!. Try a new one.'
+        error 'The IP address is not free. Try a new one.'
         ask_ip(environment)
       end
     end

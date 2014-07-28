@@ -118,26 +118,23 @@ describe 'Test 01: Bebox::Project' do
           subject.generate_steps_templates
         end
         it 'should generate manifests template' do
-          puppet_steps = %w{step-0 step-1 step-2 step-3}
-          puppet_steps.each do |step|
+          Bebox::PROVISION_STEPS.each do |step|
             content = File.read("spec/fixtures/puppet/steps/#{step}/manifests/site.pp.test")
-            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp")
+            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp")
             expect(output).to eq(content)
           end
         end
         it 'should generate hiera template' do
-          puppet_steps = %w{step-0 step-1 step-2 step-3}
-          puppet_steps.each do |step|
+          Bebox::PROVISION_STEPS.each do |step|
             content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/hiera.yaml.test")
-            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/hiera.yaml")
+            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/hiera.yaml")
             expect(output).to eq(content)
           end
         end
         it 'should generate hiera data common' do
-          puppet_steps = %w{step-0 step-1 step-2 step-3}
-          puppet_steps.each do |step|
+          Bebox::PROVISION_STEPS.each do |step|
             content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/common.yaml.test")
-            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/common.yaml")
+            output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/common.yaml")
             expect(output).to eq(content)
           end
         end

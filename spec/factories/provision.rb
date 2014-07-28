@@ -1,7 +1,7 @@
 require_relative '../factories/node.rb'
 
 FactoryGirl.define do
-  factory :puppet, :class => Bebox::Puppet do
+  factory :provision, :class => Bebox::Provision do
     project_root  "#{Dir.pwd}/tmp/bebox_pname"
     environment   'vagrant'
     node          FactoryGirl.build(:node)

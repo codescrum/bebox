@@ -10,16 +10,16 @@ describe 'Test 04: Bebox::Node' do
     context 'node creation' do
       it 'should create hiera data template' do
         subject.create_hiera_template
-        Bebox::PUPPET_STEPS.each do |step|
-          expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{subject.hostname}.yaml")).to eq(true)
+        Bebox::PROVISION_STEPS.each do |step|
+          expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.hostname}.yaml")).to eq(true)
         end
       end
 
       it 'should create node in manifests file' do
         subject.create_manifests_node
-        Bebox::PUPPET_STEPS.each do |step|
+        Bebox::PROVISION_STEPS.each do |step|
           content = File.read("spec/fixtures/puppet/steps/#{step}/manifests/site_with_node.pp.test").gsub(/\s+/, ' ').strip
-          output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp").gsub(/\s+/, ' ').strip
+          output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp").gsub(/\s+/, ' ').strip
           expect(output).to eq(content)
         end
       end
@@ -53,16 +53,16 @@ describe 'Test 04: Bebox::Node' do
 
       it 'should remove hiera data' do
         subject.remove_hiera_template
-        Bebox::PUPPET_STEPS.each do |step|
-          expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{subject.hostname}.yaml")).to be (false)
+        Bebox::PROVISION_STEPS.each do |step|
+          expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.hostname}.yaml")).to be (false)
         end
       end
 
       it 'should remove node from manifests' do
         subject.remove_manifests_node
-        Bebox::PUPPET_STEPS.each do |step|
+        Bebox::PROVISION_STEPS.each do |step|
           content = File.read("spec/fixtures/puppet/steps/#{step}/manifests/site.pp.test").gsub(/\s+/, ' ').strip
-          output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/manifests/site.pp").gsub(/\s+/, ' ').strip
+          output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp").gsub(/\s+/, ' ').strip
           expect(output).to eq(content)
         end
       end

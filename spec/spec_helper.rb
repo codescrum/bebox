@@ -15,7 +15,7 @@ require_relative '../lib/bebox/wizards/project_wizard'
 require_relative '../lib/bebox/environment'
 require_relative '../lib/bebox/node'
 require_relative '../lib/bebox/wizards/node_wizard'
-require_relative '../lib/bebox/puppet'
+require_relative '../lib/bebox/provision'
 require_relative '../lib/bebox/role'
 require_relative '../lib/bebox/profile'
 

@@ -86,12 +86,12 @@ module Bebox
       options = {}
       options[:ssh_key] = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
       options[:project_name] = Bebox::Project.shortname_from_file(self.project_root)
-      Bebox::Puppet.generate_hiera_for_steps(self.project_root, "node.yaml.erb", self.hostname, options)
+      Bebox::Provision.generate_hiera_for_steps(self.project_root, "node.yaml.erb", self.hostname, options)
     end
 
     # Create the node in the puppet manifests file
     def create_manifests_node
-      Bebox::Puppet.add_node_to_step_manifests(self.project_root, self)
+      Bebox::Provision.add_node_to_step_manifests(self.project_root, self)
     end
 
     # Prepare the vagrant nodes
@@ -197,12 +197,12 @@ module Bebox
 
     # Remove puppet hiera template file
     def remove_hiera_template
-      Bebox::Puppet.remove_hiera_for_steps(self.project_root, self.hostname)
+      Bebox::Provision.remove_hiera_for_steps(self.project_root, self.hostname)
     end
 
     # Remove node from puppet manifests
     def remove_manifests_node
-      Bebox::Puppet.remove_node_for_steps(self.project_root, self.hostname)
+      Bebox::Provision.remove_node_for_steps(self.project_root, self.hostname)
     end
 
     # Remove the specified boxes from vagrant
@@ -257,7 +257,10 @@ module Bebox
       checkpoint_directories = %w{nodes prepared_nodes steps/step-0 steps/step-1 steps/step-2 steps/step-3}
       checkpoint_directories.each do |checkpoint_directory|
         checkpoint_directory_path = "#{project_root}/.checkpoints/environments/#{environment}/#{checkpoint_directory}/#{node}.yml"
-        provision_state = state_from_checkpoint(checkpoint_directory) if File.exist?(checkpoint_directory_path)
+        if File.exist?(checkpoint_directory_path)
+          creation_date = Bebox::Node.node_creation_date(project_root, environment, checkpoint_directory, node)
+          provision_state = "#{state_from_checkpoint(checkpoint_directory)} at #{creation_date}"
+        end
       end
       provision_state
     end
@@ -278,6 +281,12 @@ module Bebox
         when 'steps/step-3'
           'Provisioned Security layer step-3'
       end
+    end
+
+    # Obtain the node creation_at of finished_at parameter of a node
+    def self.node_creation_date(project_root, environment, node_type, node)
+      node_config = YAML.load_file("#{project_root}/.checkpoints/environments/#{environment}/#{node_type}/#{node}.yml")
+      (node_type == 'nodes') ? node_config['created_at'] : node_config['finished_at']
     end
 
     # Count the number of nodes in all environments

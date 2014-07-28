@@ -1,6 +1,6 @@
 require 'tilt'
 require 'bebox/environment'
-require 'bebox/puppet'
+require 'bebox/provision'
 require 'bebox/logger'
 
 module Bebox
@@ -106,7 +106,7 @@ module Bebox
     def generate_gitignore_file
       gitignore_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/gitignore.erb")
       File.open("#{self.path}/.gitignore", 'w') do |f|
-        f.write gitignore_template.render(nil, steps: Bebox::PUPPET_STEP_NAMES)
+        f.write gitignore_template.render(nil, steps: Bebox::PROVISION_STEP_NAMES)
       end
     end
 
@@ -169,15 +169,15 @@ module Bebox
 
     # Generate steps directories
     def generate_steps_directories
-      Bebox::PUPPET_STEP_NAMES.each{|step| `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`}
+      Bebox::PROVISION_STEP_NAMES.each{|step| `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`}
       `cd #{self.path} && mkdir -p puppet/{roles,profiles}`
     end
 
     # Generate steps templates for hiera and manifests files
     def generate_steps_templates
-      Bebox::PUPPET_STEPS.each do |step|
+      Bebox::PROVISION_STEPS.each do |step|
         ssh_key = ''
-        step_dir = Bebox::Puppet.step_name(step)
+        step_dir = Bebox::Provision.step_name(step)
         templates_path = Bebox::Project::templates_path
         # Generate site.pp template
         manifest_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/manifests/site.pp.erb")

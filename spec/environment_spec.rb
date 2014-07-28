@@ -39,11 +39,10 @@ describe 'Test 02: Bebox::Environment' do
       end
 
       it 'should generate hiera data file' do
-        puppet_steps = %w{step-0 step-1 step-2 step-3}
         subject.generate_hiera_template
-        puppet_steps.each do |step|
+        Bebox::PROVISION_STEPS.each do |step|
           content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/#{subject.name}.yaml.test")
-          output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{subject.name}.yaml")
+          output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.name}.yaml")
           expect(output).to eq(content)
         end
       end
@@ -73,10 +72,9 @@ describe 'Test 02: Bebox::Environment' do
       end
 
       it 'should remove deploy file' do
-        puppet_steps = %w{step-0 step-1 step-2 step-3}
         subject.remove_hiera_template
-        puppet_steps.each do |step|
-          expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Puppet.step_name(step)}/hiera/data/#{subject.name}.yaml")).to be (false)
+        Bebox::PROVISION_STEPS.each do |step|
+          expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.name}.yaml")).to be (false)
         end
       end
     end

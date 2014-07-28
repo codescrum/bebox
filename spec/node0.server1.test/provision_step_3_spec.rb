@@ -1,16 +1,16 @@
 require 'spec_helper'
-require_relative '../factories/puppet.rb'
+require_relative '../factories/provision.rb'
 require_relative '../puppet_spec_helper.rb'
 
-describe 'Test 15: Puppet apply Security layer step-3' do
+describe 'Test 15: Apply provision for security layer step-3' do
 
-  let(:puppet) { build(:puppet, step: 'step-3') }
+  let(:provision) { build(:provision, step: 'step-3') }
   let(:security_profiles) {['base/security/fail2ban', 'base/security/iptables', 'base/security/ssh', 'base/security/sysctl']}
 
   before(:all) do
-    Bebox::Puppet.generate_puppetfile(puppet.project_root, puppet.step, security_profiles)
-    Bebox::Puppet.generate_roles_and_profiles(puppet.project_root, puppet.step, 'security', security_profiles)
-    puppet.apply
+    Bebox::Provision.generate_puppetfile(provision.project_root, provision.step, security_profiles)
+    Bebox::Provision.generate_roles_and_profiles(provision.project_root, provision.step, 'security', security_profiles)
+    provision.apply
   end
 
   context 'fail2ban module' do
@@ -66,11 +66,11 @@ describe 'Test 15: Puppet apply Security layer step-3' do
   end
 
   it 'should create checkpoint' do
-    checkpoint_file_path = "#{puppet.project_root}/.checkpoints/environments/#{puppet.environment}/steps/#{puppet.step}/#{puppet.node.hostname}.yml"
+    checkpoint_file_path = "#{provision.project_root}/.checkpoints/environments/#{provision.environment}/steps/#{provision.step}/#{provision.node.hostname}.yml"
     expect(File.exist?(checkpoint_file_path)).to eq(true)
     prepared_node_content = File.read(checkpoint_file_path).gsub(/\s+/, ' ').strip
     ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/provisioned_node_0.test.erb')
-    prepared_node_expected_content = ouput_template.render(nil, node: puppet.node).gsub(/\s+/, ' ').strip
+    prepared_node_expected_content = ouput_template.render(nil, node: provision.node).gsub(/\s+/, ' ').strip
     expect(prepared_node_content).to eq(prepared_node_expected_content)
   end
 end
