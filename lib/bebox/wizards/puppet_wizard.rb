@@ -20,7 +20,9 @@ module Bebox
             title "Applying #{step} in node #{node.hostname}:"
             role = Bebox::Puppet.role_from_node(project_root, step, node.hostname)
             profiles = Bebox::Puppet.profiles_from_role(project_root, role) unless role.nil?
+            # Before apply generate the Puppetfile with modules from all associated profiles
             Bebox::Puppet.generate_puppetfile(project_root, step, profiles) unless profiles.nil?
+            # Before apply generate the roles and profiles modules structure for puppet step
             Bebox::Puppet.generate_roles_and_profiles(project_root, step, role, profiles)
             puppet = Bebox::Puppet.new(project_root, environment, node, step)
             puppet.apply.success? ? (ok "Node #{node.hostname} provisioned to #{step}.") : (error "An error ocurred in the provision of #{step} for #{node.hostname}")
@@ -66,7 +68,9 @@ module Bebox
 
     # Ask for confirmation of node step
     def confirm_node_step?(node, step)
-      quest "The node #{node.hostname} is already in #{step}. Do you want to re-provision it?"
+      node_type = "steps/#{step}"
+      checkpoint_status = "(start: #{node.checkpoint_parameter_from_file(node_type, 'started_at')} - end: #{node.checkpoint_parameter_from_file(node_type, 'finished_at')})"
+      quest "The node #{node.hostname} was already provisioned in #{step} #{checkpoint_status}.\nDo you want to re-provision it?"
       response =  ask(highline_quest('(y/n)')) do |q|
         q.default = "n"
       end

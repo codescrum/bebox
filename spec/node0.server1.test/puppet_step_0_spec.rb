@@ -34,4 +34,13 @@ describe 'Test 12: Puppet apply Fundamental step-0' do
     let(:disable_sudo) { false }
     it { should be_file }
   end
+
+  it 'should create checkpoint' do
+    checkpoint_file_path = "#{puppet.project_root}/.checkpoints/environments/#{puppet.environment}/steps/#{puppet.step}/#{puppet.node.hostname}.yml"
+    expect(File.exist?(checkpoint_file_path)).to eq(true)
+    prepared_node_content = File.read(checkpoint_file_path).gsub(/\s+/, ' ').strip
+    ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/provisioned_node_0.test.erb')
+    prepared_node_expected_content = ouput_template.render(nil, node: puppet.node).gsub(/\s+/, ' ').strip
+    expect(prepared_node_content).to eq(prepared_node_expected_content)
+  end
 end

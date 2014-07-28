@@ -35,9 +35,10 @@ describe 'Test 01: Bebox::Project' do
 
       it 'should generate a .bebox file' do
         subject.generate_dot_bebox_file
-        expected_content = File.read("#{subject.path}/.bebox")
-        output_file = File.read('spec/fixtures/dot_bebox.test')
-        expect(output_file).to eq(expected_content)
+        dotbebox_content = File.read("#{subject.path}/.bebox").gsub(/\s+/, ' ').strip
+        ouput_template = Tilt::ERBTemplate.new('spec/fixtures/dot_bebox.test.erb')
+        dotbebox_expected_content = ouput_template.render(nil, created_at: subject.created_at).gsub(/\s+/, ' ').strip
+        expect(dotbebox_content).to eq(dotbebox_expected_content)
       end
 
       it 'should generate a .gitignore file' do
@@ -50,7 +51,7 @@ describe 'Test 01: Bebox::Project' do
       it 'should generate a .ruby-version file' do
         subject.generate_ruby_version
         version = File.read("#{subject.path}/.ruby-version").strip
-        expect(version).to eq '2.1.0'
+        expect(version).to eq(RUBY_VERSION)
       end
 
       it 'should create a Capfile' do

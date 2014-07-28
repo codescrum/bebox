@@ -6,7 +6,7 @@ module Bebox
 
     include Bebox::Logger
 
-    attr_accessor :environment, :project_root, :hostname, :ip
+    attr_accessor :environment, :project_root, :hostname, :ip, :created_at, :started_at, :finished_at
 
     def initialize(environment, project_root, hostname, ip)
       self.environment = environment
@@ -17,9 +17,9 @@ module Bebox
 
     # Create all files and directories related to an node
     def create
-      create_node_checkpoint
       create_hiera_template
       create_manifests_node
+      create_node_checkpoint
     end
 
     # Delete all files and directories related to an node
@@ -35,18 +35,24 @@ module Bebox
       Dir["#{environments_path(project_root)}/#{environment}/#{node_type}/*"].map { |f| File.basename(f, ".*") }
     end
 
-    # Get IP of node from the yml file
-    def self.ip_from_file(project_root, environment, hostname)
-      node_config = YAML.load_file("#{environments_path(project_root)}/#{environment}/nodes/#{hostname}.yml")
-      node_config['ip']
+    # Get node checkpoint parameter from the yml file
+    def checkpoint_parameter_from_file(node_type, parameter)
+      Bebox::Node.checkpoint_parameter_from_file(self.project_root, self.environment, self.hostname, node_type, parameter)
+    end
+
+    # Get node checkpoint parameter from the yml file
+    def self.checkpoint_parameter_from_file(project_root, environment, hostname, node_type, parameter)
+      node_config = YAML.load_file("#{environments_path(project_root)}/#{environment}/#{node_type}/#{hostname}.yml")
+      node_config[parameter]
     end
 
     # Prepare the configured nodes
     def prepare
+      started_at = DateTime.now.to_s
       prepare_deploy
       prepare_common_installation
       puppet_installation
-      create_prepare_checkpoint
+      create_prepare_checkpoint(started_at)
     end
 
     # Deploy the puppet prepare directory
@@ -66,8 +72,10 @@ module Bebox
     end
 
     # Create the checkpoints for the prepared nodes
-    def create_prepare_checkpoint
-      node_template = Tilt::ERBTemplate.new("#{Bebox::Node::templates_path}/node/node.yml.erb")
+    def create_prepare_checkpoint(started_at)
+      self.started_at = started_at
+      self.finished_at = DateTime.now.to_s
+      node_template = Tilt::ERBTemplate.new("#{Bebox::Node::templates_path}/node/prepared_node.yml.erb")
       File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/prepared_nodes/#{self.hostname}.yml", 'w') do |f|
         f.write node_template.render(nil, :node => self)
       end
@@ -124,7 +132,7 @@ module Bebox
       node_objects = []
       nodes = Bebox::Node.list(project_root, environment, node_type)
       nodes.each do |hostname|
-        ip = Bebox::Node.ip_from_file(project_root, environment, hostname)
+        ip = Bebox::Node.checkpoint_parameter_from_file(project_root, environment, hostname, node_type, 'ip')
         node_objects << Bebox::Node.new(environment, project_root, hostname, ip)
       end
       node_objects
@@ -173,7 +181,9 @@ module Bebox
 
     # Create checkpoint for node
     def create_node_checkpoint
-
+      # Set the creation time for the node
+      self.created_at = DateTime.now.to_s
+      # Create the checkpoint file from template
       node_template = Tilt::ERBTemplate.new("#{Bebox::Node::templates_path}/node/node.yml.erb")
       File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/nodes/#{self.hostname}.yml", 'w') do |f|
         f.write node_template.render(nil, :node => self)

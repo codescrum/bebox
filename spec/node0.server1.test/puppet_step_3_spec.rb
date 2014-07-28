@@ -64,4 +64,13 @@ describe 'Test 15: Puppet apply Security layer step-3' do
       its(:stdout) { should match /net.ipv4.icmp_echo_ignore_all = 1/ }
     end
   end
+
+  it 'should create checkpoint' do
+    checkpoint_file_path = "#{puppet.project_root}/.checkpoints/environments/#{puppet.environment}/steps/#{puppet.step}/#{puppet.node.hostname}.yml"
+    expect(File.exist?(checkpoint_file_path)).to eq(true)
+    prepared_node_content = File.read(checkpoint_file_path).gsub(/\s+/, ' ').strip
+    ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/provisioned_node_0.test.erb')
+    prepared_node_expected_content = ouput_template.render(nil, node: puppet.node).gsub(/\s+/, ' ').strip
+    expect(prepared_node_content).to eq(prepared_node_expected_content)
+  end
 end

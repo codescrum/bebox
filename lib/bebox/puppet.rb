@@ -8,7 +8,7 @@ module Bebox
 
   class Puppet
 
-    attr_accessor :environment, :project_root, :node, :step
+    attr_accessor :environment, :project_root, :node, :step, :started_at, :finished_at
 
     def initialize(project_root, environment, node, step)
       self.project_root = project_root
@@ -19,13 +19,14 @@ module Bebox
 
     # Puppet apply Fundamental step
     def apply
+      started_at = DateTime.now.to_s
       # Check if a Puppetfile is neccesary for use/not use librarian-puppet
       check_puppetfile_content
       # Copy static modules that are not downloaded by librarian-puppet
       copy_static_modules
       # Apply step and if the process is succesful create the checkpoint.
       process_status = apply_step
-      create_step_checkpoint if process_status.success?
+      create_step_checkpoint(started_at) if process_status.success?
       process_status
     end
 
@@ -220,8 +221,10 @@ module Bebox
     end
 
     # Create checkpoint for step
-    def create_step_checkpoint
-      checkpoint_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/node/node.yml.erb")
+    def create_step_checkpoint(started_at)
+      self.node.started_at = started_at
+      self.node.finished_at = DateTime.now.to_s
+      checkpoint_template = Tilt::ERBTemplate.new("#{Bebox::Puppet::templates_path}/node/provisioned_node.yml.erb")
       File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/steps/#{self.step}/#{self.node.hostname}.yml", 'w') do |f|
         f.write checkpoint_template.render(nil, :node => self.node)
       end

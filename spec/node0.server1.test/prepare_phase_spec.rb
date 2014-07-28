@@ -41,5 +41,13 @@ describe 'Test 06: Node prepared' do
     describe package('puppet') do
       it { should be_installed }
     end
+
+    it 'should create checkpoint' do
+      expect(File.exist?("#{node.project_root}/.checkpoints/environments/#{node.environment}/prepared_nodes/#{node.hostname}.yml")).to be (true)
+      prepared_node_content = File.read("#{node.project_root}/.checkpoints/environments/#{node.environment}/prepared_nodes/#{node.hostname}.yml").gsub(/\s+/, ' ').strip
+      ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/prepared_node_0.test.erb')
+      prepared_node_expected_content = ouput_template.render(nil, node: node).gsub(/\s+/, ' ').strip
+      expect(prepared_node_content).to eq(prepared_node_expected_content)
+    end
   end
 end

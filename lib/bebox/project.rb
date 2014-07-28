@@ -8,7 +8,7 @@ module Bebox
 
     include Bebox::Logger
 
-    attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path
+    attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path, :created_at
 
     def initialize(name, vagrant_box_base, parent_path, vagrant_box_provider, default_environments = [])
       self.name = name
@@ -93,6 +93,9 @@ module Bebox
 
     # Generate .bebox file
     def generate_dot_bebox_file
+      # Set the creation time for the project
+      self.created_at = DateTime.now.to_s
+      # Create the .bebox file from template
       dotbebox_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/dot_bebox.erb")
       File.open("#{self.path}/.bebox", 'w') do |f|
         f.write dotbebox_template.render(nil, project: self)

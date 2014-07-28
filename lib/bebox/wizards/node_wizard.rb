@@ -1,3 +1,4 @@
+require 'pry'
 module Bebox
   class NodeWizard
     include Bebox::Logger
@@ -85,7 +86,8 @@ module Bebox
 
     # Ask for confirmation of node preparation
     def confirm_node_preparation?(node)
-      quest "The node #{node.hostname} is already prepared. Do you want to re-prepare it?"
+      checkpoint_status = "(start: #{node.checkpoint_parameter_from_file('prepared_nodes', 'started_at')} - end: #{node.checkpoint_parameter_from_file('prepared_nodes', 'finished_at')})"
+      quest "The node #{node.hostname} was already prepared #{checkpoint_status}.\nDo you want to re-prepare it?"
       response =  ask(highline_quest('(y/n)')) do |q|
         q.default = "n"
       end

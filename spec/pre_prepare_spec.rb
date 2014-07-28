@@ -5,7 +5,7 @@ require_relative '../spec/factories/node.rb'
 
 describe 'Test 05: Bebox::Node' do
 
-  describe 'Prepare nodes' do
+  describe 'Pre-prepare nodes' do
 
     let(:nodes) { 1.times.map{|index| build(:node, :created, hostname: "node#{index}.server1.test")} }
     let(:project_root) { "#{Dir.pwd}/tmp/bebox_pname" }

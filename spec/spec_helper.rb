@@ -32,10 +32,6 @@ RSpec.configure do |config|
       ENV['RUBY_ENV'] = 'development'
   end
 
-  config.after(:suite) do
-    # `rm -rf tmp/*`
-  end
-
   # Factory Girl methods
   config.include FactoryGirl::Syntax::Methods
 end
