@@ -34,9 +34,9 @@ module Bebox
     def set_role(project_root, environment)
       roles = Bebox::Role.list(project_root)
       nodes = Bebox::Node.list(project_root, environment, 'nodes')
-      node = choose_node(nodes, 'Choose an existent node:')
+      node = choose_node(nodes, 'Choose an existing node:')
       require 'bebox/wizards/role_wizard'
-      role = Bebox::RoleWizard.new.choose_role(roles, 'Choose an existent role:')
+      role = Bebox::RoleWizard.new.choose_role(roles, 'Choose an existing role:')
       Bebox::Provision.associate_node_role(project_root, environment, node, role)
       ok 'Role associated to node!.'
     end
@@ -83,7 +83,7 @@ module Bebox
       nodes_to_prepare
     end
 
-    # Check if there's an existent node in a environment
+    # Check if there's an existing node in a environment
     def node_exists?(project_root, environment, node_name)
       File.exists?("#{project_root}/.checkpoints/environments/#{environment}/nodes/#{node_name}.yml")
     end
@@ -107,7 +107,7 @@ module Bebox
       return response == 'y' ? true : false
     end
 
-    # Asks to choose an existent node
+    # Asks to choose an existing node
     def choose_node(nodes, question)
       choose do |menu|
         menu.header = title(question)

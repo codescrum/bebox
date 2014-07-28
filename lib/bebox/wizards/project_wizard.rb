@@ -14,14 +14,14 @@ module Bebox
       return error('Project not created. There is already a project with that name in the current directory.') if project_exists?(Dir.pwd, project_name)
       # Setup the bebox boxes directory
       bebox_boxes_setup
-      # Asks to choose an existent box
-      current_box = choose_box(get_existent_boxes)
+      # Asks to choose an existing box
+      current_box = choose_box(get_existing_boxes)
       # If choose to download/select new box
       if current_box.nil?
         # Keep asking for valid uri or overwriting until confirmation
         confirm = false
         begin
-          # Asks vagrant box location to user if not choose an existent box
+          # Asks vagrant box location to user if not choose an existing box
           valid_box_uri = ask_uri
           # Confirm if the box already exist
           confirm = box_exists?(valid_box_uri) ? confirm_overwrite? : true
@@ -42,7 +42,7 @@ module Bebox
       ok "Project '#{project_name}' created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
     end
 
-    # Check if there's an existent project in that dir
+    # Check if there's an existing project in that dir
     def project_exists?(parent_path, project_name)
       Dir.exists?("#{parent_path}/#{project_name}")
     end
@@ -112,24 +112,24 @@ module Bebox
     # Check if a box with the same name already exist
     def box_exists?(valid_box_uri)
       box_name = valid_box_uri.split('/').last
-      boxes = get_existent_boxes
+      boxes = get_existing_boxes
       boxes.any? { |val| /#{box_name}/ =~ val }
     end
 
     # Obtain the current boxes downloaded or linked in the bebox user home
-    def get_existent_boxes
+    def get_existing_boxes
       # Converts the bebox boxes directory to an absolute pathname
       expanded_directory = File.expand_path("#{BEBOX_BOXES_PATH}")
       # Get an array of bebox boxes paths
       Dir["#{expanded_directory}/*"].reject {|f| File.directory? f}
     end
 
-    # Asks to choose an existent box in the bebox boxes directory
+    # Asks to choose an existing box in the bebox boxes directory
     def choose_box(boxes)
       # Menu to choose vagrant box provider
       other_box_message = 'Download/Select a new box'
       current_box = choose do |menu|
-        menu.header = title('Choose an existent box or download/select a new box')
+        menu.header = title('Choose an existing box or download/select a new box')
         boxes.each do |box|
           menu.choice(box.split('/').last)
         end

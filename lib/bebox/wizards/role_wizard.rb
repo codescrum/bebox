@@ -43,7 +43,7 @@ module Bebox
     def add_profile(project_root)
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
-      role = choose_role(roles, 'Choose an existent role:')
+      role = choose_role(roles, 'Choose an existing role:')
       require 'bebox/wizards/profile_wizard'
       profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to add:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
@@ -58,7 +58,7 @@ module Bebox
     def remove_profile(project_root)
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
-      role = choose_role(roles, 'Choose an existent role:')
+      role = choose_role(roles, 'Choose an existing role:')
       require 'bebox/wizards/profile_wizard'
       profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to remove:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
@@ -70,7 +70,7 @@ module Bebox
 
     end
 
-    # Asks to choose an existent role
+    # Asks to choose an existing role
     def choose_role(roles, question)
       choose do |menu|
         menu.header = title(question)
@@ -80,7 +80,7 @@ module Bebox
       end
     end
 
-    # Check if there's an existent role in the project
+    # Check if there's an existing role in the project
     def role_exists?(project_root, role_name)
       Dir.exists?("#{project_root}/puppet/roles/#{role_name}")
     end

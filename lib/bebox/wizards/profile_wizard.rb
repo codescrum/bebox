@@ -64,7 +64,7 @@ module Bebox
       File.join("#{profile_base_path}", "#{profile_name}")
     end
 
-    # Check if there's an existent profile in the project
+    # Check if there's an existing profile in the project
     def profile_exists?(project_root, profile_path)
       Dir.exists?( File.join("#{project_root}/puppet/profiles", "#{profile_path}") )
     end

@@ -32,10 +32,10 @@ module Bebox
       return response == 'y' ? true : false
     end
 
-    # Asks to choose an existent environment
+    # Asks to choose an existing environment
     def choose_environment(environments)
       choose do |menu|
-        menu.header = title('Choose an existent environment:')
+        menu.header = title('Choose an existing environment:')
         environments.each do |box|
           menu.choice(box.split('/').last)
         end

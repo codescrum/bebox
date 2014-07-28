@@ -106,7 +106,7 @@ module Bebox
       key_exist &&= File.exist?("#{project_root}/config/keys/environments/#{environment}/id_rsa.pub")
     end
 
-    # Check if there's an existent environment in the project
+    # Check if there's an existing environment in the project
     def self.environment_exists?(project_root, environment_name)
       Dir.exists?("#{project_root}/.checkpoints/environments/#{environment_name}")
     end
