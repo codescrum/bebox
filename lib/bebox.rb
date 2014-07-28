@@ -1,18 +1,2 @@
-# require 'bebox/version'
-# require 'bebox/wizards/project_wizard'
-# require 'bebox/wizards/environment_wizard'
-# require 'bebox/wizards/node_wizard'
-# require 'bebox/wizards/puppet_wizard'
-# require 'bebox/wizards/role_wizard'
-# require 'bebox/wizards/profile_wizard'
-# require 'bebox/project'
-# require 'bebox/environment'
-# require 'bebox/node'
-# require 'bebox/puppet'
-# require 'bebox/profile'
-# require 'bebox/role'
-# require 'bebox/cli'
-# require 'bebox/commands/general_commands'
-# require 'bebox/commands/project_commands'
 # Add requires for other files you add to your project here, so
 # you just need to require this one file in your bin file

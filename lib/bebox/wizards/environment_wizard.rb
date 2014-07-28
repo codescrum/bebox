@@ -4,7 +4,7 @@ module Bebox
     # Create a new environment
     def create_new_environment(project_root, environment_name)
       # Check if the environment exist
-      return error("The environment #{environment_name} already exist!.") if Bebox::Environment.environment_exists?(project_root, environment_name)
+      return error("The '#{environment_name}' environment already exist!.") if Bebox::Environment.environment_exists?(project_root, environment_name)
       # Environment creation
       environment = Bebox::Environment.new(environment_name, project_root)
       environment.create
@@ -14,9 +14,9 @@ module Bebox
     # Removes an existing environment
     def remove_environment(project_root, environment_name)
       # Check if the environment exist
-      return error("The environment #{environment_name} don't exist!.") unless Bebox::Environment.environment_exists?(project_root, environment_name)
+      return error("The '#{environment_name}' environment do not exist!.") unless Bebox::Environment.environment_exists?(project_root, environment_name)
       # Confirm deletion
-      return warn('Nothing done!.') unless confirm_environment_deletion?
+      return warn('No changes were made.') unless confirm_environment_deletion?
       # Environment deletion
       environment = Bebox::Environment.new(environment_name, project_root)
       environment.remove

@@ -13,8 +13,8 @@ module Bebox
         prepare_command.action do |global_options,options,args|
           environment = get_environment(options)
           # Check if vagrant is installed
-          return error('Vagrant is not installed in the system. Nothing done.') unless vagrant_installed?
-          title "Environment #{environment}."
+          return error('Vagrant is not installed in the system. No changes were made.') unless vagrant_installed?
+          title "Environment: #{environment}"
           require 'bebox/wizards/node_wizard'
           Bebox::NodeWizard.new.prepare(project_root, environment)
         end
@@ -25,11 +25,11 @@ module Bebox
         command :vagrant_halt do |vagrant_halt_command|
           vagrant_halt_command.action do |global_options,options,args|
             # Check if vagrant is installed
-            return error('Vagrant is not installed in the system. Nothing done.') unless vagrant_installed?
+            return error('Vagrant is not installed in the system. No changes were made.') unless vagrant_installed?
             # List nodes in environment and notice message
             nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
             environment = 'vagrant'
-            title "Environment #{environment}."
+            title "Environment: #{environment}"
             title 'Halting nodes:'
             nodes.each{|node| msg(node.hostname)}
             linebreak
@@ -41,11 +41,11 @@ module Bebox
         command :vagrant_up do |vagrant_up_command|
           vagrant_up_command.action do |global_options,options,args|
             # Check if vagrant is installed
-            return error('Vagrant is not installed in the system. Nothing done.') unless vagrant_installed?
+            return error('Vagrant is not installed in the system. No changes were made.') unless vagrant_installed?
             # List nodes in environment and notice message
             nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
             environment = 'vagrant'
-            title "Environment #{environment}."
+            title "Environment: #{environment}"
             title 'Running up nodes:'
             nodes.each{|node| msg(node.hostname)}
             linebreak

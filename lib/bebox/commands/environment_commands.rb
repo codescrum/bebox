@@ -15,7 +15,7 @@ module Bebox
           environment_list_command.action do |global_options,options,args|
             require 'bebox/environment'
             environments = Bebox::Environment.list(project_root)
-            title 'Current environments :'
+            title 'Current environments:'
             environments.map{|environment| msg(environment)}
             warn('There are not environments yet. You can create a new one with: \'bebox environment new\' command.') if environments.empty?
           end
@@ -25,7 +25,7 @@ module Bebox
         environment_command.arg_name "[environment]"
         environment_command.command :new do |environment_new_command|
           environment_new_command.action do |global_options,options,args|
-            help_now!(error('You don\'t supply an environment')) if args.count == 0
+            help_now!(error('You did not supply an environment')) if args.count == 0
             require 'bebox/wizards/environment_wizard'
             Bebox::EnvironmentWizard.new.create_new_environment(project_root, args.first)
           end
@@ -35,7 +35,7 @@ module Bebox
         environment_command.arg_name "[environment]"
         environment_command.command :remove do |environment_remove_command|
           environment_remove_command.action do |global_options,options,args|
-            help_now!(error('You don\'t supply an environment')) if args.count == 0
+            help_now!(error('You did not supply an environment')) if args.count == 0
             require 'bebox/wizards/environment_wizard'
             Bebox::EnvironmentWizard.new.remove_environment(project_root, args.first)
           end

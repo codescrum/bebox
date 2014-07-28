@@ -11,7 +11,7 @@ module Bebox
     # Asks for the project parameters and create the project skeleton
     def create_new_project(project_name)
       # Check project existence
-      return error('Project not created. There is already a project with that name in the current directory.!') if project_exists?(Dir.pwd, project_name)
+      return error('Project not created. There is already a project with that name in the current directory.') if project_exists?(Dir.pwd, project_name)
       # Setup the bebox boxes directory
       bebox_boxes_setup
       # Asks to choose an existent box
@@ -39,7 +39,7 @@ module Bebox
       # Project creation
       project = Bebox::Project.new(project_name, vagrant_box_base, Dir.pwd, vagrant_box_provider, default_environments)
       project.create
-      ok "Project #{project_name} created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
+      ok "Project '#{project_name}' created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
     end
 
     # Check if there's an existent project in that dir

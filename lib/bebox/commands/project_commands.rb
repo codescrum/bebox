@@ -3,10 +3,6 @@ require 'bebox/commands/commands_helper'
 module Bebox
   module ProjectCommands
 
-    # include Bebox::EnvironmentCommands
-    # include Bebox::NodeCommands
-    # include Bebox::PrepareCommands
-    # include Bebox::ProvisionCommands
     include Bebox::CommandsHelper
 
     def self.extended(base)
@@ -27,9 +23,9 @@ module Bebox
           self.extend Bebox::PrepareCommands
           # These commands are available if there are at least one prepared_node
           if Bebox::Node.count_all_nodes_by_type(project_root, 'prepared_nodes') > 0
+            # load_provision_commands
             require 'bebox/commands/provision_commands'
             self.extend Bebox::ProvisionCommands
-            # load_provision_commands
           end
         end
       end

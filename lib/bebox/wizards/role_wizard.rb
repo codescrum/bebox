@@ -12,9 +12,9 @@ module Bebox
       \n* Underscores
       \n* Must begin with an Lowercase letter
       \n* Can not be any of: #{Bebox::RESERVED_WORDS.join(', ')}
-      \n\nNothing done!." unless Bebox::Role.valid_name?(role_name)
+      \n\nNo changes were made." unless Bebox::Role.valid_name?(role_name)
       # Check if the role exist
-      return error("The role #{role_name} already exist!.") if role_exists?(project_root, role_name)
+      return error("The '#{role_name}' role already exist. No changes were made.") if role_exists?(project_root, role_name)
       # Role creation
       role = Bebox::Role.new(role_name, project_root)
       role.create
@@ -22,11 +22,17 @@ module Bebox
     end
 
     # Removes an existing role
-    def remove_role(project_root, role_name)
-      # Check if the role exist
-      return error("The role #{role_name} did not exist!.") unless role_exists?(project_root, role_name)
-      # Confirm deletion
-      return warn('Nothing done!.') unless confirm_role_deletion?
+    def remove_role(project_root)
+      # Choose a role from the availables
+      roles = Bebox::Role.list(project_root)
+      # Get a role if exist.
+      if roles.count > 0
+        role_name = choose_role(roles, 'Choose the role to remove:')
+      else
+        return error "There are no roles to remove. No changes were made."
+      end
+      # Ask for deletion confirmation
+      return warn('No changes were made.') unless confirm_role_deletion?
       # Role deletion
       role = Bebox::Role.new(role_name, project_root)
       role.remove
@@ -37,14 +43,14 @@ module Bebox
     def add_profile(project_root)
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
-      role = choose_role(roles)
+      role = choose_role(roles, 'Choose an existent role:')
       require 'bebox/wizards/profile_wizard'
       profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to add:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
-        return warn("Profile #{profile} already in the Role #{role}. Nothing done!.")
+        return warn("Profile '#{profile}' already in the Role '#{role}'. No changes were made.")
       else
         Bebox::Role.add_profile(project_root, role, profile)
-        return ok("Profile #{profile} added to Role #{role}.")
+        return ok("Profile '#{profile}' added to Role '#{role}'.")
       end
     end
 
@@ -52,22 +58,22 @@ module Bebox
     def remove_profile(project_root)
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
-      role = choose_role(roles)
+      role = choose_role(roles, 'Choose an existent role:')
       require 'bebox/wizards/profile_wizard'
       profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to remove:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
         Bebox::Role.remove_profile(project_root, role, profile)
-        return ok("Profile #{profile} removed from Role #{role}.")
+        return ok("Profile '#{profile}' removed from Role '#{role}'.")
       else
-        return warn("Profile #{profile} is not in the Role #{role}. Nothing done!.")
+        return warn("Profile '#{profile}' is not in the Role '#{role}'. No changes were made.")
       end
 
     end
 
     # Asks to choose an existent role
-    def choose_role(roles)
+    def choose_role(roles, question)
       choose do |menu|
-        menu.header = title('Choose an existent role:')
+        menu.header = title(question)
         roles.each do |box|
           menu.choice(box.split('/').last)
         end
