@@ -14,7 +14,8 @@ define users::user($email, $uid, $key)  {
     uid        => $uid,
     managehome => true,
     # Generated from openssl passwd -1 in the server
-    password   => '$1$XBHr9b2v$vBpq1zI2wXljP3209xR/d.'
+    # by default 'bebox'
+    password   => '$1$x3VGbtoD$igWgkE/f.P3QpQjOZcTBz/'
   }
 
   group { $username:
