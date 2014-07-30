@@ -32,9 +32,9 @@ module Bebox
       bundle_project
     end
 
-    # Obtain the project name without 'bebox_' prefix
+    # Obtain the project name without 'bebox-' prefix
     def shortname
-      self.name.gsub("bebox_", "")
+      self.name.gsub("bebox-", "")
     end
 
     # Create project directory
@@ -75,7 +75,7 @@ module Bebox
     # Get short project name from the .bebox file
     def self.shortname_from_file(project_root)
       project_name = self.name_from_file(project_root)
-      project_name.gsub("bebox_", "")
+      project_name.gsub("bebox-", "")
     end
 
     # Get Project name from the .bebox file

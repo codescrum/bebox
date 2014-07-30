@@ -8,9 +8,9 @@ describe 'Test 05: Bebox::Node' do
   describe 'Pre-prepare nodes' do
 
     let(:nodes) { 1.times.map{|index| build(:node, :created, hostname: "node#{index}.server1.test")} }
-    let(:project_root) { "#{Dir.pwd}/tmp/bebox_pname" }
+    let(:project_root) { "#{Dir.pwd}/tmp/bebox-pname" }
     let(:environment) { 'vagrant' }
-    let(:project_name) {'bebox_pname'}
+    let(:project_name) {'bebox-pname'}
     let(:vagrant_box_base) {"#{Dir.pwd}/ubuntu-server-12042-x64-vbox4210-nocm.box"}
 
     context 'pre vagrant prepare' do
