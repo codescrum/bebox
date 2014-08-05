@@ -5,53 +5,67 @@ Bebox
 Introduction
 ------------
 
-Bebox is a project born from the necessity of organizing a way to deal with the provisioning of remote servers. Bebox is based on puppet and much like another quite known project Boxen, the idea is to have a good agreement on how to manage a puppet repo for a remote environment. It is also a good idea to have a standard approach on dealing with the provisioning problem, including how to write modules, integrate them into the projects, a directory structure for the projects to follow, how to have a replicated “development/test” environment into virtual machines, etc.
+Bebox is designed to meet provisioning goals for small to medium environments (maybe even big ones) while using [Puppet (opensource)](http://puppetlabs.com/puppet/puppet-open-source), and without the need for a Puppet Master. This project is intended for teams that tipically use two repositories for each project: the "app" repo and the "provisioning" repo. This project centers its efforts in trying to organize how these "provisioning" repos are constructed.
 
-Bebox uses many great tools for its workflow, but essentially is based on the following:
+Bebox was originally born from the necessity of automating the provisioning of environments in which [Rails](https://github.com/rails/rails) web applications could run, with the least amount of steps, and be able to reproduce the production setup every time. Please note that, even while this is the genesis for Bebox, it does not imply that it is specifically tailored for provisiong web applications, and we think it can ultimately be used pretty much in any scenario where Puppet is used without overwhealming complexity.
 
-* Written in Ruby
-* A commandline tool framework called GLI and acts as a project skeleton generator
-* Does the provisioning and organizes the workflow (hopefully) for Puppet (opensource)
-* Uses (http://www.vagrantup.com/) for development/test setup of the remote environment (multimachine too)
-* Uses Capistrano for deployment of the puppet files and running the commands to provision the remote machines.
+Bebox's main concern is __organization__. It is generally a good idea to have conventions about how different source code files are placed and named and be able to use this to reduce the details required to understand a project while also providing automation in key places. These conventions may include things like from how to write modules, integrate them into the projects, a directory structure for the projects to follow, how to have a replicated “development/test” environment into virtual machines, etc.
+
+NOTE: For the moment, Bebox assumes that the remote machines' OS is Debian based.
+
+Bebox development is based on awesome tools on their own, and essentially based on the following:
+
+* Written in Ruby and distributed as a gem
+* It has a very nice CLI based on a commandline tool framework called [GLI](https://github.com/davetron5000/gli)
+* Uses [Puppet (opensource)](http://puppetlabs.com/puppet/puppet-open-source) for provisioning machines, and its the main component that the Bebox workflow aims to organize.
+* Uses [vagrant](http://www.vagrantup.com/) for setting up a similar development/test environment in accordance to the remote machines real setup.
+* Uses [Capistrano](http://capistranorb.com/) for automating the tasks to be executed on remote/vagrant machines.
 
 Workflow
 --------
 
-Bebox’s workflow can be better understood if we take into account that there are some defined phases which are:
+Bebox’s workflow is comprised of the five (5) phases explained below:
 
 ###Project creation phase
 
-In this phase, the project skeleton is created, just like when a rails app is created.
+In this phase, the project skeleton is created, just like when a rails app is created. Keep in mind we are generating a "provisioning" repo skeleton and much of the logic behind bebox is put directly into the generated code so it can be tuned.
 
 ###Environment definition phase
 
-Any number of environments are defined. By default, the vagrant, staging, and production environments are present, and represents the remote environment in a local vagrant configuration (to perform tests and stuff).
+Any number of environments are defined. By default, the 'vagrant', 'staging', and 'production' environments are present. You an create any number of environments you need. The 'vagrant' environment is special as it is designed to run in virtual machines hosted in the local machine.
 
 ###Node allocation phase
 
-The nodes for every environment are configured. A node represents a machine or server, so it has a hostname and IP.
+For each environment, there can be any number of nodes. The nodes for every environment are configured. A node represents a machine or server, a node's critical attributes are only it's hostname and ip address.
 
 ###Prepare phase
 
-This phase install in previously defined nodes a set of base packages (SO, development dependencies, Puppet).
+In this phase, all nodes are equipped with a set of base packages and tools via Capistrano which sole purpose is to help install Puppet. Also, very importantly, each node gets a Puppet opensource standalone installation. In order for Capistrano to be able to connect and install this in each node, a set of keys must already be present as authorized_keys in the remote servers, Bebox reminds of this step, and will possibly help do this semi-automatically in the future (requires user input because of boostraping from a root password). You will notice that Puppet installer files are bundled with Bebox, to use a fixed Puppet opensource version. This was necessary to ensure a particular Puppet version to avoid breaking things.
 
-###Provisioning phase (puppet)
+###Provisioning phase
 
-The provisioning phase is the last phase of the project and consists (currently) of four steps. This steps has a clear separation of concerns which we have chosen based on practical experience.
+Once Puppet is installed, we can use it to provision anything we want. The provisioning phase is the last phase of the project and consists (currently) of four steps. This steps has a clear separation of concerns which we have chosen based on practical experience, however this is the default and you can add or remove any number of steps, but we recommend at least to stick with the first two.
+
+Steps were created to run sequential puppet runs and apply multiple manifests in order. Although this may seem strange, Puppet's non-deterministic manner is something that is not suitable every time and having only one manifest to pack everything into can create some trouble with dependant modules.
+
+Also, the idea of steps helps in visualizing/imagining layers of configuration.
+
+Coming back to the steps, the four default steps that have been put into Bebox's projects by default are:
 
 ####Fundamental step (0-fundamental)
-This step only provides a puppet user, which the following steps use to provide everything else. This is done to have every environment as similar as possible to any other. In the vagrant environment, the main user is vagrant, but in other systems could be root or something else.
+This step only provides a 'puppet' user, which the following steps use to install everything else (instead of using root). This is done to have all environments as similar as possible. In the 'vagrant' environment, the main user is 'vagrant', but this could also be 'root' or something else, so this ensures that a single user (other than root) for making changes via Puppet is created.
 
 ####The user layer step (1-users)
-Based on practical experience, this step should be the one responsible for setting the application user and any other initial permissions and access.
+Based on practical experience, this next step should be the one responsible for setting system users, so that they exist prior to any service level provisioning.
 
 ####The service layer step (2-services)
-This step is what you would have in your regular puppet installation (except for the users of course). This would use the roles and profiles scheme and install the majority of the functional services, web, database, and rest of the stuff.
+This step is what you would have in your regular puppet provisioning repo (except for the users of course). We follow the roles and profiles scheme (links to read about [here](http://www.craigdunn.org/2012/05/239/) and [here](http://garylarizza.com/blog/2014/02/17/puppet-workflow-part-2/)) and install the majority of the functional services, web, database, etc.
 
 ####The security layer step (3-security)
 This step configure some packages to provide a minimal security in the system (fail2ban, ssh access, iptables).
 
+
+NOTE: Probably many people would think this is not advisable, so there is always the possibility of having only one step, one run, one manifest for Puppet to run in this phase.
 
 How to Use
 ----------
@@ -59,10 +73,9 @@ How to Use
 
 Pre-requisites
 
-The following must be installed for bebox to works well:
 * rbenv
-* ruby version >= 1.9.2 (2.1.0 recommended)
-* vagrant
+* ruby version >= 1.9.2 (ruby 2.1.0 recommended)
+* vagrant (tested using vagrant 1.6.3)
 
 ####Build bebox gem
 This commands clone the project and generate the bebox gem file:
@@ -98,9 +111,9 @@ From any directory:
 bebox new PROJECT_NAME
 ```
 
-In console appear a simple wizard to configure a vagrant box in the project. The vagrant box can be downloaded automatically with the wizard or linked with an existent local *.box file.
+In console appears a simple wizard to configure a vagrant box for the project. The vagrant box can be downloaded automatically with the wizard or linked with an existent local *.box file.
 
-This creates a subdirectory *bebox-[PROJECT_NAME]* with the initial skeleton of application. To access new bebox commands do:
+This creates a subdirectory named *bebox-[PROJECT_NAME]* with the initial skeleton of application. To access new bebox commands (much like Rails does) cd into the newly created bebox project:
 
 ```
 cd bebox-[PROJECT_NAME]
@@ -345,10 +358,10 @@ If you use hiera data from your profiles, you can add them to the appropiate fil
            ├── manifests/
            │   └── site.pp
            ├── modules/
-           └── Puppetfile (Automatically generated by the bebox tool in every apply)
+           └── Puppetfile (Automatically generated by Bebox in every 'apply')
 ```
 
-The Number-[step] correspond to the step-[Number] in the provision steps phase. For example **0-fundamental** correspond to **step-0** option.
+Each of he <number>-<step-name> corresponds provisioning steps phase. For example **0-fundamental** correspond to **step-0** option.
 
 To add hiera data you need to edit any of the **[node].yaml**, **[environment].yaml**, **common.yaml**.
 [node]: correspond to the hiera file for the node hostname (Ex. node0.server1.com.yaml).
