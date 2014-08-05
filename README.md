@@ -12,7 +12,7 @@ Bebox uses many great tools for its workflow, but essentially is based on the fo
 * Written in Ruby
 * A commandline tool framework called GLI and acts as a project skeleton generator
 * Does the provisioning and organizes the workflow (hopefully) for Puppet (opensource)
-* Uses http://www.vagrantup.com/ for development/test setup of the remote environment (multimachine too)
+* Uses (http://www.vagrantup.com/) for development/test setup of the remote environment (multimachine too)
 * Uses Capistrano for deployment of the puppet files and running the commands to provision the remote machines.
 
 Workflow
@@ -64,10 +64,32 @@ The following must be installed for bebox to works well:
 * ruby version >= 1.9.2 (2.1.0 recommended)
 * vagrant
 
-Install bebox:
+####Build bebox gem
+This commands clone the project and generate the bebox gem file:
+```
+git clone https://github.com/jairodiaz/bebox
+cd bebox
+gem build bebox.gemspec
+```
+This creates a *bebox-0.0.1.gem* file.
+
+
+####Setup gemserver
+
+In any directory outside bebox run the following commands that create a local gem server:
+```
+mkdir bebox_gemserver
+cd bebox_gemserver
+gem install geminabox
+echo "require 'rubygems'\nrequire 'geminabox'\nGeminabox.data = 'data'\nrun Geminabox::Server" > config.ru
+rackup
+```
+Go to http://localhost:9292/upload, then choose and upload the *bebox-0.0.1.gem* file created previously.
+
+####Install bebox:
 
 ```
-gem install bebox
+gem install bebox --source http://127.0.0.1:9292
 ```
 ###Bebox project creation (Project creation phase).
 
