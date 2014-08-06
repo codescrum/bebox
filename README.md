@@ -90,78 +90,64 @@ This creates a *bebox-0.0.1.gem* file.
 ####Setup gemserver
 
 In any directory outside bebox run the following commands that create a local gem server:
-```
-mkdir bebox_gemserver
-cd bebox_gemserver
-gem install geminabox
-echo "require 'rubygems'\nrequire 'geminabox'\nGeminabox.data = 'data'\nrun Geminabox::Server" > config.ru
-rackup
-```
+
+    mkdir bebox_gemserver
+    cd bebox_gemserver
+    gem install geminabox
+    echo "require 'rubygems'\nrequire 'geminabox'\nGeminabox.data = 'data'\nrun Geminabox::Server" > config.ru
+    rackup
+
 Go to http://localhost:9292/upload, then choose and upload the *bebox-0.0.1.gem* file created previously.
 
 ####Install bebox:
 
-```
-gem install bebox --source http://127.0.0.1:9292
-```
+    gem install bebox --source http://127.0.0.1:9292
+
 ###Bebox project creation (Project creation phase).
 
 From any directory:
-```
-bebox new PROJECT_NAME
-```
+
+    bebox new PROJECT_NAME
 
 In console appears a simple wizard to configure a vagrant box for the project. The vagrant box can be downloaded automatically with the wizard or linked with an existent local *.box file.
 
 This creates a subdirectory named *bebox-[PROJECT_NAME]* with the initial skeleton of application. To access new bebox commands (much like Rails does) cd into the newly created bebox project:
 
-```
-cd bebox-[PROJECT_NAME]
-```
+    cd bebox-[PROJECT_NAME]
 
 ###Manage Environments (Environment definition phase).
 Then you can add/remove/list environments. By default: the production, staging and vagrant environments are already created.
 
 To add an environment:
 
-```
-bebox environment new ENVIRONMENT
-```
+    bebox environment new ENVIRONMENT
+
 To remove an environment:
 
-```
-bebox environment remove ENVIRONMENT
-```
+    bebox environment remove ENVIRONMENT
+
 To list environments:
 
-```
-bebox environment list
-```
+    bebox environment list
 
 ###Manage Nodes (Node allocation phase).
 If you have at least one environment you can add/remove/list nodes.
 
 To add a node:
 
-```
-bebox node new
-```
+    bebox node new
 
 Then in the console a simple wizard appear asking the node parameters.
 
 To remove a node:
 
-```
-bebox node remove
-```
+    bebox node remove
 
 Then in the console a simple wizard appear for selecting the node to remove from the available nodes.
 
 To list nodes:
 
-```
-bebox node list [--environment ENVIRONMENT] [--all]
-```
+    bebox node list [--environment ENVIRONMENT] [--all]
 
 Without options it list nodes for the default *ENVIRONMENT* that is **vagrant**. If you provide the *ENVIRONMENT* flag it list nodes for that environment or if the *--all* switch is set list all nodes for all environments.
 
@@ -171,9 +157,7 @@ If you have nodes configured then you can prepare them.
 
 To prepare them:
 
-```
-bebox prepare [--environment ENVIRONMENT]
-```
+    bebox prepare [--environment ENVIRONMENT]
 
 It will prepare all nodes that are not prepared. If you have nodes already prepared (For example you add a new node after prepare previous nodes), a wizard appear to ask if you want to re-prepare them. It will not prepare nodes that you don't want to re-prepare.
 
@@ -185,16 +169,11 @@ Also if the nodes are in the vagrant environment you can up/halt the vagrant mac
 
 For vagrant nodes already prepared you can stop/start the vagrant machines with:
 
-```
-bebox vagrant_halt
-```
+    bebox vagrant_halt
 
-```
-bebox vagrant_up
-```
+    bebox vagrant_up
 
 ###Puppet (Provisioning phase)
-
 
 If you have nodes prepared you can provision them step-by-step. All steps can be applied without restrictions. If you want to configure the provisioning we encourage to use the roles and profiles pattern thath we implement through a special set of commands (See parts below).
 
@@ -203,9 +182,8 @@ At project creation a set of default roles, profiles and hiera data are configur
 
 To provision the nodes:
 
-```
-bebox apply [STEP] [--environment ENVIRONMENT] [--all]
-```
+    bebox apply [STEP] [--environment ENVIRONMENT] [--all]
+
 
 The STEP option must be one of: *step-0*, *step-1*, *step-2*, *step-3*
 By default if an *ENVIRONMENT* is not specified the default will be **vagrant**.
@@ -217,23 +195,18 @@ The *--all* switch allows to run all steps in order without specify the STEP opt
 
 To add a role:
 
-```
-bebox role new ROLE
-```
+    bebox role new ROLE
 
 To remove a role:
 
-```
-bebox role remove ROLE
-```
+    bebox role remove ROLE
+
 
 Then in the console a simple wizard appear for selecting the role to remove from the available roles.
 
 To list roles:
 
-```
-bebox role list
-```
+    bebox role list
 
 **We recommend to use our default roles (fundamental, users, security) for steps (0, 1, 3), but you can edit or delete them under your own risk**
 
@@ -241,23 +214,21 @@ bebox role list
 
 To add a profile:
 
-```
-bebox profile new PROFILE [-p PATH]
-```
+    bebox profile new PROFILE [-p PATH]
 
 This command creates a file structure for the profile with templates that you need to edit for the profile do something.
 The structure is like:
-```
-── profiles/
-    └── <category1>/
-        └── <category2>/
-            ...
-            └── <categoryN>/
-                └── <profile-name>/
-                    ├── manifests/
-                    │   └── init.pp
-                    └── Puppetfile
-```
+
+    ── profiles/
+        └── <category1>/
+            └── <category2>/
+                ...
+                └── <categoryN>/
+                    └── <profile-name>/
+                        ├── manifests/
+                        │   └── init.pp
+                        └── Puppetfile
+
 The *categories (category1, category2, ... categoryN)* are set if the argument *-p PATH* is passed; and are useful better organization of profiles.
 
 For example:
@@ -266,14 +237,13 @@ bebox profile new iptables -p basic/security
 ```
 would create the profiles directories structure:
 ```
-── profiles/
-    └── basic/
-        └── security/
-            └── iptables/
-                ├── manifests/
-                │   └── init.pp
-                └── Puppetfile
-```
+    ── profiles/
+        └── basic/
+            └── security/
+                └── iptables/
+                    ├── manifests/
+                    │   └── init.pp
+                    └── Puppetfile
 
 You need to modify the init.pp file adding usual puppet calls to classes, resources, modules, hiera.
 You need to modify the Puppetfile to set the modules that the manifest file will use.
@@ -281,17 +251,16 @@ Also you need to modify the hiera data that the manifest will use (See Hiera par
 
 To remove a profile:
 
-```
-bebox profile remove
-```
+
+    bebox profile remove
+
 
 Then in the console a simple wizard appear for selecting the profile to remove from the available profiles.
 
 To list profiles:
 
-```
-bebox profile list
-```
+
+    bebox profile list
 
 **We recommend to use our default profiles (fundamental, users, security) for steps (0, 1, 3), but you can edit or delete them under your own risk**
 
@@ -304,25 +273,19 @@ This add/remove a profile to a role.
 
 To add a profile to a role:
 
-```
-bebox role add_profile
-```
+    bebox role add_profile
 
 Then in the console a simple wizard appear for selecting the role and profile to add.
 
 To remove a profile from a role:
 
-```
-bebox role remove_profile
-```
+    bebox role remove_profile
 
 Then in the console a simple wizard appear for selecting the role and profile to remove.
 
 To list profiles configured in a role:
 
-```
-bebox role list_profiles ROLE
-```
+    bebox role list_profiles ROLE
 
 ####Associate nodes and roles
 
@@ -330,9 +293,8 @@ This change the role associated with a specific node.
 
 To set the role for a specific node:
 
-```
-bebox node set_role [--environment ENVIRONMENT]
-```
+
+    bebox node set_role [--environment ENVIRONMENT]
 
 Then in the console a simple wizard appear for selecting the node and role to set.
 By default if an *ENVIRONMENT* is not specified the default will be **vagrant**.
@@ -342,24 +304,22 @@ By default if an *ENVIRONMENT* is not specified the default will be **vagrant**.
 
 If you use hiera data from your profiles, you can add them to the appropiate file in the file structure shown below:
 
-```
-── puppet/
-    └── steps/
-       ├── 0-fundamental/
-       ├── 1-users/
-       ├── 2-services/
-       ├── 3-security/
-           ├── hiera/
-           │   └── data/
-           │   │   └── [node].yaml
-           │   │   └── [environment].yaml
-           │   │   └── common.yaml
-           │   └── hiera.yaml
-           ├── manifests/
-           │   └── site.pp
-           ├── modules/
-           └── Puppetfile (Automatically generated by Bebox in every 'apply')
-```
+    ── puppet/
+        └── steps/
+           ├── 0-fundamental/
+           ├── 1-users/
+           ├── 2-services/
+           ├── 3-security/
+               ├── hiera/
+               │   └── data/
+               │   │   └── [node].yaml
+               │   │   └── [environment].yaml
+               │   │   └── common.yaml
+               │   └── hiera.yaml
+               ├── manifests/
+               │   └── site.pp
+               ├── modules/
+               └── Puppetfile (Automatically generated by Bebox in every 'apply')
 
 Each of he <number>-<step-name> corresponds provisioning steps phase. For example **0-fundamental** correspond to **step-0** option.
 
@@ -374,49 +334,46 @@ Development
 To use the project in development mode, you need to do this:
 
 * Clone bebox from the repository.
-```
-git clone ssh://git@codescrum.repositoryhosting.com/codescrum/bebox.git
-```
-* Make
-```
-bundle install
-```
+
+    git clone ssh://git@codescrum.repositoryhosting.com/codescrum/bebox.git
+
+* Run bundle to install
+
+    bundle install
+
 * Generate the gem package
-```
-rake package
-```
+
+    rake package
+
 * Make a tmp directory inside bebox folder
-```
-mkdir tmp
-cd tmp
-```
+
+    mkdir tmp
+    cd tmp
+
 * Execute the project creation command preceded by **bundle exec**
-```
-bundle exec bebox new PROJECT
-```
+
+    bundle exec bebox new PROJECT
+
 * Enter to the project created
-```
-cd PROJECT
-```
+
+    cd PROJECT
+
 * Add to the **Gemfile** the line
-```
-gem 'bebox', :path => "BEBOX_PATH_IN_YOUR_PC/pkg"
-```
+
+    gem 'bebox', :path => "BEBOX_PATH_IN_YOUR_PC/pkg"
+
 * Execute any project commands preceded by **bundle exec**
-```
-bundle exec bebox environment
-```
+
+    bundle exec bebox environment
 
 Tests
 -----
 
-Before run tests you need to configure the IP address for vagrant machine. To do this create the file *spec/support/config_specs.yaml* from the *spec/support/config_specs.yaml.example* and configure a local newtwork IP free address to use.
+Before running any tests you need to configure the IP address for the vagrant machine. To do this create the file *spec/support/config_specs.yaml* from the *spec/support/config_specs.yaml.example* and configure a local newtwork IP free address to use.
 
 By project's nature the specs must be run in order. To do this all specs has a 'Test XX:' naming convention. If you want to run all tests in order we have a ordered_phases_spec.rb file than you can run with.
 
-```
-rspec spec/ordered_phases_spec.rb
-```
+    rspec spec/ordered_phases_spec.rb
 
 Maybe it would take a large time because it creates a vagrant machine and do a basic provision downloading packages and installing them in the machine.
 
