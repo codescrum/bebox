@@ -87,25 +87,17 @@ gem build bebox.gemspec
 This creates a *bebox-0.0.1.gem* file.
 
 
-####Setup gemserver
-
-In any directory outside bebox run the following commands that create a local gem server:
-
-    mkdir bebox_gemserver
-    cd bebox_gemserver
-    gem install geminabox
-    echo "require 'rubygems'\nrequire 'geminabox'\nGeminabox.data = 'data'\nrun Geminabox::Server" > config.ru
-    rackup
-
-Go to http://localhost:9292/upload, then choose and upload the *bebox-0.0.1.gem* file created previously.
-
 ####Install bebox:
 
-    gem install bebox --source http://127.0.0.1:9292
+In the directory where you want to install bebox do:
+
+    gem install BEBOX_GEM_PATH
+
+Where BEBOX_GEM_PATH is the route to the *bebox-0.0.1.gem* file created previously.
 
 ###Bebox project creation (Project creation phase).
 
-From any directory:
+To create a new bebox project do:
 
     bebox new PROJECT_NAME
 
