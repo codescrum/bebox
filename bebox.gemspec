@@ -21,7 +21,7 @@ spec = Gem::Specification.new do |s|
   s.files = `git ls-files`.split("\n") - ['.ruby-version']
   s.require_paths << 'lib'
   s.has_rdoc = false
-  s.rdoc_options << '--title' << 'bebox' << '--main' << 'README.rdoc' << '-ri'
+  s.rdoc_options << '--title' << 'bebox' << '--main' << 'README.rdoc' << '--ri'
   s.bindir = 'bin'
   s.executables << 'bebox'
   s.required_ruby_version = '>= 1.9.2'
