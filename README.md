@@ -77,23 +77,11 @@ Pre-requisites
 * ruby version >= 1.9.2 (ruby 2.1.0 recommended)
 * vagrant (tested using vagrant 1.6.3)
 
-####Build bebox gem
-This commands clone the project and generate the bebox gem file:
-```
-git clone https://github.com/jairodiaz/bebox
-cd bebox
-gem build bebox.gemspec
-```
-This creates a *bebox-0.0.1.gem* file.
-
-
 ####Install bebox:
 
 In the directory where you want to install bebox do:
 
-    gem install BEBOX_GEM_PATH
-
-Where BEBOX_GEM_PATH is the route to the *bebox-0.0.1.gem* file created previously.
+    gem install bebox
 
 ###Bebox project creation (Project creation phase).
 
@@ -327,7 +315,7 @@ To use the project in development mode, you need to do this:
 
 * Clone bebox from the repository.
 
-    git clone ssh://git@codescrum.repositoryhosting.com/codescrum/bebox.git
+    git clone https://github.com/codescrum/bebox.git
 
 * Run bundle to install
 
