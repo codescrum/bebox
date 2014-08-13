@@ -74,7 +74,7 @@ How to Use
 
 You can see a bebox demo video for a complete example of provisioning a machine and deploying a rails application in it.
 
-[![bebox demo video](http://img.youtube.com/vi/t99WeA3tr70/0.jpg)](http://www.youtube.com/watch?v=t99WeA3tr70)
+[![bebox demo video](http://img.youtube.com/vi/9NqXdZcyJV8/0.jpg)](http://www.youtube.com/watch?v=9NqXdZcyJV8)
 
 Also you can find the provision and rails app code sample projects in:
 
