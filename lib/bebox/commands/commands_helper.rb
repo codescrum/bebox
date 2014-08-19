@@ -1,10 +1,13 @@
+require 'bebox/wizards/wizards_helper'
+
 module Bebox
   module CommandsHelper
+    include Bebox::WizardsHelper
     # Obtain the environment from command parameters or menu
     def get_environment(options)
       environment = options[:environment]
       # Ask for environment of node if flag environment not set
-      environment ||= Bebox::EnvironmentWizard.new.choose_environment(Environment.list(project_root))
+      environment ||= choose_option(Environment.list(project_root), 'Choose an existing environment:')
       # Check environment existence
       Bebox::Environment.environment_exists?(project_root, environment) ? (return environment) : exit_now!(error("The '#{environment}' environment does not exist."))
     end

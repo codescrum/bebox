@@ -35,7 +35,7 @@ module Bebox
       end
       vagrant_box_base = "#{BEBOX_BOXES_PATH}/#{valid_box_uri}"
       # Asks user to choose vagrant box provider
-      vagrant_box_provider = ask_box_provider
+      vagrant_box_provider = choose_option(%w{virtualbox vmware}, 'Choose the vagrant box provider')
       # Set default environments
       default_environments = %w{vagrant staging production}
       # Project creation
@@ -47,14 +47,6 @@ module Bebox
     # Check if there's an existing project in that dir
     def project_exists?(parent_path, project_name)
       Dir.exists?("#{parent_path}/#{project_name}")
-    end
-
-    # Menu to choose vagrant box provider
-    def ask_box_provider
-      choose do |menu|
-        menu.header = title('Choose the vagrant box provider')
-        menu.choices('virtualbox', 'vmware')
-      end
     end
 
     # Setup the bebox boxes directory

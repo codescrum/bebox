@@ -42,7 +42,7 @@ module Bebox
       profiles = Bebox::Profile.list(project_root)
       # Get a profile if exist
       if profiles.count > 0
-        profile = choose_profile(profiles, 'Choose the profile to remove:')
+        profile = choose_option(profiles, 'Choose the profile to remove:')
       else
         return error "There are no profiles to remove. No changes were made."
       end
@@ -69,16 +69,6 @@ module Bebox
     # Check if there's an existing profile in the project
     def profile_exists?(project_root, profile_path)
       Dir.exists?( File.join("#{project_root}/puppet/profiles", "#{profile_path}") )
-    end
-
-    # Asks to choose a profile
-    def choose_profile(profiles, question)
-      choose do |menu|
-        menu.header = title(question)
-        profiles.each do |box|
-          menu.choice(box)
-        end
-      end
     end
   end
 end

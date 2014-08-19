@@ -24,15 +24,5 @@ module Bebox
       environment.remove
       ok 'Environment removed!.'
     end
-
-    # Asks to choose an existing environment
-    def choose_environment(environments)
-      choose do |menu|
-        menu.header = title('Choose an existing environment:')
-        environments.each do |box|
-          menu.choice(box.split('/').last)
-        end
-      end
-    end
   end
 end

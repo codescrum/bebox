@@ -20,7 +20,7 @@ module Bebox
       # Ask for a node to remove
       nodes = Bebox::Node.list(project_root, environment, 'nodes')
       if nodes.count > 0
-        hostname = choose_node(nodes, 'Choose the node to remove:')
+        hostname = choose_option(nodes, 'Choose the node to remove:')
       else
         return error "There are no nodes in the '#{environment}' environment to remove. No changes were made."
       end
@@ -36,9 +36,9 @@ module Bebox
     def set_role(project_root, environment)
       roles = Bebox::Role.list(project_root)
       nodes = Bebox::Node.list(project_root, environment, 'nodes')
-      node = choose_node(nodes, 'Choose an existing node:')
+      node = choose_option(nodes, 'Choose an existing node:')
       require 'bebox/wizards/role_wizard'
-      role = Bebox::RoleWizard.new.choose_role(roles, 'Choose an existing role:')
+      role = choose_option(roles, 'Choose an existing role:')
       Bebox::Provision.associate_node_role(project_root, environment, node, role)
       ok 'Role associated to node!.'
     end
@@ -90,16 +90,6 @@ module Bebox
     # Check if there's an existing node in a environment
     def node_exists?(project_root, environment, node_name)
       File.exists?("#{project_root}/.checkpoints/environments/#{environment}/nodes/#{node_name}.yml")
-    end
-
-    # Asks to choose an existing node
-    def choose_node(nodes, question)
-      choose do |menu|
-        menu.header = title(question)
-        nodes.each do |box|
-          menu.choice(box.split('/').last)
-        end
-      end
     end
 
     # Keep asking for a hostname that not exist

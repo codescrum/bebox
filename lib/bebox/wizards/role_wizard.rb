@@ -29,7 +29,7 @@ module Bebox
       roles = Bebox::Role.list(project_root)
       # Get a role if exist.
       if roles.count > 0
-        role_name = choose_role(roles, 'Choose the role to remove:')
+        role_name = choose_option(roles, 'Choose the role to remove:')
       else
         return error "There are no roles to remove. No changes were made."
       end
@@ -45,9 +45,9 @@ module Bebox
     def add_profile(project_root)
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
-      role = choose_role(roles, 'Choose an existing role:')
+      role = choose_option(roles, 'Choose an existing role:')
       require 'bebox/wizards/profile_wizard'
-      profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to add:')
+      profile = choose_option(profiles, 'Choose the profile to add:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
         return warn("Profile '#{profile}' already in the Role '#{role}'. No changes were made.")
       else
@@ -60,9 +60,9 @@ module Bebox
     def remove_profile(project_root)
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
-      role = choose_role(roles, 'Choose an existing role:')
+      role = choose_option(roles, 'Choose an existing role:')
       require 'bebox/wizards/profile_wizard'
-      profile = Bebox::ProfileWizard.new.choose_profile(profiles, 'Choose the profile to remove:')
+      profile = choose_option(profiles, 'Choose the profile to remove:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
         Bebox::Role.remove_profile(project_root, role, profile)
         return ok("Profile '#{profile}' removed from Role '#{role}'.")
@@ -70,16 +70,6 @@ module Bebox
         return warn("Profile '#{profile}' is not in the Role '#{role}'. No changes were made.")
       end
 
-    end
-
-    # Asks to choose an existing role
-    def choose_role(roles, question)
-      choose do |menu|
-        menu.header = title(question)
-        roles.each do |box|
-          menu.choice(box.split('/').last)
-        end
-      end
     end
 
     # Check if there's an existing role in the project
