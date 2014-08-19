@@ -3,6 +3,8 @@ require 'bebox/role'
 module Bebox
   class RoleWizard
     include Bebox::Logger
+    include Bebox::WizardsHelper
+
     # Create a new role
     def create_new_role(project_root, role_name)
       # Check if the role name is valid
@@ -32,7 +34,7 @@ module Bebox
         return error "There are no roles to remove. No changes were made."
       end
       # Ask for deletion confirmation
-      return warn('No changes were made.') unless confirm_role_deletion?
+      return warn('No changes were made.') unless confirm_action?('Are you sure that you want to delete the role?')
       # Role deletion
       role = Bebox::Role.new(role_name, project_root)
       role.remove
@@ -83,15 +85,6 @@ module Bebox
     # Check if there's an existing role in the project
     def role_exists?(project_root, role_name)
       Dir.exists?("#{project_root}/puppet/roles/#{role_name}")
-    end
-
-    # Ask for confirmation of role deletion
-    def confirm_role_deletion?
-      quest 'Are you sure that you want to delete the role?'
-      response =  ask(highline_quest('(y/n)')) do |q|
-        q.default = "n"
-      end
-      return response == 'y' ? true : false
     end
   end
 end

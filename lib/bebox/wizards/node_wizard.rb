@@ -1,6 +1,8 @@
 module Bebox
   class NodeWizard
     include Bebox::Logger
+    include Bebox::WizardsHelper
+
     # Create a new node
     def create_new_node(project_root, environment)
       # Ask the hostname for node
@@ -23,7 +25,7 @@ module Bebox
         return error "There are no nodes in the '#{environment}' environment to remove. No changes were made."
       end
       # Ask for deletion confirmation
-      return warn('No changes were made.') unless confirm_node_deletion?
+      return warn('No changes were made.') unless confirm_action?('Are you sure that you want to delete the node?')
       # Node deletion
       node = Bebox::Node.new(environment, project_root, hostname, nil)
       node.remove
@@ -75,7 +77,9 @@ module Bebox
       prepared_nodes = Bebox::Node.list(project_root, environment, 'prepared_nodes')
       nodes.each do |node|
         if prepared_nodes.include?(node.hostname)
-          nodes_to_prepare << node if confirm_node_preparation?(node)
+          checkpoint_status = "(start: #{node.checkpoint_parameter_from_file('prepared_nodes', 'started_at')} - end: #{node.checkpoint_parameter_from_file('prepared_nodes', 'finished_at')})"
+          message = "The node '#{node.hostname}' was already prepared #{checkpoint_status}.\nDo you want to re-prepare it?"
+          nodes_to_prepare << node if confirm_action?(message)
         else
           nodes_to_prepare << node
         end
@@ -86,25 +90,6 @@ module Bebox
     # Check if there's an existing node in a environment
     def node_exists?(project_root, environment, node_name)
       File.exists?("#{project_root}/.checkpoints/environments/#{environment}/nodes/#{node_name}.yml")
-    end
-
-    # Ask for confirmation of node preparation
-    def confirm_node_preparation?(node)
-      checkpoint_status = "(start: #{node.checkpoint_parameter_from_file('prepared_nodes', 'started_at')} - end: #{node.checkpoint_parameter_from_file('prepared_nodes', 'finished_at')})"
-      quest "The node '#{node.hostname}' was already prepared #{checkpoint_status}.\nDo you want to re-prepare it?"
-      response =  ask(highline_quest('(y/n)')) do |q|
-        q.default = "n"
-      end
-      return response == 'y' ? true : false
-    end
-
-    # Ask for confirmation of node deletion
-    def confirm_node_deletion?
-      quest 'Are you sure that you want to delete the node?'
-      response =  ask(highline_quest('(y/n)')) do |q|
-        q.default = "n"
-      end
-      return response == 'y' ? true : false
     end
 
     # Asks to choose an existing node

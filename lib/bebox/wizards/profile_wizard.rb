@@ -3,6 +3,8 @@ require 'bebox/profile'
 module Bebox
   class ProfileWizard
     include Bebox::Logger
+    include Bebox::WizardsHelper
+
     # Create a new profile
     def create_new_profile(project_root, profile_name, profile_base_path)
       # Check if the profile name is valid
@@ -45,7 +47,7 @@ module Bebox
         return error "There are no profiles to remove. No changes were made."
       end
       # Ask for deletion confirmation
-      return warn('No changes were made.') unless confirm_profile_deletion?
+      return warn('No changes were made.') unless confirm_action?('Are you sure that you want to delete the profile?')
       # Profile deletion
       profile_name = profile.split('/').last
       profile_base_path = profile.split('/')[0...-1].join('/')
@@ -67,15 +69,6 @@ module Bebox
     # Check if there's an existing profile in the project
     def profile_exists?(project_root, profile_path)
       Dir.exists?( File.join("#{project_root}/puppet/profiles", "#{profile_path}") )
-    end
-
-    # Ask for confirmation of profile deletion
-    def confirm_profile_deletion?
-      quest 'Are you sure that you want to delete the profile?'
-      response =  ask(highline_quest('(y/n)')) do |q|
-        q.default = "n"
-      end
-      return response == 'y' ? true : false
     end
 
     # Asks to choose a profile

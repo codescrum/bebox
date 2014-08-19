@@ -1,3 +1,4 @@
+require 'bebox/wizards/wizards_helper'
 require 'bebox/project'
 require 'net/http'
 require 'uri'
@@ -5,6 +6,7 @@ require 'uri'
 module Bebox
   class ProjectWizard
     include Bebox::Logger
+    include Bebox::WizardsHelper
     # Bebox boxes directory
     BEBOX_BOXES_PATH = '~/.bebox/boxes'
 
@@ -24,7 +26,7 @@ module Bebox
           # Asks vagrant box location to user if not choose an existing box
           valid_box_uri = ask_uri
           # Confirm if the box already exist
-          confirm = box_exists?(valid_box_uri) ? confirm_overwrite? : true
+          confirm = box_exists?(valid_box_uri) ? confirm_action?('There is already a box with that name, do you want to overwrite it?') : true
         end while !confirm
         # Setup the box with the valid uri
         set_box(valid_box_uri)
@@ -98,15 +100,6 @@ module Bebox
       else
         File.file?(uri.path) ? (return true) : error('File path not exist!.')
       end
-    end
-
-    # Ask for confirmation of overwrite a box
-    def confirm_overwrite?
-      quest 'There is already a box with that name, do you want to overwrite it?'
-      response =  ask(highline_quest('(y/n)')) do |q|
-        q.default = 'n'
-      end
-      return response == 'y' ? true : false
     end
 
     # Check if a box with the same name already exist
