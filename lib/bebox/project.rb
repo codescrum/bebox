@@ -1,12 +1,14 @@
-require 'tilt'
+# require 'tilt'
 require 'bebox/environment'
 require 'bebox/provision'
 require 'bebox/logger'
+require 'bebox/file_helper'
 
 module Bebox
   class Project
 
     include Bebox::Logger
+    include Bebox::FileHelper
 
     attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path, :created_at
 
@@ -96,18 +98,12 @@ module Bebox
       # Set the creation time for the project
       self.created_at = DateTime.now.to_s
       # Create the .bebox file from template
-      dotbebox_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/dot_bebox.erb")
-      File.open("#{self.path}/.bebox", 'w') do |f|
-        f.write dotbebox_template.render(nil, project: self)
-      end
+      generate_file_from_template("#{Bebox::Project.templates_path}/project/dot_bebox.erb", "#{self.path}/.bebox", {project: self})
     end
 
     # Generate .gitignore file
     def generate_gitignore_file
-      gitignore_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/gitignore.erb")
-      File.open("#{self.path}/.gitignore", 'w') do |f|
-        f.write gitignore_template.render(nil, steps: Bebox::PROVISION_STEP_NAMES)
-      end
+      generate_file_from_template("#{Bebox::Project.templates_path}/project/gitignore.erb", "#{self.path}/.gitignore", {steps: Bebox::PROVISION_STEP_NAMES})
     end
 
     # Create templates directories
@@ -180,20 +176,11 @@ module Bebox
         step_dir = Bebox::Provision.step_name(step)
         templates_path = Bebox::Project::templates_path
         # Generate site.pp template
-        manifest_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/manifests/site.pp.erb")
-        File.open("#{self.path}/puppet/steps/#{step_dir}/manifests/site.pp", 'w') do |f|
-          f.write manifest_template.render(nil, :nodes => [])
-        end
+        generate_file_from_template("#{templates_path}/puppet/#{step}/manifests/site.pp.erb", "#{self.path}/puppet/steps/#{step_dir}/manifests/site.pp", {nodes: []})
         # Generate hiera.yaml template
-        hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/hiera.yaml.erb")
-        File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/hiera.yaml", 'w') do |f|
-          f.write hiera_template.render(nil, :step_dir => step_dir)
-        end
+        generate_file_from_template("#{templates_path}/puppet/#{step}/hiera/hiera.yaml.erb", "#{self.path}/puppet/steps/#{step_dir}/hiera/hiera.yaml", {step_dir: step_dir})
         # Generate common.yaml template
-        hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/common.yaml.erb")
-        File.open("#{self.path}/puppet/steps/#{step_dir}/hiera/data/common.yaml", 'w') do |f|
-          f.write hiera_template.render(nil, :step_dir => step_dir, :ssh_key => ssh_key, :project_name => self.shortname)
-        end
+        generate_file_from_template("#{templates_path}/puppet/#{step}/hiera/data/common.yaml.erb", "#{self.path}/puppet/steps/#{step_dir}/hiera/data/common.yaml", {step_dir: step_dir, ssh_key: ssh_key, project_name: self.shortname})
       end
     end
 
@@ -228,10 +215,7 @@ module Bebox
 
     # Generate the deploy file for the project
     def generate_deploy_file
-      config_deploy_template = Tilt::ERBTemplate.new("#{Bebox::Project.templates_path}/project/config/deploy.erb")
-      File.open("#{self.path}/config/deploy.rb", 'w') do |f|
-        f.write config_deploy_template.render(nil, project: self)
-      end
+      generate_file_from_template("#{Bebox::Project.templates_path}/project/config/deploy.erb", "#{self.path}/config/deploy.rb", {project: self})
     end
 
     # Path to the lib directory in the gem

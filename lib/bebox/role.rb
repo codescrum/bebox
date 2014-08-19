@@ -1,8 +1,8 @@
-require 'tilt'
+require 'bebox/file_helper'
 
 module Bebox
   class Role
-
+    include Bebox::FileHelper
     attr_accessor :project_root, :name
 
     def initialize(name, project_root)
@@ -33,10 +33,7 @@ module Bebox
 
     # Generate the manifests init.pp file
     def generate_manifests_file
-      manifests_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/roles/manifests/init.pp.erb")
-      File.open("#{self.path}/manifests/init.pp", 'w') do |f|
-        f.write manifests_template.render(nil, :role => self)
-      end
+      generate_file_from_template("#{templates_path}/puppet/roles/manifests/init.pp.erb", "#{self.path}/manifests/init.pp", {role: self})
     end
 
     # Path to the templates directory in the gem
