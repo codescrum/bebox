@@ -61,7 +61,7 @@ module Bebox
     # Generate the deploy file for the environment
     def generate_deploy_file
       template_name = (self.name == 'vagrant') ? 'vagrant' : "environment"
-      generate_file_from_template("#{templates_path}/project/config/deploy/#{template_name}.erb", "#{self.project_root}/config/deploy/#{self.name}.rb", {node: nil, environment: self.name})
+      generate_file_from_template("#{templates_path}/project/config/deploy/#{template_name}.erb", "#{self.project_root}/config/deploy/#{self.name}.rb", {nodes: nil, environment: self.name})
     end
 
     # Generate the hiera data template for the environment

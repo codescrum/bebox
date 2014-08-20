@@ -141,12 +141,12 @@ module Bebox
       network_interface = RUBY_PLATFORM =~ /darwin/ ? 'en0' : 'eth0'
       project_name = Bebox::Project.name_from_file(project_root)
       vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(project_root)
-      Bebox::FilesHelper.generate_file_from_template("#{templates_path}/node/Vagrantfile.erb", "#{project_root}/Vagrantfile", {nodes: nodes, project_name: project_name, vagrant_box_provider: vagrant_box_provider, network_interface: network_interface})
+      generate_file_from_template("#{templates_path}/node/Vagrantfile.erb", "#{project_root}/Vagrantfile", {nodes: nodes, project_name: project_name, vagrant_box_provider: vagrant_box_provider, network_interface: network_interface})
     end
 
     # Backup and add the vagrant hosts to local hosts file
     def configure_local_hosts(project_name)
-      info "\nPlease provide your account password, if ask you, to configure the local hosts file."
+      info "\nPlease provide your local password, if ask you, to configure the local hosts file."
       backup_local_hosts(project_name)
       add_to_local_hosts
     end
