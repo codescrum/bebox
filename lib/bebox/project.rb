@@ -54,7 +54,7 @@ module Bebox
       generate_ruby_version
       # Generate Capfile and deploy files
       create_capfile
-      generate_deploy_file
+      generate_deploy_files
       # Generate Gemfile
       create_gemfile
       # Create the default environments
@@ -122,7 +122,7 @@ module Bebox
 
     # Create config deploy and keys directories
     def create_config_deploy_directories
-      `cd #{self.path} && mkdir -p config/{deploy,keys/environments}`
+      `cd #{self.path} && mkdir -p config/{deploy/steps,keys/environments}`
     end
 
     # Create the default environments
@@ -207,8 +207,11 @@ module Bebox
     end
 
     # Generate the deploy file for the project
-    def generate_deploy_file
+    def generate_deploy_files
       generate_file_from_template("#{Bebox::Project.templates_path}/project/config/deploy.erb", "#{self.path}/config/deploy.rb", {project: self})
+      Bebox::PROVISION_STEPS.each do |step|
+        generate_file_from_template("#{Bebox::Project.templates_path}/project/config/deploy/steps/#{step}.erb", "#{self.path}/config/deploy/steps/#{step}.rb", {})
+      end
     end
 
     # Path to the lib directory in the gem
