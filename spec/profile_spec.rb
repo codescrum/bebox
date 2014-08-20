@@ -1,7 +1,11 @@
 require 'spec_helper'
 require_relative '../spec/factories/profile.rb'
+require_relative '../lib/bebox/wizards/wizards_helper'
 
 describe 'Test 08: Bebox::Profile' do
+
+  # include Wizard helper methods
+  include Bebox::WizardsHelper
 
   describe 'Manage profiles' do
 
@@ -15,15 +19,15 @@ describe 'Test 08: Bebox::Profile' do
 
       it 'should validate the profile name' do
         # Test not valid reserved words
-        Bebox::RESERVED_WORDS.each{|reserved_word| expect(Bebox::Profile.valid_name?(reserved_word)).to be (false)}
+        Bebox::RESERVED_WORDS.each{|reserved_word| expect(valid_puppet_class_name?(reserved_word)).to be (false)}
         # Test not valid start by undescore
-        expect(Bebox::Profile.valid_name?('_profile_0')).to be (false)
+        expect(valid_puppet_class_name?('_profile_0')).to be (false)
         # Test not valid contain Upper letter
-        expect(Bebox::Profile.valid_name?('Profile_0')).to be (false)
+        expect(valid_puppet_class_name?('Profile_0')).to be (false)
         # Test not valid contain dash character
-        expect(Bebox::Profile.valid_name?('profile-0')).to be (false)
+        expect(valid_puppet_class_name?('profile-0')).to be (false)
         # Test valid name not contains reserved words, start with letter, contains only downcase letters, numbers and undescores
-        expect(Bebox::Profile.valid_name?(subject.name)).to be (true)
+        expect(valid_puppet_class_name?(subject.name)).to be (true)
       end
 
       it 'should clean the profile path' do

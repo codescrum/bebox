@@ -1,7 +1,11 @@
 require 'spec_helper'
 require_relative '../spec/factories/role.rb'
+require_relative '../lib/bebox/wizards/wizards_helper'
 
 describe 'Test 07: Bebox::Role' do
+
+  # include Wizard helper methods
+  include Bebox::WizardsHelper
 
   describe 'Manage roles' do
 
@@ -15,15 +19,15 @@ describe 'Test 07: Bebox::Role' do
 
       it 'should validate the role name' do
         # Test not valid reserved words
-        Bebox::RESERVED_WORDS.each{|reserved_word| expect(Bebox::Role.valid_name?(reserved_word)).to be (false)}
+        Bebox::RESERVED_WORDS.each{|reserved_word| expect(valid_puppet_class_name?(reserved_word)).to be (false)}
         # Test not valid start by undescore
-        expect(Bebox::Role.valid_name?('_role_0')).to be (false)
+        expect(valid_puppet_class_name?('_role_0')).to be (false)
         # Test not valid contain Upper letter
-        expect(Bebox::Role.valid_name?('Role_0')).to be (false)
+        expect(valid_puppet_class_name?('Role_0')).to be (false)
         # Test not valid contain dash character
-        expect(Bebox::Role.valid_name?('role-0')).to be (false)
+        expect(valid_puppet_class_name?('role-0')).to be (false)
         # Test valid name not contains reserved words, start with letter, contains only downcase letters, numbers and undescores
-        expect(Bebox::Role.valid_name?(subject.name)).to be (true)
+        expect(valid_puppet_class_name?(subject.name)).to be (true)
       end
 
       it 'should create role directories' do
