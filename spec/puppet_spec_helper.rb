@@ -6,7 +6,7 @@ RSpec.configure do |config|
       config.ssh.close if config.ssh
       config.host  = host
       options = Net::SSH::Config.for(config.host)
-      options[:keys] = ["#{puppet.project_root}/config/keys/environments/vagrant/id_rsa"]
+      options[:keys] = ["#{provision.project_root}/config/keys/environments/vagrant/id_rsa"]
       options[:forward_agent] = true
       user = 'puppet'
       config.ssh   = Net::SSH.start(config.host, user, options)

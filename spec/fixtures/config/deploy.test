@@ -24,6 +24,9 @@ def custom_facter_variables
   facter_variables.map{|facter_key, facter_value| "FACTER_#{facter_key}=#{facter_value}"}.join(' ')
 end
 
+# load specific task from each step
+load "config/deploy/steps/#{phase}" if phase =~ /step/
+
 namespace :deploy do
 
   desc 'Installs tools and required dependencies in the remote machine'

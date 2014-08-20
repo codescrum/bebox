@@ -61,11 +61,18 @@ describe 'Test 01: Bebox::Project' do
         expect(output_file).to eq(expected_content)
       end
 
-      it 'should generate deploy file' do
-        subject.generate_deploy_file
+      it 'should generate deploy files' do
+        subject.generate_deploy_files
+        # Generate deploy.rb file
         config_deploy_content = File.read("#{subject.path}/config/deploy.rb").gsub(/\s+/, ' ').strip
         config_deploy_output_content = File.read("spec/fixtures/config/deploy.test").gsub(/\s+/, ' ').strip
         expect(config_deploy_content).to eq(config_deploy_output_content)
+        # Generate steps/step-N.rb files
+        Bebox::PROVISION_STEPS.each do |step|
+          content = File.read("spec/fixtures/config/deploy/steps/#{step}.test")
+          output = File.read("#{subject.path}/config/deploy/steps/#{step}.rb")
+          expect(output).to eq(content)
+        end
       end
 
       it 'should create Gemfile' do
