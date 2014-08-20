@@ -1,5 +1,6 @@
 require 'bebox/commands/commands_helper'
 require 'bebox/wizards/wizards_helper'
+require 'bebox/environment'
 
 module Bebox
   module ProjectCommands
@@ -11,35 +12,30 @@ module Bebox
     end
 
     def load_commands
-      require 'bebox/commands/environment_commands'
-      require 'bebox/environment'
+      load_environment_commands
+      load_node_commands
+      load_prepare_commands
+      load_provision_commands
+    end
+
+    # Load environment commands
+    def load_environment_commands
       self.extend Bebox::EnvironmentCommands
-      # This commands only run if there are environments configured
-      if Bebox::Environment.list(project_root).count > 0
-        require 'bebox/commands/node_commands'
-        self.extend Bebox::NodeCommands
-        # These commands are available if there are at least one node configured in the project
-        if Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0
-          require 'bebox/commands/prepare_commands'
-          self.extend Bebox::PrepareCommands
-          # These commands are available if there are at least one prepared_node
-          if Bebox::Node.count_all_nodes_by_type(project_root, 'prepared_nodes') > 0
-            # load_provision_commands
-            require 'bebox/commands/provision_commands'
-            self.extend Bebox::ProvisionCommands
-          end
-        end
-      end
-      pre do |global_options,command,options,args|
-        true
-      end
+    end
 
-      post do |global_options,command,options,args|
-      end
+    # Load node commands if there are environments configured
+    def load_node_commands
+       Bebox::Environment.list(project_root).count > 0 ? (self.extend Bebox::NodeCommands) : return
+    end
 
-      on_error do |exception|
-        true
-      end
+    # Load prepare commands if there are at least one node
+    def load_prepare_commands
+      Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0 ? (self.extend Bebox::PrepareCommands) : return
+    end
+
+    # Load provision commands if there are nodes prepared
+    def load_provision_commands
+      Bebox::Node.count_all_nodes_by_type(project_root, 'prepared_nodes') > 0 ? (self.extend Bebox::ProvisionCommands) : return
     end
   end
 end
