@@ -1,4 +1,4 @@
-require 'tilt'
+require 'bebox/files_helper'
 
 module Bebox
 
@@ -7,6 +7,8 @@ module Bebox
   RESERVED_WORDS = %w{and case class default define else elsif false if in import inherits node or true undef unless main settings}
 
   class Provision
+
+    include Bebox::FilesHelper
 
     attr_accessor :environment, :project_root, :node, :step, :started_at, :finished_at
 
@@ -45,32 +47,20 @@ module Bebox
     def generate_hiera
       ssh_key = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
       project_name = Bebox::Project.shortname_from_file(self.project_root)
-      hiera_template = Tilt::ERBTemplate.new("#{Bebox::Provision::templates_path}/puppet/#{self.step}/hiera/hiera.yaml.erb")
-      File.open("#{self.project_root}/puppet/steps/#{Bebox::Provision.step_name(self.step)}/hiera/hiera.yaml", 'w') do |f|
-        f.write hiera_template.render(nil, :step_dir => Bebox::Provision.step_name(self.step))
-      end
-      common_hiera_template = Tilt::ERBTemplate.new("#{Bebox::Provision::templates_path}/puppet/#{self.step}/hiera/data/common_apply.yaml.erb")
-      File.open("#{self.project_root}/puppet/steps/#{Bebox::Provision.step_name(self.step)}/hiera/data/common.yaml", 'w') do |f|
-        f.write common_hiera_template.render(nil, :ssh_key => ssh_key, :project_name => project_name)
-      end
+      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{self.step}/hiera/hiera.yaml.erb", "#{self.project_root}/puppet/steps/#{Bebox::Provision.step_name(self.step)}/hiera/hiera.yaml", {step_dir: Bebox::Provision.step_name(self.step)})
+      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{self.step}/hiera/data/common_apply.yaml.erb", "#{self.project_root}/puppet/steps/#{Bebox::Provision.step_name(self.step)}/hiera/data/common.yaml", {ssh_key: ssh_key, project_name: project_name})
     end
 
     # Generate the site.pp manifests file for step
     def self.generate_manifests(project_root, step, nodes)
-      manifest_template = Tilt::ERBTemplate.new("#{Bebox::Provision::templates_path}/puppet/#{step}/manifests/site_apply.pp.erb", :trim => true)
-      File.open("#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp", 'w') do |f|
-        f.write manifest_template.render(nil, :nodes => nodes)
-      end
+      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{step}/manifests/site_apply.pp.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp", {nodes: nodes})
     end
 
     # Generate the hiera templates for each step
     def self.generate_hiera_for_steps(project_root, template_file, filename, options)
       Bebox::PROVISION_STEPS.each do |step|
         step_dir = Bebox::Provision.step_name(step)
-        hiera_template = Tilt::ERBTemplate.new("#{Bebox::Provision::templates_path}/puppet/#{step}/hiera/data/#{template_file}")
-        File.open("#{project_root}/puppet/steps/#{step_dir}/hiera/data/#{filename}.yaml", 'w') do |f|
-          f.write hiera_template.render(nil, options)
-        end
+        generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{step}/hiera/data/#{template_file}", "#{project_root}/puppet/steps/#{step_dir}/hiera/data/#{filename}.yaml", options)
       end
     end
 
@@ -99,10 +89,7 @@ module Bebox
         puppetfile_content = File.read(profile_puppetfile_path)
         modules << puppetfile_content.scan(/^\s*(mod\s*.+?)$/).uniq
       end
-      puppetfile_template = Tilt::ERBTemplate.new("#{Bebox::Provision::templates_path}/puppet/#{step}/Puppetfile.erb", :trim => true)
-      File.open("#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile", 'w') do |f|
-        f.write puppetfile_template.render(nil, :profile_modules => modules.flatten)
-      end
+      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{step}/Puppetfile.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile", {profile_modules: modules.flatten})
     end
 
     # Get the role name associated with a node
@@ -142,13 +129,12 @@ module Bebox
     # Add a node to site.pp
     def self.add_node_to_step_manifests(project_root, node)
       Bebox::PROVISION_STEPS.each do |step|
-        manifest_node_template = Tilt::ERBTemplate.new("#{Bebox::Provision::templates_path}/puppet/#{step}/manifests/node.erb", :trim => true)
-        manifest_node = manifest_node_template.render(nil, :node => node)
+        manifest_node = render_erb_template("#{Bebox::Provision::templates_path}/puppet/#{step}/manifests/node.erb", {node: node})
         Bebox::Provision.remove_node(project_root, node.hostname, step)
         manifest_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp"
         content = File.read(manifest_path)
         content += "\n#{manifest_node}\n"
-        File.open(manifest_path, 'wb') { |file| file.write(content) }
+        write_content_to_file(manifest_path, content)
       end
     end
 
@@ -224,10 +210,7 @@ module Bebox
     def create_step_checkpoint(started_at)
       self.node.started_at = started_at
       self.node.finished_at = DateTime.now.to_s
-      checkpoint_template = Tilt::ERBTemplate.new("#{Bebox::Provision::templates_path}/node/provisioned_node.yml.erb")
-      File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/steps/#{self.step}/#{self.node.hostname}.yml", 'w') do |f|
-        f.write checkpoint_template.render(nil, :node => self.node)
-      end
+      generate_file_from_template("#{Bebox::Provision::templates_path}/node/provisioned_node.yml.erb", "#{self.project_root}/.checkpoints/environments/#{self.environment}/steps/#{self.step}/#{self.node.hostname}.yml", {node: self.node})
     end
 
     # Get the templates path inside the gem

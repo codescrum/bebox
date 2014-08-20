@@ -1,7 +1,9 @@
-require 'tilt'
+require 'bebox/files_helper'
 
 module Bebox
   class Profile
+
+    include Bebox::FilesHelper
 
     attr_accessor :project_root, :name, :path
 
@@ -36,18 +38,12 @@ module Bebox
 
     # Generate the manifests init.pp file
     def generate_manifests_file
-      manifests_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/profiles/manifests/init.pp.erb")
-      File.open("#{absolute_path}/manifests/init.pp", 'w') do |f|
-        f.write manifests_template.render(nil, :profile => self)
-      end
+      generate_file_from_template("#{templates_path}/puppet/profiles/manifests/init.pp.erb", "#{absolute_path}/manifests/init.pp", {profile: self})
     end
 
     # Generate the Puppetfile
     def generate_puppetfile
-      puppetfile_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/profiles/Puppetfile.erb")
-      File.open("#{absolute_path}/Puppetfile", 'w') do |f|
-        f.write puppetfile_template.render(nil)
-      end
+      generate_file_from_template("#{templates_path}/puppet/profiles/Puppetfile.erb", "#{absolute_path}/Puppetfile", {})
     end
 
     # Path to the templates directory in the gem

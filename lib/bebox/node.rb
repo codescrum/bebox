@@ -1,11 +1,11 @@
 require 'bebox/logger'
-require 'bebox/file_helper'
+require 'bebox/files_helper'
 
 module Bebox
   class Node
 
     include Bebox::Logger
-    include Bebox::FileHelper
+    include Bebox::FilesHelper
 
     attr_accessor :environment, :project_root, :hostname, :ip, :created_at, :started_at, :finished_at
 
@@ -141,7 +141,7 @@ module Bebox
       network_interface = RUBY_PLATFORM =~ /darwin/ ? 'en0' : 'eth0'
       project_name = Bebox::Project.name_from_file(project_root)
       vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(project_root)
-      generate_file_from_template("#{templates_path}/node/Vagrantfile.erb", "#{project_root}/Vagrantfile", {nodes: nodes, project_name: project_name, vagrant_box_provider: vagrant_box_provider, network_interface: network_interface})
+      Bebox::FilesHelper.generate_file_from_template("#{templates_path}/node/Vagrantfile.erb", "#{project_root}/Vagrantfile", {nodes: nodes, project_name: project_name, vagrant_box_provider: vagrant_box_provider, network_interface: network_interface})
     end
 
     # Backup and add the vagrant hosts to local hosts file
@@ -178,7 +178,7 @@ module Bebox
       # Set the creation time for the node
       self.created_at = DateTime.now.to_s
       # Create the checkpoint file from template
-      generate_file_from_template("#{Bebox::Node::templates_path}/node/node.yml.erb", "#{self.project_root}/.checkpoints/environments/#{self.environment}/nodes/#{self.hostname}.yml", {node: self})
+      generate_file_from_template("#{Bebox::Node::templates_path}/node/node.yml.erb", "#{project_root}/.checkpoints/environments/#{environment}/nodes/#{hostname}.yml", {node: self})
     end
 
     # Remove checkpoints for node

@@ -1,14 +1,13 @@
-# require 'tilt'
 require 'bebox/environment'
 require 'bebox/provision'
 require 'bebox/logger'
-require 'bebox/file_helper'
+require 'bebox/files_helper'
 
 module Bebox
   class Project
 
     include Bebox::Logger
-    include Bebox::FileHelper
+    include Bebox::FilesHelper
 
     attr_accessor :name, :vagrant_box_base, :parent_path, :vagrant_box_provider, :environments, :path, :created_at
 
@@ -133,18 +132,12 @@ module Bebox
 
     # Create Capfile for the project
     def create_capfile
-      capfile_content = File.read("#{Bebox::Project.templates_path}/project/Capfile.erb")
-      File::open("#{self.path}/Capfile", "w")do |f|
-        f.write(capfile_content)
-      end
+      write_content_to_file("#{path}/Capfile", File.read("#{Bebox::Project.templates_path}/project/Capfile.erb"))
     end
 
     # Create Gemfile for the project
     def create_gemfile
-      gemfile_content = File.read("#{Bebox::Project.templates_path}/project/Gemfile.erb")
-      File::open("#{self.path}/Gemfile", "w")do |f|
-        f.write(gemfile_content)
-      end
+      write_content_to_file("#{self.path}/Gemfile", File.read("#{Bebox::Project.templates_path}/project/Gemfile.erb"))
     end
 
     # Create puppet base directories and files

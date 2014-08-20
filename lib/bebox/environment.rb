@@ -1,8 +1,10 @@
-require 'tilt'
 require 'bebox/project'
+require 'bebox/files_helper'
 
 module Bebox
   class Environment
+
+    include Bebox::FilesHelper
 
     attr_accessor :name, :project_root
 
@@ -59,10 +61,7 @@ module Bebox
     # Generate the deploy file for the environment
     def generate_deploy_file
       template_name = (self.name == 'vagrant') ? 'vagrant' : "environment"
-      config_deploy_template = Tilt::ERBTemplate.new("#{templates_path}/project/config/deploy/#{template_name}.erb")
-      File.open("#{self.project_root}/config/deploy/#{self.name}.rb", 'w') do |f|
-        f.write config_deploy_template.render(nil, :nodes => nil, :environment => self.name)
-      end
+      generate_file_from_template("#{templates_path}/project/config/deploy/#{template_name}.erb", "#{self.project_root}/config/deploy/#{self.name}.rb", {node: nil, environment: self.name})
     end
 
     # Generate the hiera data template for the environment
@@ -71,10 +70,7 @@ module Bebox
       project_name = Bebox::Project.shortname_from_file(self.project_root)
       Bebox::PROVISION_STEPS.each do |step|
         step_dir = Bebox::Provision.step_name(step)
-        hiera_template = Tilt::ERBTemplate.new("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb")
-        File.open("#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", 'w') do |f|
-          f.write hiera_template.render(nil, :step_dir => step_dir, :ssh_key => ssh_key, :project_name => project_name)
-        end
+        generate_file_from_template("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb", "#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", {step_dir: step_dir, ssh_key: ssh_key, project_name: project_name})
       end
     end
 

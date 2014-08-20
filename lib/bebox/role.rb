@@ -1,8 +1,8 @@
-require 'bebox/file_helper'
+require 'bebox/files_helper'
 
 module Bebox
   class Role
-    include Bebox::FileHelper
+    include Bebox::FilesHelper
     attr_accessor :project_root, :name
 
     def initialize(name, project_root)

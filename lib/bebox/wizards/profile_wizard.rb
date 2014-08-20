@@ -15,9 +15,9 @@ module Bebox
       \n* Must begin with an Lowercase letter
       \n* Can not be any of: #{Bebox::RESERVED_WORDS.join(', ')}
       \n\nNo changes were made." unless Bebox::Profile.valid_name?(profile_name)
-      # Clean the profile_path to make it a valid path
-      profile_base_path = Bebox::Profile.cleanpath(profile_base_path)
       unless profile_base_path.empty?
+        # Clean the profile_path to make it a valid path
+        profile_base_path = Bebox::Profile.cleanpath(profile_base_path)
         # Check if the path name is valid
         return error "Each part of the path can only contain:\n
           \n* Lowercase letters
@@ -28,7 +28,7 @@ module Bebox
           \n\nNo changes were made." unless Bebox::Profile.valid_pathname?(profile_base_path)
       end
       # Check if the profile exist
-      profile_path = profile_complete_path(profile_base_path, profile_name)
+      profile_path = profile_base_path.empty? ? profile_name : profile_complete_path(profile_base_path, profile_name)
       return error("The profile '#{profile_path}' already exist. No changes were made.") if profile_exists?(project_root, profile_path)
       # Profile creation
       profile = Bebox::Profile.new(profile_name, project_root, profile_base_path)
