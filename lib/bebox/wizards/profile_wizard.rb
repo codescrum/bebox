@@ -14,7 +14,7 @@ module Bebox
       \n* Underscores
       \n* Must begin with an Lowercase letter
       \n* Can not be any of: #{Bebox::RESERVED_WORDS.join(', ')}
-      \n\nNo changes were made." unless Bebox::Profile.valid_name?(profile_name)
+      \n\nNo changes were made." unless valid_puppet_class_name?(profile_name)
       unless profile_base_path.empty?
         # Clean the profile_path to make it a valid path
         profile_base_path = Bebox::Profile.cleanpath(profile_base_path)

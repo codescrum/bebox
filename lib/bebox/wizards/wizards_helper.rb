@@ -18,5 +18,11 @@ module Bebox
         end
       end
     end
+
+    # Check if the puppet resource has a valid name
+    def valid_puppet_class_name?(name)
+      valid_name = (name =~ /\A[a-z][a-z0-9_]*\Z/).nil? ? false : true
+      valid_name && !Bebox::RESERVED_WORDS.include?(name)
+    end
   end
 end

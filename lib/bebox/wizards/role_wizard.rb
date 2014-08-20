@@ -14,7 +14,7 @@ module Bebox
       \n* Underscores
       \n* Must begin with an Lowercase letter
       \n* Can not be any of: #{Bebox::RESERVED_WORDS.join(', ')}
-      \n\nNo changes were made." unless Bebox::Role.valid_name?(role_name)
+      \n\nNo changes were made." unless valid_puppet_class_name?(role_name)
       # Check if the role exist
       return error("The '#{role_name}' role already exist. No changes were made.") if role_exists?(project_root, role_name)
       # Role creation

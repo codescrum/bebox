@@ -61,12 +61,6 @@ module Bebox
       Bebox::Profile.list(project_root).count
     end
 
-    # Check if the profile has a valid name
-    def self.valid_name?(name)
-      valid_name = (name =~ /\A[a-z][a-z0-9_]*\Z/).nil? ? false : true
-      valid_name && !Bebox::RESERVED_WORDS.include?(name)
-    end
-
     # Check if the profile has a valid path name
     def self.valid_pathname?(pathname)
       #Split the name and validate each path part
