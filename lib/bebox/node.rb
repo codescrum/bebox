@@ -1,10 +1,11 @@
-require 'tilt'
 require 'bebox/logger'
+require 'bebox/file_helper'
 
 module Bebox
   class Node
 
     include Bebox::Logger
+    include Bebox::FileHelper
 
     attr_accessor :environment, :project_root, :hostname, :ip, :created_at, :started_at, :finished_at
 
@@ -75,10 +76,7 @@ module Bebox
     def create_prepare_checkpoint(started_at)
       self.started_at = started_at
       self.finished_at = DateTime.now.to_s
-      node_template = Tilt::ERBTemplate.new("#{Bebox::Node::templates_path}/node/prepared_node.yml.erb")
-      File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/prepared_nodes/#{self.hostname}.yml", 'w') do |f|
-        f.write node_template.render(nil, :node => self)
-      end
+      generate_file_from_template("#{Bebox::Node::templates_path}/node/prepared_node.yml.erb", "#{self.project_root}/.checkpoints/environments/#{self.environment}/prepared_nodes/#{self.hostname}.yml", {node: self})
     end
 
     # Create the puppet hiera template file
@@ -140,14 +138,10 @@ module Bebox
 
     # Generate the Vagrantfile
     def self.generate_vagrantfile(project_root, nodes)
-      template = Tilt::ERBTemplate.new("#{templates_path}/node/Vagrantfile.erb")
       network_interface = RUBY_PLATFORM =~ /darwin/ ? 'en0' : 'eth0'
       project_name = Bebox::Project.name_from_file(project_root)
       vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(project_root)
-      File.open("#{project_root}/Vagrantfile", 'w') do |f|
-        f.write template.render(nil, :nodes => nodes, :project_name => project_name,
-          :vagrant_box_provider => vagrant_box_provider, :network_interface => network_interface)
-      end
+      generate_file_from_template("#{templates_path}/node/Vagrantfile.erb", "#{project_root}/Vagrantfile", {nodes: nodes, project_name: project_name, vagrant_box_provider: vagrant_box_provider, network_interface: network_interface})
     end
 
     # Backup and add the vagrant hosts to local hosts file
@@ -184,10 +178,7 @@ module Bebox
       # Set the creation time for the node
       self.created_at = DateTime.now.to_s
       # Create the checkpoint file from template
-      node_template = Tilt::ERBTemplate.new("#{Bebox::Node::templates_path}/node/node.yml.erb")
-      File.open("#{self.project_root}/.checkpoints/environments/#{self.environment}/nodes/#{self.hostname}.yml", 'w') do |f|
-        f.write node_template.render(nil, :node => self)
-      end
+      generate_file_from_template("#{Bebox::Node::templates_path}/node/node.yml.erb", "#{self.project_root}/.checkpoints/environments/#{self.environment}/nodes/#{self.hostname}.yml", {node: self})
     end
 
     # Remove checkpoints for node
@@ -226,10 +217,7 @@ module Bebox
     # Regenerate the deploy file for the environment
     def self.regenerate_deploy_file(project_root, environment, nodes)
       template_name = (environment == 'vagrant') ? 'vagrant' : "environment"
-      config_deploy_template = Tilt::ERBTemplate.new("#{templates_path}/project/config/deploy/#{template_name}.erb")
-      File.open("#{project_root}/config/deploy/#{environment}.rb", 'w') do |f|
-        f.write config_deploy_template.render(nil, :nodes => nodes, :environment => environment)
-      end
+      generate_file_from_template("#{templates_path}/project/config/deploy/#{template_name}.erb", "#{project_root}/config/deploy/#{environment}.rb", {nodes: nodes, environment: environment})
     end
 
     # Return the running status of vagrant node
