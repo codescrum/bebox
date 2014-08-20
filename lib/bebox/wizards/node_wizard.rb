@@ -1,3 +1,5 @@
+require 'bebox/wizards/wizards_helper'
+
 module Bebox
   class NodeWizard
     include Bebox::Logger
