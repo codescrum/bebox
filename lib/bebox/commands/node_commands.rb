@@ -54,7 +54,7 @@ module Bebox
 
     def node_remove_command(node_command)
       # Node remove command
-      node_command.desc "remove a node in a environment"
+      node_command.desc "Remove a node in a environment"
       node_command.command :remove do |node_remove_command|
         node_remove_command.action do |global_options,options,args|
           environment = get_environment(options)

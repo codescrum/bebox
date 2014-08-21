@@ -31,7 +31,7 @@ module Bebox
 
     # Environment list command
     def environment_list_command(environment_command)
-      environment_command.desc 'list the remote environments in the project'
+      environment_command.desc 'List the remote environments in the project'
       environment_command.command :list do |environment_list_command|
         environment_list_command.action do |global_options,options,args|
           environments = Bebox::Environment.list(project_root)
