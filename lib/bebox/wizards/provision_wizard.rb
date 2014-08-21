@@ -1,3 +1,4 @@
+require 'bebox/wizards/wizards_helper'
 require 'bebox/provision'
 require 'bebox/node'
 

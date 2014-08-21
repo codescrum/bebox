@@ -43,24 +43,14 @@ module Bebox
 
     def generate_node_command(node_command, command, send_command, description)
       node_command.desc description
-      node_command.command command do |command|
-        command.action do |global_options,options,args|
+      node_command.command command do |generated_command|
+        generated_command.action do |global_options,options,args|
           environment = get_environment(options)
           info "Environment: #{environment}"
           Bebox::NodeWizard.new.send(send_command, project_root, environment)
         end
       end
     end
-
-    # def node_new_command(node_command)
-    #   # Node new command
-    #   node_command.desc 'add a node to a environment'
-    #   node_command.command :new do |node_new_command|
-    #     node_new_command.action do |global_options,options,args|
-    #       node_command_action(:create_node, options)
-    #     end
-    #   end
-    # end
 
     def node_remove_command(node_command)
       # Node remove command
@@ -73,15 +63,5 @@ module Bebox
         end
       end
     end
-
-    # def node_set_role_command(node_command)
-    #   # Associate node to role command
-    #   node_command.desc "Associate a node with a role in a environment"
-    #   node_command.command :set_role do |node_role_command|
-    #     node_role_command.action do |global_options,options,args|
-    #       node_command_action(:set_role, options)
-    #     end
-    #   end
-    # end
   end
 end
