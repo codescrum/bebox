@@ -1,5 +1,6 @@
 require 'bebox/wizards/wizards_helper'
 require 'bebox/project'
+require 'progressbar'
 require 'net/http'
 require 'uri'
 
@@ -18,22 +19,7 @@ module Bebox
       bebox_boxes_setup
       # Asks to choose an existing box
       current_box = choose_box(get_existing_boxes)
-      # If choose to download/select new box
-      if current_box.nil?
-        # Keep asking for valid uri or overwriting until confirmation
-        confirm = false
-        begin
-          # Asks vagrant box location to user if not choose an existing box
-          valid_box_uri = ask_uri
-          # Confirm if the box already exist
-          confirm = box_exists?(valid_box_uri) ? confirm_action?('There is already a box with that name, do you want to overwrite it?') : true
-        end while !confirm
-        # Setup the box with the valid uri
-        set_box(valid_box_uri)
-      else
-        valid_box_uri = current_box
-      end
-      vagrant_box_base = "#{BEBOX_BOXES_PATH}/#{valid_box_uri}"
+      vagrant_box_base = "#{BEBOX_BOXES_PATH}/#{get_valid_box_uri(current_box)}"
       # Asks user to choose vagrant box provider
       vagrant_box_provider = choose_option(%w{virtualbox vmware}, 'Choose the vagrant box provider')
       # Set default environments
@@ -42,6 +28,21 @@ module Bebox
       project = Bebox::Project.new(project_name, vagrant_box_base, Dir.pwd, vagrant_box_provider, default_environments)
       project.create
       ok "Project '#{project_name}' created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
+    end
+
+    # If choose to download/select new box get a valid uri
+    def get_valid_box_uri(current_box)
+      return (valid_box_uri = current_box) unless current_box.nil?
+      # Keep asking for valid uri or overwriting until confirmation
+      confirm = false
+      begin
+        # Asks vagrant box location to user if not choose an existing box
+        valid_box_uri = ask_uri
+        # Confirm if the box already exist
+        confirm = box_exists?(valid_box_uri) ? confirm_action?('There is already a box with that name, do you want to overwrite it?') : true
+      end while !confirm
+      # Setup the box with the valid uri
+      set_box(valid_box_uri)
     end
 
     # Check if there's an existing project in that dir
@@ -70,28 +71,28 @@ module Bebox
     def set_box(box_uri)
       uri = URI.parse(box_uri)
       if uri.scheme == ('http' || 'https')
+        info 'Downloading box ...'
         download_box(uri)
       else
-        file_name = uri.path.split('/').last
-        `ln -fs #{uri.path} #{BEBOX_BOXES_PATH}/#{file_name}`
+        `ln -fs #{uri.path} #{BEBOX_BOXES_PATH}/#{uri.path.split('/').last}`
       end
     end
 
     # Validate uri download or local box existence
     def uri_valid?(vbox_uri)
       uri = URI.parse(vbox_uri)
-      if uri.scheme == ('http' || 'https')
-        request = Net::HTTP.new uri.host
-        response = request.request_head uri.path
-        if response.code.to_i == 302
-          uri = URI.parse(response['location'])
-          request = Net::HTTP.new uri.host
-          response = request.request_head uri.path
-        end
-        ( response.code.to_i == 200) ? (return true) : error('Download link not valid!.')
-      else
-        File.file?(uri.path) ? (return true) : error('File path not exist!.')
-      end
+      %w{http https}.include?(uri.scheme) ? http_uri_valid?(uri) : file_uri_valid?(uri)
+    end
+
+    def http_uri_valid?(uri)
+      request = Net::HTTP.new uri.host
+      response = request.request_head uri.path
+      error('Redirections not supported.') if response.code.to_i == 302
+      ( response.code.to_i == 200) ? (return true) : error('Download link not valid!.')
+    end
+
+    def file_uri_valid?(uri)
+      File.file?(uri.path) ? (return true) : error('File path not exist!.')
     end
 
     # Check if a box with the same name already exist
@@ -125,22 +126,12 @@ module Bebox
 
     # Download a box by the specified uri
     def download_box(uri)
-      require 'progressbar'
-      info 'Downloading box ...'
       @counter = 0
-      # Manage redirections
-      request = Net::HTTP.new uri.host
-      response = request.request_head uri.path
-      uri = URI.parse(response['location']) if response.code.to_i == 302
-
-      # Set url variables
       url = uri.path
-      url_base = uri.host
       file_name = uri.path.split('/').last
-      expanded_directory = File.expand_path("#{BEBOX_BOXES_PATH}")
-
+      expanded_directory = File.expand_path(BEBOX_BOXES_PATH)
       # Download file to bebox boxes tmp
-      Net::HTTP.start(url_base) do |http|
+      Net::HTTP.start(uri.host) do |http|
         response = http.request_head(URI.escape(url))
         ProgressBar
         pbar = ProgressBar.new('file name:', response['content-length'].to_i)
