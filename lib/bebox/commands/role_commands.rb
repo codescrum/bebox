@@ -13,7 +13,8 @@ module Bebox
       desc 'Manage roles for the node provisioning phase.'
       command :role do |role_command|
         role_new_command(role_command)
-        role_remove_command(role_command)
+        generate_role_command(role_command, :remove, :remove_role, 'Remove a role from the project')
+        # role_remove_command(role_command)
         role_list_command(role_command)
         # These commands are available if there are at least one role and one profile
         (Bebox::Role.roles_count(project_root) > 0 && Bebox::Profile.profiles_count(project_root) > 0) ? load_role_profile_commands(role_command) : return
@@ -46,38 +47,19 @@ module Bebox
       end
     end
 
-    # Role remove command
-    def role_remove_command(role_command)
-      role_command.desc "Remove a role from the project"
-      role_command.command :remove do |role_remove_command|
-        role_remove_command.action do |global_options,options,args|
-          Bebox::RoleWizard.new.remove_role(project_root)
-        end
-      end
-    end
-
     def load_role_profile_commands(role_command)
-      role_add_profile_command(role_command)
-      role_remove_profile_command(role_command)
+      # role_add_profile_command(role_command)
+      generate_role_command(role_command, :add_profile, :add_profile, 'Add a profile to a role')
+      generate_role_command(role_command, :remove_profile, :remove_profile, 'Remove a profile from a role')
+      # role_remove_profile_command(role_command)
       role_list_profiles_command(role_command)
     end
 
-    # Role add profile command
-    def role_add_profile_command(role_command)
-      role_command.desc 'Add a profile to a role'
-      role_command.command :add_profile do |add_profile_command|
-        add_profile_command.action do |global_options,options,args|
-          Bebox::RoleWizard.new.add_profile(project_root)
-        end
-      end
-    end
-
-    # Role remove profile command
-    def role_remove_profile_command(role_command)
-      role_command.desc "Remove a profile from a role"
-      role_command.command :remove_profile do |remove_profile_command|
-        remove_profile_command.action do |global_options,options,args|
-          Bebox::RoleWizard.new.remove_profile(project_root)
+    def generate_role_command(role_command, command, send_command, description)
+      role_command.desc description
+      role_command.command command do |generated_command|
+        generated_command.action do |global_options,options,args|
+          Bebox::RoleWizard.new.send(send_command, project_root)
         end
       end
     end
@@ -91,13 +73,16 @@ module Bebox
           help_now!(error('You did not supply a role name.')) if args.count == 0
           role = args.first
           exit_now!(error("The '#{role}' role does not exist.")) unless Bebox::RoleWizard.new.role_exists?(project_root, role)
-          profiles = Bebox::Role.list_profiles(project_root, role)
-          title "Current profiles in '#{role}' role:"
-          profiles.map{|profile| msg(profile)}
-          warn("There are not profiles in role '#{role}'. You can add a new one with: 'bebox role add_profile' command.") if profiles.empty?
-          linebreak
+          print_profiles(role, Bebox::Role.list_profiles(project_root, role))
         end
       end
+    end
+
+    def print_profiles(role, profiles)
+      title "Current profiles in '#{role}' role:"
+      profiles.map{|profile| msg(profile)}
+      warn("There are not profiles in role '#{role}'. You can add a new one with: 'bebox role add_profile' command.") if profiles.empty?
+      linebreak
     end
   end
 end
