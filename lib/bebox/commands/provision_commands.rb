@@ -29,7 +29,6 @@ module Bebox
           if options[:all]
             title "Provisioning all steps..."
             Bebox::PROVISION_STEPS.each do |step|
-              title "Provisioning #{step}:"
               Bebox::ProvisionWizard.new.apply_step(project_root, environment, step)
             end
           else
@@ -37,7 +36,6 @@ module Bebox
             help_now!(error('You did not specify an step')) if args.count == 0
             help_now!(error('You did not specify a valid step')) unless valid_step?(step)
             # Apply the step for the environment
-            title "Provisioning #{step}:"
             Bebox::ProvisionWizard.new.apply_step(project_root, environment, step)
           end
         end
