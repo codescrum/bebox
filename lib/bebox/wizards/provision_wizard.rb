@@ -33,10 +33,6 @@ module Bebox
       provision.apply.success? ? (ok "Node '#{node.hostname}' provisioned to #{step}.") : (error "An error ocurred in the provision of #{step} for node '#{node.hostname}'")
     end
 
-    def regenerate_puppet_step_files
-
-    end
-
     def check_node_to_step(node, in_step_nodes, step)
       return true unless in_step_nodes.include?(node.hostname)
       message = "The node '#{node.hostname}' was already provisioned in #{step}"
