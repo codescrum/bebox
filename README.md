@@ -1,6 +1,7 @@
-
 Bebox
 =====
+
+[![Code Climate](https://codeclimate.com/github/codescrum/bebox/badges/gpa.svg)](https://codeclimate.com/github/codescrum/bebox)
 
 Introduction
 ------------
