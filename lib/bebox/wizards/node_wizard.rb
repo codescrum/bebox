@@ -1,9 +1,11 @@
 require 'bebox/wizards/wizards_helper'
+require 'bebox/vagrant_helper'
 
 module Bebox
   class NodeWizard
     include Bebox::Logger
     include Bebox::WizardsHelper
+    include Bebox::VagrantHelper
 
     # Create a new node
     def create_new_node(project_root, environment)
@@ -58,9 +60,9 @@ module Bebox
         Bebox::Node.regenerate_deploy_file(project_root, environment, nodes_to_prepare)
         # If environment is 'vagrant' Prepare and Up the machines
         if environment == 'vagrant'
-          Bebox::Node.generate_vagrantfile(project_root, nodes_to_prepare)
-          nodes_to_prepare.each{|node| node.prepare_vagrant}
-          Bebox::Node.up_vagrant_nodes(project_root)
+          Bebox::VagrantHelper.generate_vagrantfile(nodes_to_prepare)
+          nodes_to_prepare.each{|node| prepare_vagrant(node)}
+          Bebox::VagrantHelper.up_vagrant_nodes(project_root)
         end
         # For all the environments do the preparation
         nodes_to_prepare.each do |node|

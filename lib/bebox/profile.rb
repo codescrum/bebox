@@ -1,4 +1,5 @@
 require 'bebox/files_helper'
+require 'pry'
 
 module Bebox
   class Profile
@@ -81,7 +82,7 @@ module Bebox
 
     # Create the profile path relative to the project
     def relative_path
-      File.join("#{self.path}", "#{self.name}")
+      path.empty? ? self.name : File.join("#{self.path}", "#{self.name}")
     end
 
     # Generate the namespace name from the profile relative path

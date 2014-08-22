@@ -41,6 +41,7 @@ module Bebox
       end
     end
 
+    # For new and set_role commands
     def generate_node_command(node_command, command, send_command, description)
       node_command.desc description
       node_command.command command do |generated_command|
@@ -53,7 +54,6 @@ module Bebox
     end
 
     def node_remove_command(node_command)
-      # Node remove command
       node_command.desc "Remove a node in a environment"
       node_command.command :remove do |node_remove_command|
         node_remove_command.action do |global_options,options,args|

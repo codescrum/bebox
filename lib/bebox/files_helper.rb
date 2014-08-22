@@ -23,5 +23,15 @@ module Bebox
         f.write content
       end
     end
+
+    # Get the content of a file with trimmed spaces
+    def file_content_trimmed(path)
+      File.read(path).gsub(/\s+/, ' ').strip
+    end
+
+    # Get the templates path inside the gem
+    def self.templates_path
+      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+    end
   end
 end

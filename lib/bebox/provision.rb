@@ -34,33 +34,41 @@ module Bebox
 
     # Check if it's necessary a Puppetfile accord to it's content
     def check_puppetfile_content
-      puppetfile_content = File.read("#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile").strip
-      `rm "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile"` if puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten.empty?
+      puppetfile_content = File.read("#{project_root}/puppet/steps/#{step_name}/Puppetfile").strip
+      `rm "#{project_root}/puppet/steps/#{step_name}/Puppetfile"` if puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten.empty?
     end
 
     # Copy the static modules to the step-N modules path
     def copy_static_modules
-      `cp -R #{Bebox::Provision::templates_path}/puppet/#{self.step}/modules/* #{self.project_root}/puppet/steps/#{Bebox::Provision.step_name(self.step)}/modules/`
+      `cp -R #{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/modules/* #{self.project_root}/puppet/steps/#{step_name}/modules/`
     end
 
     # Generate the hiera data for step from the template
     def generate_hiera
+      generate_hiera_yaml
+      generate_hiera_data_common
+    end
+
+    def generate_hiera_yaml
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/hiera/hiera.yaml.erb", "#{self.project_root}/puppet/steps/#{step_name}/hiera/hiera.yaml", {step_dir: step_name})
+    end
+
+    def generate_hiera_data_common
       ssh_key = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
       project_name = Bebox::Project.shortname_from_file(self.project_root)
-      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{self.step}/hiera/hiera.yaml.erb", "#{self.project_root}/puppet/steps/#{Bebox::Provision.step_name(self.step)}/hiera/hiera.yaml", {step_dir: Bebox::Provision.step_name(self.step)})
-      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{self.step}/hiera/data/common_apply.yaml.erb", "#{self.project_root}/puppet/steps/#{Bebox::Provision.step_name(self.step)}/hiera/data/common.yaml", {ssh_key: ssh_key, project_name: project_name})
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/hiera/data/common_apply.yaml.erb", "#{self.project_root}/puppet/steps/#{step_name}/hiera/data/common.yaml", {ssh_key: ssh_key, project_name: project_name})
     end
 
     # Generate the site.pp manifests file for step
     def self.generate_manifests(project_root, step, nodes)
-      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{step}/manifests/site_apply.pp.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp", {nodes: nodes})
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/manifests/site_apply.pp.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp", {nodes: nodes})
     end
 
     # Generate the hiera templates for each step
     def self.generate_hiera_for_steps(project_root, template_file, filename, options)
       Bebox::PROVISION_STEPS.each do |step|
         step_dir = Bebox::Provision.step_name(step)
-        generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{step}/hiera/data/#{template_file}", "#{project_root}/puppet/steps/#{step_dir}/hiera/data/#{filename}.yaml", options)
+        generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/hiera/data/#{template_file}", "#{project_root}/puppet/steps/#{step_dir}/hiera/data/#{filename}.yaml", options)
       end
     end
 
@@ -89,7 +97,7 @@ module Bebox
         puppetfile_content = File.read(profile_puppetfile_path)
         modules << puppetfile_content.scan(/^\s*(mod\s*.+?)$/).uniq
       end
-      generate_file_from_template("#{Bebox::Provision::templates_path}/puppet/#{step}/Puppetfile.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile", {profile_modules: modules.flatten})
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/Puppetfile.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile", {profile_modules: modules.flatten})
     end
 
     # Get the role name associated with a node
@@ -129,7 +137,7 @@ module Bebox
     # Add a node to site.pp
     def self.add_node_to_step_manifests(project_root, node)
       Bebox::PROVISION_STEPS.each do |step|
-        manifest_node = render_erb_template("#{Bebox::Provision::templates_path}/puppet/#{step}/manifests/node.erb", {node: node})
+        manifest_node = render_erb_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/manifests/node.erb", {node: node})
         Bebox::Provision.remove_node(project_root, node.hostname, step)
         manifest_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp"
         content = File.read(manifest_path)
@@ -210,12 +218,7 @@ module Bebox
     def create_step_checkpoint(started_at)
       self.node.started_at = started_at
       self.node.finished_at = DateTime.now.to_s
-      generate_file_from_template("#{Bebox::Provision::templates_path}/node/provisioned_node.yml.erb", "#{self.project_root}/.checkpoints/environments/#{self.environment}/steps/#{self.step}/#{self.node.hostname}.yml", {node: self.node})
-    end
-
-    # Get the templates path inside the gem
-    def self.templates_path
-      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/provisioned_node.yml.erb", "#{self.project_root}/.checkpoints/environments/#{self.environment}/steps/#{self.step}/#{self.node.hostname}.yml", {node: self.node})
     end
 
     # Translate step name to directory name

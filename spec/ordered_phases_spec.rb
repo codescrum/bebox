@@ -28,16 +28,18 @@ describe 'Test 99: ordered specs' do
 
   context '99: project destroy' do
 
+    include Bebox::VagrantHelper
+
     let(:project) { build(:project) }
     let(:node) { build(:node) }
 
     it 'should clean spec files' do
       # Test if the vagrant was halt
-      Bebox::Node.halt_vagrant_nodes(node.project_root)
-      expect(node.vagrant_box_running?).to be(false)
+      Bebox::VagrantHelper.halt_vagrant_nodes(node.project_root)
+      expect(vagrant_box_running?(node)).to be(false)
       # Test if the vagrant box was destroyed
-      node.remove_vagrant_box
-      expect(node.vagrant_box_exist?).to be(false)
+      remove_vagrant_box(node)
+      expect(vagrant_box_exist?(node)).to be(false)
       # Test if the project directory was destroyed
       project.destroy
       expect(Dir.exist?("#{project.path}")).to be(false)

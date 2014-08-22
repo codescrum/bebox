@@ -18,6 +18,7 @@ require_relative '../lib/bebox/wizards/node_wizard'
 require_relative '../lib/bebox/provision'
 require_relative '../lib/bebox/role'
 require_relative '../lib/bebox/profile'
+require_relative '../lib/bebox/vagrant_helper'
 
 I18n.enforce_available_locales = false
 

@@ -5,6 +5,8 @@ require_relative '../spec/factories/node.rb'
 
 describe 'Test 05: Bebox::Node' do
 
+  include Bebox::VagrantHelper
+
   describe 'Pre-prepare nodes' do
 
     let(:nodes) { 1.times.map{|index| build(:node, :created, hostname: "node#{index}.server1.test")} }
@@ -15,7 +17,7 @@ describe 'Test 05: Bebox::Node' do
 
     context 'pre vagrant prepare' do
       it 'should generate the Vagrantfile' do
-        Bebox::Node.generate_vagrantfile(project_root, nodes)
+        Bebox::VagrantHelper.generate_vagrantfile(nodes)
         vagrantfile_content = File.read("#{project_root}/Vagrantfile").gsub(/\s+/, ' ').strip
         ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/Vagrantfile.test.erb')
         vagrantfile_output_content = ouput_template.render(nil, ip_address: nodes.first.ip).gsub(/\s+/, ' ').strip
@@ -44,7 +46,7 @@ describe 'Test 05: Bebox::Node' do
         end
 
         it 'should add the hosts config to hosts file' do
-          nodes.each{|node| node.add_to_local_hosts}
+          nodes.each{|node| add_to_local_hosts(node)}
           node = nodes.first
           hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
           expect(hosts_content).to include(*nodes.map{|node| "#{node.ip} #{node.hostname}"})
@@ -54,14 +56,14 @@ describe 'Test 05: Bebox::Node' do
       describe 'vagrant setup' do
         it 'should add the node to vagrant' do
           vagrant_box_names_expected = nodes.map{|node| "#{project_name}-#{node.hostname}"}
-          nodes.each{|node| node.add_vagrant_node(project_name, vagrant_box_base)}
+          nodes.each{|node| add_vagrant_node(project_name, vagrant_box_base, node)}
           node = nodes.first
-          expect(node.installed_vagrant_box_names).to include(*vagrant_box_names_expected)
+          expect(installed_vagrant_box_names(node)).to include(*vagrant_box_names_expected)
         end
 
         it 'should up the vagrant boxes' do
-          Bebox::Node.up_vagrant_nodes(project_root)
-          nodes.each{|node| expect(node.vagrant_box_running?).to eq(true)}
+          Bebox::VagrantHelper.up_vagrant_nodes(project_root)
+          nodes.each{|node| expect(vagrant_box_running?(node)).to eq(true)}
         end
 
         it 'should connect to vagrant box through ssh' do

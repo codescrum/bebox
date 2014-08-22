@@ -1,4 +1,5 @@
 require 'bebox/wizards/node_wizard'
+require 'bebox/vagrant_helper'
 
 module Bebox
   module PrepareCommands
@@ -47,7 +48,7 @@ module Bebox
       title "Environment: #{environment}\n#{message}"
       nodes.each{|node| msg(node.hostname)}
       linebreak
-      Bebox::Node.send(command, project_root)
+      Bebox::VagrantHelper.send(command, project_root)
     end
   end
 end

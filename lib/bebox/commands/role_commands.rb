@@ -14,7 +14,6 @@ module Bebox
       command :role do |role_command|
         role_new_command(role_command)
         generate_role_command(role_command, :remove, :remove_role, 'Remove a role from the project')
-        # role_remove_command(role_command)
         role_list_command(role_command)
         # These commands are available if there are at least one role and one profile
         (Bebox::Role.roles_count(project_root) > 0 && Bebox::Profile.profiles_count(project_root) > 0) ? load_role_profile_commands(role_command) : return
@@ -48,13 +47,12 @@ module Bebox
     end
 
     def load_role_profile_commands(role_command)
-      # role_add_profile_command(role_command)
       generate_role_command(role_command, :add_profile, :add_profile, 'Add a profile to a role')
       generate_role_command(role_command, :remove_profile, :remove_profile, 'Remove a profile from a role')
-      # role_remove_profile_command(role_command)
       role_list_profiles_command(role_command)
     end
 
+    # For add_profile remove_profile and remove_role commands
     def generate_role_command(role_command, command, send_command, description)
       role_command.desc description
       role_command.command command do |generated_command|
