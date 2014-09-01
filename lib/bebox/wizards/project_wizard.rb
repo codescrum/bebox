@@ -103,7 +103,8 @@ module Bebox
       # Converts the bebox boxes directory to an absolute pathname
       expanded_directory = File.expand_path("#{BEBOX_BOXES_PATH}")
       # Get an array of bebox boxes paths
-      Dir["#{expanded_directory}/*"].reject {|f| File.directory? f}
+      boxes = Dir["#{expanded_directory}/*"].reject {|f| File.directory? f}
+      boxes.map{|box| box.split('/').last}
     end
 
     # Asks to choose an existing box in the bebox boxes directory
