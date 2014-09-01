@@ -71,6 +71,7 @@ pkg/
 
 # Spec tests
 spec/support/config_specs.yaml
+coverage/
 
 # Local
 TODO
