@@ -1,5 +1,3 @@
-require 'bebox/wizards/node_wizard'
-require 'bebox/vagrant_helper'
 
 module Bebox
   module PrepareCommands

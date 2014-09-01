@@ -1,6 +1,3 @@
-require 'bebox/role'
-require 'bebox/node'
-require 'bebox/wizards/node_wizard'
 
 module Bebox
   module NodeCommands

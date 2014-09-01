@@ -1,5 +1,3 @@
-require 'bebox/files_helper'
-require 'pry'
 
 module Bebox
   class Profile

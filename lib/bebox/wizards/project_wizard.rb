@@ -1,8 +1,3 @@
-require 'bebox/wizards/wizards_helper'
-require 'bebox/project'
-require 'progressbar'
-require 'net/http'
-require 'uri'
 
 module Bebox
   class ProjectWizard
@@ -60,15 +55,14 @@ module Bebox
 
     # Asks vagrant box location to user until is valid
     def ask_uri
-      vbox_uri =  ask(highline_quest('Write the URI (http, local_path) for the vagrant box to be used in the project:')) do |q|
-        q.default = 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
-      end
+      vbox_uri = write_input('Write the URI (http, local_path) for the vagrant box to be used in the project:', 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box')
       # If valid return uri if not keep asking for uri
       uri_valid?(vbox_uri) ? (return vbox_uri) : ask_uri
     end
 
     # Setup the box in the bebox boxes directory
     def set_box(box_uri)
+      require 'uri'
       uri = URI.parse(box_uri)
       if uri.scheme == ('http' || 'https')
         info 'Downloading box ...'
@@ -80,11 +74,13 @@ module Bebox
 
     # Validate uri download or local box existence
     def uri_valid?(vbox_uri)
+      require 'uri'
       uri = URI.parse(vbox_uri)
       %w{http https}.include?(uri.scheme) ? http_uri_valid?(uri) : file_uri_valid?(uri)
     end
 
     def http_uri_valid?(uri)
+      require 'net/http'
       request = Net::HTTP.new uri.host
       response = request.request_head uri.path
       error('Redirections not supported.') if response.code.to_i == 302
@@ -114,13 +110,8 @@ module Bebox
     def choose_box(boxes)
       # Menu to choose vagrant box provider
       other_box_message = 'Download/Select a new box'
-      current_box = choose do |menu|
-        menu.header = title('Choose an existing box or download/select a new box')
-        boxes.each do |box|
-          menu.choice(box.split('/').last)
-        end
-        menu.choice(other_box_message)
-      end
+      boxes << other_box_message
+      current_box = choose_option(boxes, 'Choose an existing box or download/select a new box')
       current_box = (current_box == other_box_message) ? nil : current_box
     end
 
@@ -131,6 +122,8 @@ module Bebox
       file_name = uri.path.split('/').last
       expanded_directory = File.expand_path(BEBOX_BOXES_PATH)
       # Download file to bebox boxes tmp
+      require 'net/http'
+      require 'uri'
       Net::HTTP.start(uri.host) do |http|
         response = http.request_head(URI.escape(url))
         ProgressBar

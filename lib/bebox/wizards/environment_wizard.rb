@@ -1,4 +1,3 @@
-require 'bebox/wizards/wizards_helper'
 
 module Bebox
   class EnvironmentWizard

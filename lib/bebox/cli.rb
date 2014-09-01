@@ -1,6 +1,3 @@
-require 'gli'
-require 'highline/import'
-require 'bebox/logger'
 
 module Bebox
   class Cli
@@ -16,10 +13,8 @@ module Bebox
       version Bebox::VERSION
 
       if inside_project?
-        require 'bebox/commands/project_commands'
         self.extend Bebox::ProjectCommands
       else
-        require 'bebox/commands/general_commands'
         self.extend Bebox::GeneralCommands
       end
       exit run(*args)

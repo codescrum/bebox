@@ -1,6 +1,3 @@
-require 'bebox/commands/commands_helper'
-require 'bebox/wizards/wizards_helper'
-require 'bebox/environment'
 
 module Bebox
   module ProjectCommands

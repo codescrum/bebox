@@ -1,5 +1,3 @@
-require 'bebox/wizards/profile_wizard'
-
 
 module Bebox
   module ProfileCommands

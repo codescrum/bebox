@@ -1,5 +1,3 @@
-require 'bebox/files_helper'
-require 'bebox/logger'
 
 module Bebox
   module VagrantHelper
@@ -32,7 +30,7 @@ module Bebox
 
     # Backup and add the vagrant hosts to local hosts file
     def configure_local_hosts(project_name, node)
-      info "\nPlease provide your local password, if ask you, to configure the local hosts file."
+      info "\nPlease provide your local password, if asked, to configure the local hosts file."
       backup_local_hosts(project_name)
       add_to_local_hosts(node)
     end

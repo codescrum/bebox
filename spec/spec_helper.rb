@@ -10,6 +10,10 @@ require 'net/ssh'
 include Serverspec::Helper::Ssh
 include Serverspec::Helper::Debian
 
+require_relative '../lib/bebox/logger'
+require_relative '../lib/bebox/files_helper'
+require_relative '../lib/bebox/wizards/wizards_helper'
+require_relative '../lib/bebox/vagrant_helper'
 require_relative '../lib/bebox/project'
 require_relative '../lib/bebox/wizards/project_wizard'
 require_relative '../lib/bebox/environment'

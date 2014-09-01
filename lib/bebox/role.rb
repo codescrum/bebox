@@ -1,4 +1,3 @@
-require 'bebox/files_helper'
 
 module Bebox
   class Role

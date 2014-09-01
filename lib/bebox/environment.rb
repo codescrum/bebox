@@ -1,5 +1,3 @@
-require 'bebox/project'
-require 'bebox/files_helper'
 
 module Bebox
   class Environment

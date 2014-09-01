@@ -1,4 +1,3 @@
-require 'bebox/role'
 
 module Bebox
   class RoleWizard
@@ -46,7 +45,6 @@ module Bebox
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
       role = choose_option(roles, 'Choose an existing role:')
-      require 'bebox/wizards/profile_wizard'
       profile = choose_option(profiles, 'Choose the profile to add:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
         return warn("Profile '#{profile}' already in the Role '#{role}'. No changes were made.")
@@ -61,7 +59,6 @@ module Bebox
       roles = Bebox::Role.list(project_root)
       profiles = Bebox::Profile.list(project_root)
       role = choose_option(roles, 'Choose an existing role:')
-      require 'bebox/wizards/profile_wizard'
       profile = choose_option(profiles, 'Choose the profile to remove:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
         Bebox::Role.remove_profile(project_root, role, profile)

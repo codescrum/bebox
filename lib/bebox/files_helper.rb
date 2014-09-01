@@ -1,4 +1,3 @@
-require 'tilt'
 
 module Bebox
   module FilesHelper
@@ -14,6 +13,7 @@ module Bebox
 
     # Render a template for file content
     def render_erb_template(template_path, options)
+      require 'tilt'
       Tilt::ERBTemplate.new(template_path).render(nil, options)
     end
 

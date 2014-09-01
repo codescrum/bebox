@@ -1,5 +1,3 @@
-require 'bebox/wizards/environment_wizard'
-require 'bebox/environment'
 
 module Bebox
   module EnvironmentCommands

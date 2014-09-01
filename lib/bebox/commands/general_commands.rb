@@ -12,7 +12,6 @@ module Bebox
       command :new do |project_command|
         project_command.action do |global_options,options,args|
           if args.count > 0
-            require 'bebox/wizards/project_wizard'
             Bebox::ProjectWizard.new.create_new_project("bebox-#{args.first}")
           else
             help_now!(error('You did not supply a project name'))

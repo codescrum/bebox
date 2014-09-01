@@ -1,6 +1,3 @@
-require 'bebox/profile'
-require 'bebox/wizards/role_wizard'
-
 
 module Bebox
   module RoleCommands

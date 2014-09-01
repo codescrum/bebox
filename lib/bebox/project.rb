@@ -1,7 +1,3 @@
-require 'bebox/environment'
-require 'bebox/provision'
-require 'bebox/logger'
-require 'bebox/files_helper'
 
 module Bebox
   class Project

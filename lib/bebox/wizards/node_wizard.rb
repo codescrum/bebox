@@ -1,5 +1,3 @@
-require 'bebox/wizards/wizards_helper'
-require 'bebox/vagrant_helper'
 
 module Bebox
   class NodeWizard
@@ -41,7 +39,6 @@ module Bebox
       roles = Bebox::Role.list(project_root)
       nodes = Bebox::Node.list(project_root, environment, 'nodes')
       node = choose_option(nodes, 'Choose an existing node:')
-      require 'bebox/wizards/role_wizard'
       role = choose_option(roles, 'Choose an existing role:')
       Bebox::Provision.associate_node_role(project_root, environment, node, role)
       ok 'Role associated to node!.'
@@ -108,20 +105,14 @@ module Bebox
       end
     end
 
-    # Ask for the hostname until is valid
+    # Ask for the hostname
     def ask_hostname(project_root, environment)
-      ask(highline_quest('Write the hostname for the node:')) do |q|
-        q.validate = /\.(.*)/
-        q.responses[:not_valid] = highline_warn('Enter valid hostname. Ex. host.server1.com')
-      end
+      write_input('Write the hostname for the node:', nil, /\.(.*)/, 'Enter valid hostname. Ex. host.server1.com')
     end
 
     # Ask for the ip until is valid
     def ask_ip(environment)
-      ip = ask(highline_quest('Write the IP address for the node:')) do |q|
-        q.validate = /\.(.*)/
-        q.responses[:not_valid] = highline_warn('Enter a valid IP address. Ex. 192.168.0.50')
-      end
+      ip = write_input('Write the IP address for the node:', nil, /\.(.*)/, 'Enter a valid IP address. Ex. 192.168.0.50')
       # If the environment is not vagrant don't check ip free
       return ip if environment != 'vagrant'
       # Check if the ip address is free

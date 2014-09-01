@@ -1,4 +1,3 @@
-require 'colorize'
 
 # A simple logger with colored output (logs to STDOUT)
 module Bebox

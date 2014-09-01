@@ -1,6 +1,3 @@
-require 'bebox/logger'
-require 'bebox/files_helper'
-require 'bebox/vagrant_helper'
 
 module Bebox
   class Node

@@ -1,5 +1,3 @@
-require 'bebox/wizards/provision_wizard'
-
 
 module Bebox
   module ProvisionCommands
