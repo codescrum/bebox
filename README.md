@@ -20,25 +20,35 @@ Bebox development is based on awesome tools on their own, and essentially based 
 * Written in Ruby and distributed as a gem
 * It has a very nice CLI based on a commandline tool framework called [GLI](https://github.com/davetron5000/gli)
 * Uses [Puppet (opensource)](http://puppetlabs.com/puppet/puppet-open-source) for provisioning machines, and its the main component that the Bebox workflow aims to organize.
-* Uses [vagrant](http://www.vagrantup.com/) for setting up a similar development/test environment in accordance to the remote machines real setup.
+* Uses [Vagrant](http://www.vagrantup.com/) for setting up a similar development/test environment in accordance to the remote machines real setup.
 * Uses [Capistrano](http://capistranorb.com/) for automating the tasks to be executed on remote/vagrant machines.
 
 Workflow
 --------
 
-Bebox’s workflow is comprised of the five (5) phases explained below:
+Bebox’s workflow is comprised of the three (3) phases explained below:
 
-###Project creation phase
+###Configuration phase
 
-In this phase, the project skeleton is created, just like when a rails app is created. Keep in mind we are generating a "provisioning" repo skeleton and much of the logic behind bebox is put directly into the generated code so it can be tuned.
+In this phase all the project generation and configuration is done. This involves the project creation, an environment definition, the node allocation for each environment and the roles/profiles creation.
 
-###Environment definition phase
+* ####Project creation
 
-Any number of environments are defined. By default, the 'vagrant', 'staging', and 'production' environments are present. You an create any number of environments you need. The 'vagrant' environment is special as it is designed to run in virtual machines hosted in the local machine.
+    The project skeleton is created, just like when a rails app is created. Keep in mind we are generating a             "provisioning" repo skeleton and much of the logic behind bebox is put directly into the generated code so
+    it can be tuned.
 
-###Node allocation phase
+* ####Environment definition
 
-For each environment, there can be any number of nodes. The nodes for every environment are configured. A node represents a machine or server, a node's critical attributes are only it's hostname and ip address.
+    Any number of environments are defined. By default, the 'vagrant', 'staging', and 'production' environments are      present. You an create any number of environments you need. The 'vagrant' environment is special as it is            designed to run in virtual machines hosted in the local machine.
+
+* ####Node allocation
+
+    For each environment, there can be any number of nodes. The nodes for every environment are configured. A node       represents a machine or server, a node's critical attributes are only it's hostname and ip address.
+
+* ####Roles/Profiles definition
+
+    We follow the roles and profiles scheme (links to read about [here](http://www.craigdunn.org/2012/05/239/) and       [here](http://garylarizza.com/blog/2014/02/17/puppet-workflow-part-2/)). Each node has a role associated and a
+    role can have multiple profiles associated. Each profile contains the puppet code and modules definition that        determine the tasks to perform in the remote machine.
 
 ###Prepare phase
 
@@ -54,17 +64,20 @@ Also, the idea of steps helps in visualizing/imagining layers of configuration.
 
 Coming back to the steps, the four default steps that have been put into Bebox's projects by default are:
 
-####Fundamental step (0-fundamental)
-This step only provides a 'puppet' user, which the following steps use to install everything else (instead of using root). This is done to have all environments as similar as possible. In the 'vagrant' environment, the main user is 'vagrant', but this could also be 'root' or something else, so this ensures that a single user (other than root) for making changes via Puppet is created.
+* ####Fundamental step (step-0)
 
-####The user layer step (1-users)
-Based on practical experience, this next step should be the one responsible for setting system users, so that they exist prior to any service level provisioning.
+    This step only provides a 'puppet' user, which the following steps use to install everything else (instead of        using root). This is done to have all environments as similar as possible. In the 'vagrant' environment, the
+    main user is 'vagrant', but this could also be 'root' or something else, so this ensures that a single user         (other than root) for making changes via Puppet is created.
 
-####The service layer step (2-services)
-This step is what you would have in your regular puppet provisioning repo (except for the users of course). We follow the roles and profiles scheme (links to read about [here](http://www.craigdunn.org/2012/05/239/) and [here](http://garylarizza.com/blog/2014/02/17/puppet-workflow-part-2/)) and install the majority of the functional services, web, database, etc.
+* ####The user layer step (step-1)
 
-####The security layer step (3-security)
-This step configure some packages to provide a minimal security in the system (fail2ban, ssh access, iptables).
+    Based on practical experience, this next step should be the one responsible for setting system users, so that        they exist prior to any service level provisioning.
+
+* ####The service layer step (step-2)
+    This step is what you would have in your regular puppet provisioning repo (except for the users of course).          Following the roles and profiles pattern we can and install the majority of the functional services, web,            database, etc.
+
+* ####The security layer step (step-3)
+    This step configure some packages to provide a minimal security in the system (fail2ban, ssh access, iptables).
 
 
 NOTE: Probably many people would think this is not advisable, so there is always the possibility of having only one step, one run, one manifest for Puppet to run in this phase.
@@ -204,7 +217,7 @@ To list roles:
 
     bebox role list
 
-**We recommend to use our default roles (fundamental, users, security) for steps (0, 1, 3), but you can edit or delete them under your own risk**
+**We recommend to use our default roles (fundamental, users, security) for steps (0, 1, 3) respectively, but you can edit or delete them under your own risk**
 
 ####Manage profiles
 
@@ -258,7 +271,7 @@ To list profiles:
 
     bebox profile list
 
-**We recommend to use our default profiles (fundamental, users, security) for steps (0, 1, 3), but you can edit or delete them under your own risk**
+**We recommend to use our default profiles (fundamental, users, security) for steps (0, 1, 3) respectively, but you can edit or delete them under your own risk**
 
 **Important:** Remember that you need to write/edit the puppet code for the profiles to work (specially step-2 that has no defaults); also you have to write/edit the Puppetfile template created to add modules that your profile use; additionally if you call hiera data from a profile you need to add them in the hiera/data/<data>.yaml file in the structure created (see Hiera part below)
 
@@ -302,10 +315,10 @@ If you use hiera data from your profiles, you can add them to the appropiate fil
 
     ── puppet/
         └── steps/
-           ├── 0-fundamental/
-           ├── 1-users/
-           ├── 2-services/
-           ├── 3-security/
+           ├── step-0/
+           ├── step-1/
+           ├── step-2/
+           ├── step-3/
                ├── hiera/
                │   └── data/
                │   │   └── [node].yaml
@@ -317,11 +330,37 @@ If you use hiera data from your profiles, you can add them to the appropiate fil
                ├── modules/
                └── Puppetfile (Automatically generated by Bebox in every 'apply')
 
-Each of the *<number>-<step-name>* directories corresponds to a provisioning step phase. For example **0-fundamental** correspond to **step-0** option.
+Each of the *<number>-<step-name>* directories corresponds to a provisioning step phase.
 
 To add hiera data you need to edit any of the **[node].yaml**, **[environment].yaml**, **common.yaml**.
 [node]: correspond to the hiera file for the node hostname (Ex. node0.server1.com.yaml).
 [environment]: correspond to the hiera file for the node hostname (Ex. vagrant.yaml, production.yaml).
+
+###Checkpoints
+
+Bebox create a series of checkpoint files to reflect the node phase and step current state. The checkpoints are stored in a structure like the following:
+
+    ── .checkpoints/
+       └── environments/
+           ├── production/
+           ├── staging/
+           ├── vagrant/
+              └── phases/
+                  ├── phase-0/
+                  │   └── node_0.yml
+                  ├── phase-1/
+                  │   └── node_0.yml
+                  └── phase-2/
+                      └── steps/
+                         ├── step-0/
+                         ├── step-1/
+                         ├── step-2/
+                         └── step-3/
+                            └── node_0.yml
+
+The **[node].yml** file store some information about datetimes for creation, start and finish of the node in each phase.
+
+**Note:** The .checkpoints directory is gitignored by default.
 
 
 Development
