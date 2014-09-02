@@ -14,16 +14,16 @@ module Bebox
     # Create all files and directories related to an environment
     def create
       create_checkpoints
-      create_capistrano_base
-      generate_deploy_file
+      create_config_base
+      generate_deploy_files
       generate_hiera_template
     end
 
     # Delete all files and directories related to an environment
     def remove
       remove_checkpoints
-      remove_capistrano_base
-      remove_deploy_file
+      remove_config
+      # remove_deploy_file
       remove_hiera_template
     end
 
@@ -43,23 +43,28 @@ module Bebox
       `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.name}`
     end
 
-    # Create capistrano base
-    def create_capistrano_base
+    # Create config base for environment
+    def create_config_base
       # Create keys directory for environment
-      `cd #{self.project_root} && mkdir -p config/keys/environments/#{self.name}`
+      `cd #{self.project_root} && mkdir -p config/environments/#{self.name}/{steps,keys}`
       # Create ssh key for puppet user if environment is vagrant
       generate_puppet_user_keys('vagrant') if self.name == 'vagrant'
     end
 
-    # Remove capistrano base
-    def remove_capistrano_base
-      `cd #{self.project_root} && rm -rf config/keys/environments/#{self.name}`
+    # Remove config for environment
+    def remove_config
+      `cd #{self.project_root} && rm -rf config/environments/#{self.name}`
     end
 
-    # Generate the deploy file for the environment
-    def generate_deploy_file
+    # Generate the deploy files for the environment
+    def generate_deploy_files
       template_name = (self.name == 'vagrant') ? 'vagrant' : "environment"
-      generate_file_from_template("#{templates_path}/project/config/deploy/#{template_name}.erb", "#{self.project_root}/config/deploy/#{self.name}.rb", {nodes: nil, environment: self.name})
+      # Generate capistrano specific steps recipes
+      Bebox::PROVISION_STEPS.each do |step|
+        generate_file_from_template("#{templates_path}/project/config/deploy/steps/#{step}.erb", "#{self.project_root}/config/environments/#{name}/steps/#{step}.rb", {})
+      end
+      # Generate capistrano recipe for environment
+      generate_file_from_template("#{templates_path}/project/config/deploy/#{template_name}.erb", "#{self.project_root}/config/environments/#{name}/deploy.rb", {nodes: nil, environment: self.name})
     end
 
     # Generate the hiera data template for the environment
@@ -70,11 +75,6 @@ module Bebox
         step_dir = Bebox::Provision.step_name(step)
         generate_file_from_template("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb", "#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", {step_dir: step_dir, ssh_key: ssh_key, project_name: project_name})
       end
-    end
-
-    # Remove the deploy file for the environment
-    def remove_deploy_file
-      `cd #{self.project_root} && rm -rf config/deploy/#{self.name}.rb`
     end
 
     # Remove the hiera data template file for the environment
@@ -90,14 +90,14 @@ module Bebox
 
     # Generate ssh keys for connection with puppet user in environment
     def generate_puppet_user_keys(environment)
-      `rm -f #{self.project_root}/config/keys/environments/#{environment}/{id_rsa,id_rsa.pub}`
-      `cd #{self.project_root}/config/keys/environments/#{environment} && ssh-keygen -q -f id_rsa -t rsa -N ''`
+      `rm -f #{self.project_root}/config/environments/#{environment}/keys/{id_rsa,id_rsa.pub}`
+      `cd #{self.project_root}/config/environments/#{environment}/keys && ssh-keygen -q -f id_rsa -t rsa -N ''`
     end
 
     # Check if the environment has ssh keys configured
     def self.check_environment_access(project_root, environment)
-      key_exist = File.exist?("#{project_root}/config/keys/environments/#{environment}/id_rsa")
-      key_exist &&= File.exist?("#{project_root}/config/keys/environments/#{environment}/id_rsa.pub")
+      key_exist = File.exist?("#{project_root}/config/environments/#{environment}/keys/id_rsa")
+      key_exist &&= File.exist?("#{project_root}/config/environments/#{environment}/keys/id_rsa.pub")
     end
 
     # Check if there's an existing environment in the project

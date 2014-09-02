@@ -1,4 +1,4 @@
-set :ssh_key, '<%= "config/keys/environments/#{environment}/id_rsa" %>'
+set :ssh_key, '<%= "config/environments/#{environment}/keys/id_rsa" %>'
 set(:deploy_via, :copy_subdir)
 set(:deploy_subdir, 'puppet')
 # Select options accord to the phase parameter

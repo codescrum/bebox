@@ -13,7 +13,7 @@ elsif phase == 'step-0'
   set(:deploy_to) { "/home/vagrant/code" }
 else
   set :user, "puppet"
-  set :ssh_key, '<%= "config/keys/environments/vagrant/id_rsa" %>'
+  set :ssh_key, '<%= "config/environments/vagrant/keys/id_rsa" %>'
   set :copy_exclude, ['/lib', '/prepare', '/profiles', '/roles']
   set(:deploy_to) { "/home/puppet/code" }
 end

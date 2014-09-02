@@ -178,7 +178,7 @@ module Bebox
 
     # Executes capistrano commands
     def cap(command)
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} #{command} -S phase='#{self.step}' -S step_dir='#{step_name}' HOSTS=#{self.node.hostname}`
+      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{command} -S phase='#{self.step}' -S step_dir='#{step_name}' -S environment=#{environment} HOSTS=#{self.node.hostname}`
     end
 
     # Create checkpoint for step

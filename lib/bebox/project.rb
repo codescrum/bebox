@@ -118,7 +118,7 @@ module Bebox
 
     # Create config deploy and keys directories
     def create_config_deploy_directories
-      `cd #{self.path} && mkdir -p config/{deploy/steps,keys/environments}`
+      `cd #{self.path} && mkdir -p config/environments`
     end
 
     # Create the default environments
@@ -206,9 +206,6 @@ module Bebox
     # Generate the deploy file for the project
     def generate_deploy_files
       generate_file_from_template("#{Bebox::Project.templates_path}/project/config/deploy.erb", "#{self.path}/config/deploy.rb", {project: self})
-      Bebox::PROVISION_STEPS.each do |step|
-        generate_file_from_template("#{Bebox::Project.templates_path}/project/config/deploy/steps/#{step}.erb", "#{self.path}/config/deploy/steps/#{step}.rb", {})
-      end
     end
 
     # Path to the lib directory in the gem
@@ -224,7 +221,7 @@ module Bebox
 
     # Obtain the ssh public key from file in environment
     def self.public_ssh_key_from_file(project_root, environment)
-      ssh_key_path = "#{project_root}/config/keys/environments/#{environment}/id_rsa.pub"
+      ssh_key_path = "#{project_root}/config/environments/#{environment}/keys/id_rsa.pub"
       return (File.exist?(ssh_key_path)) ? File.read(ssh_key_path).strip : ''
     end
 

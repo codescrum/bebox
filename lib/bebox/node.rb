@@ -56,18 +56,23 @@ module Bebox
 
     # Deploy the puppet prepare directory
     def prepare_deploy
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy:setup -S phase=node_prepare HOSTS=#{self.hostname}`
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy -S phase=node_prepare HOSTS=#{self.hostname}`
+      cap 'deploy:setup'
+      cap 'deploy'
     end
 
     # Execute through capistrano the common development installation packages
     def prepare_common_installation
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy:prepare_installation:common -S phase=node_prepare HOSTS=#{self.hostname}`
+      cap 'deploy:prepare_installation:common'
     end
 
     # Execute through capistrano the puppet installation
     def puppet_installation
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{self.environment} deploy:prepare_installation:puppet -S phase=node_prepare HOSTS=#{self.hostname}`
+      cap 'deploy:prepare_installation:puppet'
+    end
+
+    # Executes capistrano commands
+    def cap(command)
+      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{command} -S phase=node_prepare -S environment=#{self.environment} HOSTS=#{self.hostname}`
     end
 
     # Create the checkpoints for the prepared nodes
@@ -133,7 +138,7 @@ module Bebox
     # Regenerate the deploy file for the environment
     def self.regenerate_deploy_file(project_root, environment, nodes)
       template_name = (environment == 'vagrant') ? 'vagrant' : "environment"
-      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/project/config/deploy/#{template_name}.erb", "#{project_root}/config/deploy/#{environment}.rb", {nodes: nodes, environment: environment})
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/project/config/deploy/#{template_name}.erb", "#{project_root}/config/environments/#{environment}/deploy.rb", {nodes: nodes, environment: environment})
     end
 
     # Count the number of prepared nodes

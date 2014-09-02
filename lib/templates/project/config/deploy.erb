@@ -1,15 +1,13 @@
-require 'capistrano/ext/multistage'
 
 set :application, "<%= project.shortname %>"
-set :stages, Dir[".checkpoints/*/*"].map{|f| File.basename(f)}
-set :default_stage, 'vagrant'
+set :environment, environment
 set :use_sudo, false
 set :keep_releases, 3
 set :deploy_via, :remote_cache
 default_run_options[:pty] = true
 default_run_options[:shell] = '/bin/bash --login'
 set :normalize_asset_timestamps, false
-set(:facter_variables) { {deploy_environment: stage, deploy_user: user, deploy_to: deploy_to} }
+set(:facter_variables) { {deploy_environment: environment, deploy_user: user, deploy_to: deploy_to} }
 
 before 'puppet:apply', 'puppet:config_hiera'
 
@@ -24,8 +22,11 @@ def custom_facter_variables
   facter_variables.map{|facter_key, facter_value| "FACTER_#{facter_key}=#{facter_value}"}.join(' ')
 end
 
+# load specific environment recipe
+load "config/environments/#{environment}/deploy.rb"
+
 # load specific task from each step
-load "config/deploy/steps/#{phase}" if phase =~ /step/
+load "config/environments/#{environment}/steps/#{phase}" if phase =~ /step/
 
 namespace :deploy do
 
