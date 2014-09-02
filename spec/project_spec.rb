@@ -33,12 +33,7 @@ describe 'Test 07: Bebox::Project' do
       end
 
       it 'creates the config deploy directories' do
-        directories_expected = ['config', 'deploy', 'keys', 'environments']
-        directories = []
-        directories << Dir["#{subject.path}/*/"].map { |f| File.basename(f) }
-        directories << Dir["#{subject.path}/*/*/"].map { |f| File.basename(f) }
-        directories << Dir["#{subject.path}/*/*/*/"].map { |f| File.basename(f) }
-        expect(directories.flatten).to include(*directories_expected)
+        expect(Dir.exist?("#{subject.path}/config/environments")).to be (true)
       end
 
       it 'generates a .bebox file' do
@@ -71,12 +66,6 @@ describe 'Test 07: Bebox::Project' do
         config_deploy_content = File.read("#{subject.path}/config/deploy.rb").gsub(/\s+/, ' ').strip
         config_deploy_output_content = File.read("spec/fixtures/config/deploy.test").gsub(/\s+/, ' ').strip
         expect(config_deploy_content).to eq(config_deploy_output_content)
-        # Generate steps/step-N.rb files
-        Bebox::PROVISION_STEPS.each do |step|
-          content = File.read("spec/fixtures/config/deploy/steps/#{step}.test")
-          output = File.read("#{subject.path}/config/deploy/steps/#{step}.rb")
-          expect(output).to eq(content)
-        end
       end
 
       it 'creates a Gemfile' do
@@ -163,7 +152,7 @@ describe 'Test 07: Bebox::Project' do
     context '05: create default environments' do
       it 'generates the deploy environment files' do
         subject.environments.each do |environment|
-          config_deploy_vagrant_content = File.read("#{subject.path}/config/deploy/#{environment.name}.rb").gsub(/\s+/, ' ').strip
+          config_deploy_vagrant_content = File.read("#{subject.path}/config/environments/#{environment.name}/deploy.rb").gsub(/\s+/, ' ').strip
           config_deploy_vagrant_output_content = File.read("spec/fixtures/config/deploy/#{environment.name}.test").gsub(/\s+/, ' ').strip
           expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
         end
@@ -183,10 +172,10 @@ describe 'Test 07: Bebox::Project' do
 
       it 'creates environments capistrano base' do
         subject.environments.each do |environment|
-          expect(Dir.exist?("#{subject.path}/config/keys/environments/#{environment.name}")).to be (true)
+          expect(Dir.exist?("#{subject.path}/config/environments/#{environment.name}")).to be (true)
         end
-        expect(File.exist?("#{subject.path}/config/keys/environments/vagrant/id_rsa")).to be (true)
-        expect(File.exist?("#{subject.path}/config/keys/environments/vagrant/id_rsa.pub")).to be (true)
+        expect(File.exist?("#{subject.path}/config/environments/vagrant/keys/id_rsa")).to be (true)
+        expect(File.exist?("#{subject.path}/config/environments/vagrant/keys/id_rsa.pub")).to be (true)
       end
     end
 

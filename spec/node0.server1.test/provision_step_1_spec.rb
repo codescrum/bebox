@@ -25,7 +25,7 @@ describe 'Test 18: Apply provision for users layer step-1' do
     let(:disable_sudo) { false }
     it { should be_file }
     its(:content) {
-      keys_content = File.read("#{provision.project_root}/config/keys/environments/vagrant/id_rsa.pub").strip
+      keys_content = File.read("#{provision.project_root}/config/environments/vagrant/keys/id_rsa.pub").strip
       should == "#{keys_content}"
     }
   end

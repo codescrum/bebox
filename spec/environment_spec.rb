@@ -30,14 +30,23 @@ describe 'Test 08: Bebox::Environment' do
         expect(directories.flatten).to include(*expected_directories)
       end
 
-      it 'generates a capistrano base' do
-        expect(Dir.exist?("#{subject.project_root}/config/keys/environments/#{subject.name}")).to be (true)
+      it 'sgenerates a capistrano base' do
+        expected_files = %w{steps keys}
+        files = Dir["#{subject.project_root}/config/environments/#{subject.name}/*/"].map { |f| File.basename(f) }
+        expect(files.flatten).to include(*expected_files)
       end
 
-      it 'generates a deploy file' do
-        deploy_content = File.read("#{subject.project_root}/config/deploy/#{subject.name}.rb").gsub(/\s+/, ' ').strip
+      it 'generates the deploy files' do
+        # Generate capistrano recipe for environment
+        deploy_content = File.read("#{subject.project_root}/config/environments/#{subject.name}/deploy.rb").gsub(/\s+/, ' ').strip
         deploy_output_content = File.read("spec/fixtures/config/deploy/environment.test").gsub(/\s+/, ' ').strip
         expect(deploy_content).to eq(deploy_output_content)
+        # Generate capistrano specific steps recipes
+        Bebox::PROVISION_STEPS.each do |step|
+          content = File.read("spec/fixtures/config/deploy/steps/#{step}.test")
+          output = File.read("#{subject.project_root}/config/environments/#{subject.name}/steps/#{step}.rb")
+          expect(output).to eq(content)
+        end
       end
 
       it 'generates a hiera data file' do
@@ -66,12 +75,8 @@ describe 'Test 08: Bebox::Environment' do
         expect(directories.flatten).to_not include(*environment_directories)
       end
 
-      it 'removes the capistrano base' do
-        expect(Dir.exist?("#{subject.project_root}/config/keys/environments/#{subject.name}")).to be (false)
-      end
-
-      it 'removes the deploy file' do
-        expect(File.exist?("#{subject.project_root}/config/deploy/#{subject.name}.rb")).to be (false)
+      it 'removes the environment config' do
+        expect(Dir.exist?("#{subject.project_root}/config/environments/#{subject.name}")).to be (false)
       end
 
       it 'removes the hiera node files' do

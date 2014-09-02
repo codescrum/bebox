@@ -23,7 +23,7 @@ describe 'Test 10: Bebox::Node' do
       end
       it 'should regenerate the vagrant deploy file' do
         Bebox::Node.regenerate_deploy_file(project_root, environment, nodes)
-        vagrant_deploy_content = File.read("#{project_root}/config/deploy/vagrant.rb").gsub(/\s+/, ' ').strip
+        vagrant_deploy_content = File.read("#{project_root}/config/environments/vagrant/deploy.rb").gsub(/\s+/, ' ').strip
         vagrant_deploy_output_content = File.read("spec/fixtures/node/vagrant_deploy.test").gsub(/\s+/, ' ').strip
         expect(vagrant_deploy_content).to eq(vagrant_deploy_output_content)
       end
