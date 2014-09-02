@@ -31,7 +31,7 @@ describe 'Test 18: Apply provision for users layer step-1' do
   end
 
   it 'should create checkpoint' do
-    checkpoint_file_path = "#{provision.project_root}/.checkpoints/environments/#{provision.environment}/steps/#{provision.step}/#{provision.node.hostname}.yml"
+    checkpoint_file_path = "#{provision.project_root}/.checkpoints/environments/#{provision.environment}/phases/phase-2/steps/#{provision.step}/#{provision.node.hostname}.yml"
     expect(File.exist?(checkpoint_file_path)).to eq(true)
     prepared_node_content = File.read(checkpoint_file_path).gsub(/\s+/, ' ').strip
     ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/provisioned_node_0.test.erb')

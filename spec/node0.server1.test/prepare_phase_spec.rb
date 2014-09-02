@@ -43,8 +43,9 @@ describe 'Test 11: Node prepared' do
     end
 
     it 'should create checkpoint' do
-      expect(File.exist?("#{node.project_root}/.checkpoints/environments/#{node.environment}/prepared_nodes/#{node.hostname}.yml")).to be (true)
-      prepared_node_content = File.read("#{node.project_root}/.checkpoints/environments/#{node.environment}/prepared_nodes/#{node.hostname}.yml").gsub(/\s+/, ' ').strip
+      node_checkpoint_path = "#{node.project_root}/.checkpoints/environments/#{node.environment}/phases/phase-1/#{node.hostname}.yml"
+      expect(File.exist?(node_checkpoint_path)).to be (true)
+      prepared_node_content = File.read(node_checkpoint_path).gsub(/\s+/, ' ').strip
       ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/prepared_node_0.test.erb')
       prepared_node_expected_content = ouput_template.render(nil, node: node).gsub(/\s+/, ' ').strip
       expect(prepared_node_content).to eq(prepared_node_expected_content)

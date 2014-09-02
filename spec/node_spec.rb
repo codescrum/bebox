@@ -28,8 +28,10 @@ describe 'Test 09: Bebox::Node' do
       end
 
       it 'creates checkpoint' do
-        expect(File.exist?("#{subject.project_root}/.checkpoints/environments/#{subject.environment}/nodes/#{subject.hostname}.yml")).to be (true)
-        node_content = File.read("#{subject.project_root}/.checkpoints/environments/#{subject.environment}/nodes/#{subject.hostname}.yml").gsub(/\s+/, ' ').strip
+        subject.create_node_checkpoint
+        node_checkpoint_path = "#{subject.project_root}/.checkpoints/environments/#{subject.environment}/phases/phase-0/#{subject.hostname}.yml"
+        expect(File.exist?(node_checkpoint_path)).to be (true)
+        node_content = File.read(node_checkpoint_path).gsub(/\s+/, ' ').strip
         ouput_template = Tilt::ERBTemplate.new('spec/fixtures/node/node_0.test.erb')
         node_output_content = ouput_template.render(nil, node: subject).gsub(/\s+/, ' ').strip
         expect(node_content).to eq(node_output_content)
@@ -37,7 +39,7 @@ describe 'Test 09: Bebox::Node' do
 
       it 'list the current nodes' do
         current_nodes = [subject.hostname]
-        nodes = Bebox::Node.list(subject.project_root, subject.environment, 'nodes')
+        nodes = Bebox::Node.list(subject.project_root, subject.environment, 'phase-0')
         expect(nodes).to include(*current_nodes)
       end
 
@@ -83,11 +85,14 @@ describe 'Test 09: Bebox::Node' do
       end
 
       it 'removes the checkpoints' do
-        expect(File.exist?("#{subject.project_root}/.checkpoints/environments/#{subject.environment}/nodes/#{subject.hostname}.yml")).to be (false)
+        checkpoint_phases = %w{phase-0 phase-1 phase-2/steps/step-0 phase-2/steps/step-1 phase-2/steps/step-2 phase-2/steps/step-3}
+        checkpoint_phases.each do |checkpoint_phase|
+          expect(File.exist?("#{subject.project_root}/.checkpoints/environments/#{subject.environment}/phases/#{checkpoint_phase}/#{subject.hostname}.yml")).to be (false)
+        end
       end
 
       it 'not list any nodes' do
-        nodes = Bebox::Node.list(subject.project_root, subject.environment, 'nodes')
+        nodes = Bebox::Node.list(subject.project_root, subject.environment, 'phase-0')
         expect(nodes.count).to eq(0)
       end
 

@@ -18,20 +18,15 @@ describe 'Test 08: Bebox::Environment' do
         subject.create
       end
 
-      it 'generates SSH keys for a given environment' do
-        subject.generate_puppet_user_keys(subject.name)
-        %w{id_rsa id_rsa.pub}.each do |key|
-          expect(File.exist?("#{subject.project_root}/config/keys/environments/#{subject.name}/#{key}")).to be (true)
-        end
-      end
-
       it 'creates checkpoints' do
-        expected_directories = [subject.name, 'nodes', 'prepared_nodes',
+        expected_directories = [subject.name, 'phases', 'phase-0', 'phase-1', 'phase-2',
           'steps', 'step-0', 'step-1', 'step-2', 'step-3']
         directories = []
         directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/"].map { |f| File.basename(f) }
         directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/"].map { |f| File.basename(f) }
         directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/*/*/"].map { |f| File.basename(f) }
         expect(directories.flatten).to include(*expected_directories)
       end
 
@@ -60,12 +55,14 @@ describe 'Test 08: Bebox::Environment' do
       end
 
       it 'removes checkpoints' do
-        environment_directories = [subject.name, 'nodes', 'prepared_nodes',
+        environment_directories = [subject.name, 'phases', 'phase-0', 'phase-1', 'phase-2',
           'steps', 'step-0', 'step-1', 'step-2', 'step-3']
         directories = []
         directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/"].map { |f| File.basename(f) }
         directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/"].map { |f| File.basename(f) }
         directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.project_root}/.checkpoints/environments/#{subject.name}/*/*/*/*/"].map { |f| File.basename(f) }
         expect(directories.flatten).to_not include(*environment_directories)
       end
 

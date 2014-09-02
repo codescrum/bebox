@@ -170,12 +170,14 @@ describe 'Test 07: Bebox::Project' do
       end
 
       it 'creates environments checkpoints' do
-        expected_directories = ['vagrant', 'staging', 'production', 'nodes', 'prepared_nodes',
+        expected_directories = ['vagrant', 'staging', 'production', 'phases', 'phase-0', 'phase-1', 'phase-2',
           'steps', 'step-0', 'step-1', 'step-2', 'step-3']
         directories = []
         directories << Dir["#{subject.path}/.checkpoints/environments/*/"].map { |f| File.basename(f) }
         directories << Dir["#{subject.path}/.checkpoints/environments/*/*/"].map { |f| File.basename(f) }
         directories << Dir["#{subject.path}/.checkpoints/environments/*/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/.checkpoints/environments/*/*/*/*/"].map { |f| File.basename(f) }
+        directories << Dir["#{subject.path}/.checkpoints/environments/*/*/*/*/*/"].map { |f| File.basename(f) }
         expect(directories.flatten).to include(*expected_directories)
       end
 
