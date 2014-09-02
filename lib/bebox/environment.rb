@@ -34,8 +34,8 @@ module Bebox
 
     # Create checkpoints base directories
     def create_checkpoints
-      `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/{nodes,prepared_nodes,steps}`
-      (0..3).each{|i| `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/steps/step-#{i}`}
+      `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/phases/{phase-0,phase-1,phase-2}`
+      (0..3).each{|i| `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/phases/phase-2/steps/step-#{i}`}
     end
 
     # Remove checkpoints base directories

@@ -31,7 +31,7 @@ module Bebox
 
     # List existing nodes for environment and type (nodes, prepared_nodes)
     def self.list(project_root, environment, node_type)
-      Dir["#{environments_path(project_root)}/#{environment}/#{node_type}/*"].map { |f| File.basename(f, ".*") }
+      Dir["#{environments_path(project_root)}/#{environment}/phases/#{node_type}/*"].map { |f| File.basename(f, ".*") }
     end
 
     # Get node checkpoint parameter from the yml file
@@ -40,8 +40,8 @@ module Bebox
     end
 
     # Get node checkpoint parameter from the yml file
-    def self.checkpoint_parameter_from_file(project_root, environment, hostname, node_type, parameter)
-      node_config = YAML.load_file("#{environments_path(project_root)}/#{environment}/#{node_type}/#{hostname}.yml")
+    def self.checkpoint_parameter_from_file(project_root, environment, hostname, node_phase, parameter)
+      node_config = YAML.load_file("#{environments_path(project_root)}/#{environment}/phases/#{node_phase}/#{hostname}.yml")
       node_config[parameter]
     end
 
@@ -74,7 +74,8 @@ module Bebox
     def create_prepare_checkpoint(started_at)
       self.started_at = started_at
       self.finished_at = DateTime.now.to_s
-      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/prepared_node.yml.erb", "#{self.project_root}/.checkpoints/environments/#{self.environment}/prepared_nodes/#{self.hostname}.yml", {node: self})
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/prepared_node.yml.erb",
+        "#{self.project_root}/.checkpoints/environments/#{self.environment}/phases/phase-1/#{self.hostname}.yml", {node: self})
     end
 
     # Create the puppet hiera template file
@@ -90,11 +91,11 @@ module Bebox
 
     # returns an Array of the Node objects for an environment
     # @returns Array
-    def self.nodes_in_environment(project_root, environment, node_type)
+    def self.nodes_in_environment(project_root, environment, node_phase)
       node_objects = []
-      nodes = Bebox::Node.list(project_root, environment, node_type)
+      nodes = Bebox::Node.list(project_root, environment, node_phase)
       nodes.each do |hostname|
-        ip = Bebox::Node.checkpoint_parameter_from_file(project_root, environment, hostname, node_type, 'ip')
+        ip = Bebox::Node.checkpoint_parameter_from_file(project_root, environment, hostname, node_phase, 'ip')
         node_objects << Bebox::Node.new(environment, project_root, hostname, ip)
       end
       node_objects
@@ -105,12 +106,13 @@ module Bebox
       # Set the creation time for the node
       self.created_at = DateTime.now.to_s
       # Create the checkpoint file from template
-      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/node.yml.erb", "#{project_root}/.checkpoints/environments/#{environment}/nodes/#{hostname}.yml", {node: self})
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/node.yml.erb",
+        "#{project_root}/.checkpoints/environments/#{environment}/phases/phase-0/#{hostname}.yml", {node: self})
     end
 
     # Remove checkpoints for node
     def remove_checkpoints
-      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/{nodes,prepared_nodes,steps/step-{0..3}}/#{self.hostname}.yml`
+      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/phases/{phase-0,phase-1,phase-2/steps/step-{0..3}}/#{self.hostname}.yml`
     end
 
     # Remove puppet hiera template file
@@ -142,9 +144,9 @@ module Bebox
     # Return a description string for the node provision state
     def self.node_provision_state(project_root, environment, node)
       provision_state = ''
-      checkpoint_directories = %w{nodes prepared_nodes steps/step-0 steps/step-1 steps/step-2 steps/step-3}
+      checkpoint_directories = %w{phase-0 phase-1 phase-2/steps/step-0 phase-2/steps/step-1 phase-2/steps/step-2 phase-2/steps/step-3}
       checkpoint_directories.each do |checkpoint_directory|
-        checkpoint_directory_path = "#{project_root}/.checkpoints/environments/#{environment}/#{checkpoint_directory}/#{node}.yml"
+        checkpoint_directory_path = "#{project_root}/.checkpoints/environments/#{environment}/phases/#{checkpoint_directory}/#{node}.yml"
         next unless File.exist?(checkpoint_directory_path)
         provision_state = "#{state_from_checkpoint(checkpoint_directory)} at #{Bebox::Node.node_creation_date(project_root, environment, checkpoint_directory, node)}"
       end
@@ -154,25 +156,25 @@ module Bebox
     # Get the corresponding state from checkpoint directory
     def self.state_from_checkpoint(checkpoint)
       case checkpoint
-        when 'nodes'
+        when 'phase-0'
           'Allocated'
-        when 'prepared_nodes'
+        when 'phase-1'
           'Prepared'
-        when 'steps/step-0'
-          'Provisioned Fundamental step-0'
-        when 'steps/step-1'
-          'Provisioned Users layer step-1'
-        when 'steps/step-2'
-          'Provisioned Services layer step-2'
-        when 'steps/step-3'
-          'Provisioned Security layer step-3'
+        when 'phase-2/steps/step-0'
+          'Provisioned step-0'
+        when 'phase-2/steps/step-1'
+          'Provisioned step-1'
+        when 'phase-2/steps/step-2'
+          'Provisioned step-2'
+        when 'phase-2/steps/step-3'
+          'Provisioned step-3'
       end
     end
 
     # Obtain the node creation_at parameter for a node
-    def self.node_creation_date(project_root, environment, node_type, node)
-      node_config = YAML.load_file("#{project_root}/.checkpoints/environments/#{environment}/#{node_type}/#{node}.yml")
-      (node_type == 'nodes') ? node_config['created_at'] : node_config['finished_at']
+    def self.node_creation_date(project_root, environment, node_phase, node)
+      node_config = YAML.load_file("#{project_root}/.checkpoints/environments/#{environment}/phases/#{node_phase}/#{node}.yml")
+      (node_type == 'phase-0') ? node_config['created_at'] : node_config['finished_at']
     end
 
     # Count the number of nodes in all environments
