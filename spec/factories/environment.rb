@@ -4,17 +4,5 @@ FactoryGirl.define do
     project_root "#{Dir.pwd}/tmp/bebox-pname"
 
     initialize_with { new(name, project_root) }
-
-    trait :created do
-      after(:build) do |environment|
-        environment.create
-      end
-    end
-
-    trait :removed do
-      after(:build) do |environment|
-        environment.remove
-      end
-    end
   end
 end

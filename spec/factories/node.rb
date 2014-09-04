@@ -12,11 +12,5 @@ FactoryGirl.define do
         node.create
       end
     end
-
-    trait :removed do
-      after(:build) do |node|
-        node.remove
-      end
-    end
   end
 end

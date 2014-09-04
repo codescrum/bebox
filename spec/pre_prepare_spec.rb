@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'tilt'
-require 'colorize'
 require_relative '../spec/factories/node.rb'
 
 describe 'Test 05: Bebox::Node' do
@@ -13,7 +12,6 @@ describe 'Test 05: Bebox::Node' do
     let(:project_root) { "#{Dir.pwd}/tmp/bebox-pname" }
     let(:environment) { 'vagrant' }
     let(:project_name) {'bebox-pname'}
-    let(:vagrant_box_base) {"#{Dir.pwd}/ubuntu-server-12042-x64-vbox4210-nocm.box"}
 
     context 'pre vagrant prepare' do
       it 'should generate the Vagrantfile' do
@@ -32,13 +30,20 @@ describe 'Test 05: Bebox::Node' do
     end
 
     context 'vagrant prepare' do
+
+      let (:original_hosts_content) { File.read("#{nodes.first.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip }
+
+      before :all do
+        node = nodes.first
+        puts "\nPlease provide your account password, if ask you, to configure the local hosts file.".yellow
+        original_hosts_content
+        `sudo rm -rf #{node.local_hosts_path}/hosts_before_#{project_name}`
+        prepare_vagrant(node)
+      end
+
       describe 'Configure the hosts file' do
         it 'should create a hosts backup file' do
           node = nodes.first
-          puts "\nPlease provide your account password, if ask you, to configure the local hosts file.".yellow
-          `sudo rm -rf #{node.local_hosts_path}/hosts_before_#{project_name}`
-          original_hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
-          nodes.each{|node| node.backup_local_hosts(project_name)}
           hosts_backup_file = "#{node.local_hosts_path}/hosts_before_#{project_name}"
           expect(File).to exist(hosts_backup_file)
           hosts_backup_content = File.read(hosts_backup_file).gsub(/\s+/, ' ').strip
@@ -46,7 +51,6 @@ describe 'Test 05: Bebox::Node' do
         end
 
         it 'should add the hosts config to hosts file' do
-          nodes.each{|node| add_to_local_hosts(node)}
           node = nodes.first
           hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
           expect(hosts_content).to include(*nodes.map{|node| "#{node.ip} #{node.hostname}"})
@@ -56,7 +60,6 @@ describe 'Test 05: Bebox::Node' do
       describe 'vagrant setup' do
         it 'should add the node to vagrant' do
           vagrant_box_names_expected = nodes.map{|node| "#{project_name}-#{node.hostname}"}
-          nodes.each{|node| add_vagrant_node(project_name, vagrant_box_base, node)}
           node = nodes.first
           expect(installed_vagrant_box_names(node)).to include(*vagrant_box_names_expected)
         end

@@ -16,5 +16,11 @@ describe 'Test 10: Associate node and role' do
       output_file = File.read("#{node.project_root}/puppet/steps/2-services/manifests/site.pp").strip
       expect(output_file).to eq(expected_content)
     end
+
+    it 'gets the role from a node' do
+      node = nodes.first
+      expected_role = Bebox::Provision.role_from_node(node.project_root, 'step-2', node.hostname)
+      expect(expected_role).to include(role.name)
+    end
   end
 end

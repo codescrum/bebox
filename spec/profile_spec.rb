@@ -17,7 +17,7 @@ describe 'Test 08: Bebox::Profile' do
 
     context '00: profile creation' do
 
-      it 'should validate the profile name' do
+      it 'validates the profile name' do
         # Test not valid reserved words
         Bebox::RESERVED_WORDS.each{|reserved_word| expect(valid_puppet_class_name?(reserved_word)).to be (false)}
         # Test not valid start by undescore
@@ -30,7 +30,7 @@ describe 'Test 08: Bebox::Profile' do
         expect(valid_puppet_class_name?(subject.name)).to be (true)
       end
 
-      it 'should clean the profile path' do
+      it 'cleans the profile path' do
         # Profile path with slash
         expect(Bebox::Profile.cleanpath('/')).to eq ('')
         # Profile path with multiple slashes
@@ -39,17 +39,17 @@ describe 'Test 08: Bebox::Profile' do
         expect(Bebox::Profile.cleanpath(subject.path)).to eq (subject.path)
       end
 
-      it 'should create profile directories' do
+      it 'creates profile directories' do
         expect(Dir.exist?("#{subject.absolute_path}/manifests")).to be (true)
       end
 
-      it 'should generate the manifests file' do
+      it 'generates the manifests file' do
         output_file = File.read("#{subject.absolute_path}/manifests/init.pp").strip
         expected_content = File.read("spec/fixtures/puppet/profiles/#{subject.relative_path}/manifests/init.pp.test").strip
         expect(output_file).to eq(expected_content)
       end
 
-      it 'should generate the Puppetfile' do
+      it 'generates the Puppetfile' do
         output_file = File.read("#{subject.absolute_path}/Puppetfile").strip
         expected_content = File.read("spec/fixtures/puppet/profiles/#{subject.relative_path}/Puppetfile.test").strip
         expect(output_file).to eq(expected_content)
@@ -57,7 +57,7 @@ describe 'Test 08: Bebox::Profile' do
     end
 
     context '01: profile list' do
-      it 'should list profiles' do
+      it 'list the profiles' do
         current_profiles = [subject.relative_path]
         profiles = Bebox::Profile.list(subject.project_root)
         expect(profiles).to include(*current_profiles)
@@ -65,9 +65,22 @@ describe 'Test 08: Bebox::Profile' do
     end
 
     context '02: profile deletion' do
-      it 'should delete profile directory' do
+      it 'deletes the profile directory' do
         subject.remove
         expect(Dir.exist?("#{subject.absolute_path}")).to be (false)
+      end
+    end
+
+    context '03: self methods' do
+      it 'counts the number of profiles in the project' do
+        profiles_count = Bebox::Profile.profiles_count(subject.project_root)
+        expect(profiles_count).to eq(9)
+      end
+
+      it 'validates a profile with path' do
+        path = 'basic/test'
+        valid_path = Bebox::Profile.valid_pathname?(path)
+        expect(valid_path).to eq(true)
       end
     end
   end
