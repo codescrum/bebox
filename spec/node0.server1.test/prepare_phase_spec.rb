@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../factories/node.rb'
 require_relative '../vagrant_spec_helper.rb'
 
-describe 'Test 06: Node prepared' do
+describe 'Test 07: Node prepared' do
 
   let(:node) { build(:node) }
 

@@ -18,8 +18,9 @@ module Bebox
       return error("The '#{role_name}' role already exist. No changes were made.") if role_exists?(project_root, role_name)
       # Role creation
       role = Bebox::Role.new(role_name, project_root)
-      role.create
+      output = role.create
       ok 'Role created!.'
+      return output
     end
 
     # Removes an existing role
@@ -36,8 +37,9 @@ module Bebox
       return warn('No changes were made.') unless confirm_action?('Are you sure that you want to delete the role?')
       # Role deletion
       role = Bebox::Role.new(role_name, project_root)
-      role.remove
+      output = role.remove
       ok 'Role removed!.'
+      return output
     end
 
     # Add a profile to a role
@@ -47,11 +49,13 @@ module Bebox
       role = choose_option(roles, 'Choose an existing role:')
       profile = choose_option(profiles, 'Choose the profile to add:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
-        return warn("Profile '#{profile}' already in the Role '#{role}'. No changes were made.")
+        warn "Profile '#{profile}' already in the Role '#{role}'. No changes were made."
+        output = false
       else
-        Bebox::Role.add_profile(project_root, role, profile)
-        return ok("Profile '#{profile}' added to Role '#{role}'.")
+        output = Bebox::Role.add_profile(project_root, role, profile)
+        ok "Profile '#{profile}' added to Role '#{role}'."
       end
+      return output
     end
 
     # Remove a profile in a role
@@ -61,12 +65,13 @@ module Bebox
       role = choose_option(roles, 'Choose an existing role:')
       profile = choose_option(profiles, 'Choose the profile to remove:')
       if Bebox::Role.profile_in_role?(project_root, role, profile)
-        Bebox::Role.remove_profile(project_root, role, profile)
-        return ok("Profile '#{profile}' removed from Role '#{role}'.")
+        output = Bebox::Role.remove_profile(project_root, role, profile)
+        ok "Profile '#{profile}' removed from Role '#{role}'."
       else
-        return warn("Profile '#{profile}' is not in the Role '#{role}'. No changes were made.")
+        warn "Profile '#{profile}' is not in the Role '#{role}'. No changes were made."
+        output = false
       end
-
+      return output
     end
 
     # Check if there's an existing role in the project

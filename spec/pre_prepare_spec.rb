@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'tilt'
 require_relative '../spec/factories/node.rb'
 
-describe 'Test 05: Bebox::Node' do
+describe 'Test 06: Bebox::Node' do
 
   include Bebox::VagrantHelper
 
@@ -35,7 +35,7 @@ describe 'Test 05: Bebox::Node' do
 
       before :all do
         node = nodes.first
-        puts "\nPlease provide your account password, if ask you, to configure the local hosts file.".yellow
+        puts "\nPlease provide your local password, if asked, to configure the local hosts file.".yellow
         original_hosts_content
         `sudo rm -rf #{node.local_hosts_path}/hosts_before_#{project_name}`
         prepare_vagrant(node)

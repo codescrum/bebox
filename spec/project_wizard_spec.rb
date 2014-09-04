@@ -15,11 +15,15 @@ describe 'Test 00: Create a new project with the wizard' do
     let(:local_box_uri) {"#{Dir.pwd}/spec/fixtures/test_box.box"}
     let(:bebox_boxes_path) {File.expand_path(Bebox::ProjectWizard::BEBOX_BOXES_PATH)}
 
+    before :each do
+      $stdout.stub(:write)
+    end
+
     after :all do
       `rm #{bebox_boxes_path}/test_box.box`
     end
 
-    it 'creates a project from wizard' do
+    it 'creates a project with wizard' do
       Bebox::Project.any_instance.stub(:create) { true }
       if File.exist?("#{bebox_boxes_path}/ubuntu-server-12042-x64-vbox4210-nocm.box")
         $stdin.stub(:gets).and_return('ubuntu-server-12042-x64-vbox4210-nocm.box', '1')

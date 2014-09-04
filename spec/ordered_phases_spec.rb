@@ -1,12 +1,15 @@
 require 'spec_helper'
 require 'project_wizard_spec'
 require 'project_spec'
+require 'environment_wizard_spec'
 require 'environment_spec'
 require 'node_wizard_spec'
 require 'node_spec'
 require 'pre_prepare_spec'
 require 'node0.server1.test/prepare_phase_spec'
+require 'role_wizard_spec'
 require 'role_spec'
+require 'profile_wizard_spec'
 require 'profile_spec'
 require 'role_profiles_spec'
 require 'node_role_spec'
@@ -44,7 +47,7 @@ describe 'Test 99: ordered specs' do
       project.destroy
       expect(Dir.exist?("#{project.path}")).to be(false)
       # Test that the local hosts file was restored
-      puts "\nPlease provide your account password, if ask you, to restore the local hosts file.".yellow
+      puts "\nPlease provide your local password, if asked, to configure the local hosts file.".yellow
       hosts_backup_content = File.read("#{node.local_hosts_path}/hosts_before_#{project.name}").gsub(/\s+/, ' ').strip
       node.restore_local_hosts(project.name)
       hosts_content = File.read("#{node.local_hosts_path}/hosts").gsub(/\s+/, ' ').strip

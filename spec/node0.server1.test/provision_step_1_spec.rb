@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../factories/provision.rb'
 require_relative '../puppet_spec_helper.rb'
 
-describe 'Test 13: Apply provision for users layer step-1' do
+describe 'Test 16: Apply provision for users layer step-1' do
 
   let(:provision) { build(:provision, step: 'step-1') }
   let(:users_profiles) {['base/users/ssh', 'base/users/users']}

@@ -31,8 +31,9 @@ module Bebox
       return error("The profile '#{profile_path}' already exist. No changes were made.") if profile_exists?(project_root, profile_path)
       # Profile creation
       profile = Bebox::Profile.new(profile_name, project_root, profile_base_path)
-      profile.create
+      output = profile.create
       ok "Profile '#{profile_path}' created!."
+      return output
     end
 
     # Removes an existing profile
@@ -51,8 +52,9 @@ module Bebox
       profile_name = profile.split('/').last
       profile_base_path = profile.split('/')[0...-1].join('/')
       profile = Bebox::Profile.new(profile_name, project_root, profile_base_path)
-      profile.remove
+      output = profile.remove
       ok 'Profile removed!.'
+      return output
     end
 
     # Lists existing profiles

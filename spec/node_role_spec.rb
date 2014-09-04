@@ -3,7 +3,7 @@ require_relative '../spec/factories/role.rb'
 require_relative '../spec/factories/node.rb'
 require_relative '../spec/factories/provision.rb'
 
-describe 'Test 10: Associate node and role' do
+describe 'Test 13: Associate node and role' do
 
   let(:role) { build(:role) }
   let(:nodes) { [build(:node)] }
