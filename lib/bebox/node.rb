@@ -170,7 +170,7 @@ module Bebox
       end
     end
 
-    # Obtain the node creation_at of finished_at parameter of a node
+    # Obtain the node creation_at parameter for a node
     def self.node_creation_date(project_root, environment, node_type, node)
       node_config = YAML.load_file("#{project_root}/.checkpoints/environments/#{environment}/#{node_type}/#{node}.yml")
       (node_type == 'nodes') ? node_config['created_at'] : node_config['finished_at']

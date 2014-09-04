@@ -13,8 +13,9 @@ module Bebox
       ip = ask_ip(environment)
       # Node creation
       node = Bebox::Node.new(environment, project_root, hostname, ip)
-      node.create
+      output = node.create
       ok 'Node created!.'
+      return output
     end
 
     # Removes an existing node
@@ -24,14 +25,16 @@ module Bebox
       if nodes.count > 0
         hostname = choose_option(nodes, 'Choose the node to remove:')
       else
-        return error "There are no nodes in the '#{environment}' environment to remove. No changes were made."
+        error "There are no nodes in the '#{environment}' environment to remove. No changes were made."
+        return true
       end
       # Ask for deletion confirmation
       return warn('No changes were made.') unless confirm_action?('Are you sure that you want to delete the node?')
       # Node deletion
       node = Bebox::Node.new(environment, project_root, hostname, nil)
-      node.remove
+      output = node.remove
       ok 'Node removed!.'
+      return output
     end
 
     # Associate a role with a node in a environment
@@ -40,8 +43,9 @@ module Bebox
       nodes = Bebox::Node.list(project_root, environment, 'nodes')
       node = choose_option(nodes, 'Choose an existing node:')
       role = choose_option(roles, 'Choose an existing role:')
-      Bebox::Provision.associate_node_role(project_root, environment, node, role)
+      output = Bebox::Provision.associate_node_role(project_root, environment, node, role)
       ok 'Role associated to node!.'
+      return output
     end
 
     # Prepare the nodes in a environment
@@ -69,6 +73,7 @@ module Bebox
       else
         warn 'There are no nodes to prepare. No changes were made.'
       end
+      return true
     end
 
     # Check the nodes already prepared and ask confirmation to re-do-it

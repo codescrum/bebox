@@ -42,27 +42,6 @@ module Bebox
       `cp -R #{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/modules/* #{self.project_root}/puppet/steps/#{step_name}/modules/`
     end
 
-    # Generate the hiera data for step from the template
-    def generate_hiera
-      generate_hiera_yaml
-      generate_hiera_data_common
-    end
-
-    def generate_hiera_yaml
-      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/hiera/hiera.yaml.erb", "#{self.project_root}/puppet/steps/#{step_name}/hiera/hiera.yaml", {step_dir: step_name})
-    end
-
-    def generate_hiera_data_common
-      ssh_key = Bebox::Project.public_ssh_key_from_file(self.project_root, self.environment)
-      project_name = Bebox::Project.shortname_from_file(self.project_root)
-      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/hiera/data/common_apply.yaml.erb", "#{self.project_root}/puppet/steps/#{step_name}/hiera/data/common.yaml", {ssh_key: ssh_key, project_name: project_name})
-    end
-
-    # Generate the site.pp manifests file for step
-    def self.generate_manifests(project_root, step, nodes)
-      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/manifests/site_apply.pp.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp", {nodes: nodes})
-    end
-
     # Generate the hiera templates for each step
     def self.generate_hiera_for_steps(project_root, template_file, filename, options)
       Bebox::PROVISION_STEPS.each do |step|
@@ -123,12 +102,6 @@ module Bebox
 
     # Set a role for a node in the step-2 manifests file
     def self.associate_node_role(project_root, environment, node_name, role_name)
-      # Create the manifests site.pp file for step-2 if not exist
-      unless Bebox::Provision.manifests_exists?(project_root, 'step-2')
-        nodes = Bebox::Node.nodes_in_environment(project_root, environment, 'nodes')
-        Bebox::Provision.generate_manifests(project_root, self.step, nodes)
-      end
-      # Set the role for a node
       Bebox::Provision.remove_role(project_root, node_name, 'step-2')
       Bebox::Provision.add_role(project_root, node_name, role_name)
     end
@@ -188,11 +161,6 @@ module Bebox
       regexp = /^\s*node\s+#{node_name}\s*({.*?}\s*)/m
       content = File.read(manifest_path).sub(regexp, "\nnode #{node_name} {\n\n}\n\n")
       File.open(manifest_path, 'wb') { |file| file.write(content) }
-    end
-
-    # Check if a manifests for a step exist
-    def self.manifests_exists?(project_root, step)
-      File.exist?("#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp")
     end
 
     # Apply step via capistrano in the machine

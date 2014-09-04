@@ -1,5 +1,6 @@
 module Bebox
   module WizardsHelper
+
     # Ask for confirmation of any action
     def confirm_action?(message)
       require 'highline/import'

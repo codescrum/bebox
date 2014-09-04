@@ -21,13 +21,14 @@ module Bebox
       default_environments = %w{vagrant staging production}
       # Project creation
       project = Bebox::Project.new(project_name, vagrant_box_base, Dir.pwd, vagrant_box_provider, default_environments)
-      project.create
+      output = project.create
       ok "Project '#{project_name}' created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
+      return output
     end
 
     # If choose to download/select new box get a valid uri
     def get_valid_box_uri(current_box)
-      return (valid_box_uri = current_box) unless current_box.nil?
+      return current_box unless current_box.nil?
       # Keep asking for valid uri or overwriting until confirmation
       confirm = false
       begin
@@ -64,7 +65,7 @@ module Bebox
     def set_box(box_uri)
       require 'uri'
       uri = URI.parse(box_uri)
-      if uri.scheme == ('http' || 'https')
+      if %w{http https}.include?(uri.scheme)
         info 'Downloading box ...'
         download_box(uri)
       else
