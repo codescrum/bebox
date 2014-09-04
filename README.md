@@ -2,6 +2,7 @@ Bebox
 =====
 
 [![Code Climate](https://codeclimate.com/github/codescrum/bebox/badges/gpa.svg)](https://codeclimate.com/github/codescrum/bebox)
+[![Test Coverage](https://codeclimate.com/github/codescrum/bebox/badges/coverage.svg)](https://codeclimate.com/github/codescrum/bebox)
 
 Introduction
 ------------
