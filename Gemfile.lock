@@ -157,10 +157,10 @@ PLATFORMS
 DEPENDENCIES
   aruba (= 0.5.4)
   bebox!
-  codeclimate-test-reporter
+  codeclimate-test-reporter (= 0.4.0)
   factory_girl (= 4.3.0)
   jazz_hands (= 0.5.2)
   rake (= 10.3.1)
   rspec (= 2.14.1)
   serverspec (= 1.6.0)
-  simplecov
+  simplecov (= 0.9.0)
