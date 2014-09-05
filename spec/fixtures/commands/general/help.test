@@ -1,0 +1,1 @@
+NAME rspec - Create basic provisioning of remote servers. SYNOPSIS rspec [global options] command [command options] [arguments...] VERSION 0.1.0 GLOBAL OPTIONS --help - Show this message --version - Display the program version COMMANDS help - Shows a list of commands or help for one command new - Create a new bebox project through a simple wizard
