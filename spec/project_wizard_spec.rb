@@ -15,8 +15,12 @@ describe 'Test 00: Bebox::ProjectWizard' do
     let(:local_box_uri) {"#{Dir.pwd}/spec/fixtures/test_box.box"}
     let(:bebox_boxes_path) {File.expand_path(Bebox::ProjectWizard::BEBOX_BOXES_PATH)}
 
+    before :all do
+      `mkdir -p #{bebox_boxes_path}/tmp`
+    end
+
     before :each do
-      $stdout.stub(:write)
+      # $stdout.stub(:write)
     end
 
     after :all do
@@ -25,16 +29,20 @@ describe 'Test 00: Bebox::ProjectWizard' do
 
     it 'creates a project with wizard' do
       Bebox::Project.any_instance.stub(:create) { true }
-      if File.exist?("#{bebox_boxes_path}/ubuntu-server-12042-x64-vbox4210-nocm.box")
-        $stdin.stub(:gets).and_return('ubuntu-server-12042-x64-vbox4210-nocm.box', '1')
-      else
-        $stdin.stub(:gets).and_return("#{Dir.pwd}/ubuntu-server-12042-x64-vbox4210-nocm.box", '1')
-      end
+      subject.stub(:bebox_boxes_setup)
+      subject.stub(:choose_box) { 'test_box.box' }
+      $stdin.stub(:gets).and_return('1')
       output = subject.create_new_project(project_name)
       expect(output).to eq(true)
     end
 
-    it 'gest a valid box uri from user' do
+    it 'chooses a box from a menu' do
+      $stdin.stub(:gets).and_return('1')
+      output = subject.choose_box(['test_box.box'])
+      expect(output).to eq('test_box.box')
+    end
+
+    it 'gets a valid box uri from user' do
       $stdin.stub(:gets).and_return(local_box_uri, 'y')
       subject.get_valid_box_uri(nil)
       expect(File.symlink?("#{bebox_boxes_path}/test_box.box")).to eq(true)
@@ -42,7 +50,7 @@ describe 'Test 00: Bebox::ProjectWizard' do
 
     it 'checks for project existence' do
       output = subject.project_exists?(parent_path, project_name)
-      expect(output).to eq(false)
+      expect(output).to eq(Dir.exists?("#{Dir.pwd}/tmp/#{project_name}"))
     end
 
     it 'setup the bebox boxes directory' do
