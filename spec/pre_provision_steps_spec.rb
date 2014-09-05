@@ -3,7 +3,7 @@ require_relative '../spec/factories/role.rb'
 require_relative '../spec/factories/profile.rb'
 require_relative '../spec/factories/provision.rb'
 
-describe 'Test 14: Pre provision apply step' do
+describe 'Test 15: Pre provision apply step' do
 
   let(:provision) { build(:provision, step: 'step-2') }
   let(:role) { build(:role) }

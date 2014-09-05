@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../spec/factories/node.rb'
 
-describe 'Test 04: Manage nodes with the wizard' do
+describe 'Test 04: Bebox::NodeWizard' do
 
   subject { Bebox::NodeWizard.new }
 
@@ -19,7 +19,7 @@ describe 'Test 04: Manage nodes with the wizard' do
 
     it 'creates a node with wizard' do
       Bebox::Node.any_instance.stub(:create) { true }
-      # Try first with a non-free IP (127.0.0.2) and then the free
+      # First try with a non-free IP (127.0.0.1) and then the free
       $stdin.stub(:gets).and_return(node_hostname, '127.0.0.1', node_ip)
       output = subject.create_new_node(project_root, environment)
       expect(output).to eq(true)
@@ -27,7 +27,6 @@ describe 'Test 04: Manage nodes with the wizard' do
 
     it 'removes a node with wizard' do
       Bebox::Node.any_instance.stub(:remove) { true }
-      # $stdin.stub(:gets).and_return(node_hostname, node_ip)
       output = subject.remove_node(project_root, environment, node_hostname)
       expect(output).to eq(true)
     end
@@ -51,6 +50,7 @@ describe 'Test 04: Manage nodes with the wizard' do
 
     it 'creates a node with wizard' do
       Bebox::Node.any_instance.stub(:create) { true }
+      # First try with an existing hostname and then an inexisting
       $stdin.stub(:gets).and_return(node.hostname, 'localhost', node.ip)
       output = subject.create_new_node(project_root, environment)
       expect(output).to eq(true)

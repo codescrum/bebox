@@ -13,10 +13,12 @@ module Bebox
       nodes_for_provisioning(nodes_to_step, step)
       # Apply the nodes provisioning for step-N
       in_step_nodes = Bebox::Node.list(project_root, environment, "steps/#{step}")
+      outputs = []
       nodes_to_step.each do |node|
         next unless check_node_to_step(node, in_step_nodes, step)
-        provision_step_in_node(project_root, environment, step, in_step_nodes, node)
+        outputs << provision_step_in_node(project_root, environment, step, in_step_nodes, node)
       end
+      return outputs
     end
 
     def provision_step_in_node(project_root, environment, step, in_step_nodes, node)
@@ -28,7 +30,9 @@ module Bebox
       # Before apply generate the roles and profiles modules structure for puppet step
       Bebox::Provision.generate_roles_and_profiles(project_root, step, role, profiles)
       provision = Bebox::Provision.new(project_root, environment, node, step)
-      provision.apply.success? ? (ok "Node '#{node.hostname}' provisioned to #{step}.") : (error "An error ocurred in the provision of #{step} for node '#{node.hostname}'")
+      output = provision.apply.success?
+      output ? (ok "Node '#{node.hostname}' provisioned to #{step}.") : (error "An error ocurred in the provision of #{step} for node '#{node.hostname}'")
+      return output
     end
 
     def check_node_to_step(node, in_step_nodes, step)

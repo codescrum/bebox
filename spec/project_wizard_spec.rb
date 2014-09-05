@@ -3,7 +3,7 @@ require 'progressbar'
 
 require_relative '../spec/factories/project.rb'
 
-describe 'Test 00: Create a new project with the wizard' do
+describe 'Test 00: Bebox::ProjectWizard' do
 
   describe 'Project data provision' do
 
