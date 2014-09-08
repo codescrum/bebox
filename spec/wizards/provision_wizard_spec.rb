@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-require_relative '../spec/factories/provision.rb'
+require_relative '../factories/provision.rb'
 
-describe 'Test 00: Bebox::ProvisionWizard' do
+describe 'Test 05: Bebox::ProvisionWizard' do
 
   subject { Bebox::ProvisionWizard.new }
 

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'progressbar'
 
-require_relative '../spec/factories/project.rb'
+require_relative '../factories/project.rb'
 
 describe 'Test 00: Bebox::ProjectWizard' do
 

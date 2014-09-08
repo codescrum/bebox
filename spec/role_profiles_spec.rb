@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../spec/factories/role.rb'
 require_relative '../spec/factories/profile.rb'
 
-describe 'Test 12: Associate roles and profiles' do
+describe 'Test 13: Associate roles and profiles' do
 
   let(:role) { build(:role) }
   let(:profile) { build(:profile) }

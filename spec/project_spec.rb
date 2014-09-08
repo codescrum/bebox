@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/project.rb'
 
-describe 'Test 01: Bebox::Project' do
+describe 'Test 06: Bebox::Project' do
 
   describe 'Project creation' do
 
