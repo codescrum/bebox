@@ -2,100 +2,109 @@ require 'spec_helper'
 
 require_relative '../spec/factories/node.rb'
 
-describe 'Test 04: Bebox::NodeWizard' do
+describe 'Test 00: Bebox::NodeWizard' do
 
   subject { Bebox::NodeWizard.new }
 
-  let(:project_root) { "#{Dir.pwd}/tmp/bebox-pname" }
-  let(:environment) { "vagrant" }
-  let(:node_hostname) { "node_0.server1.test" }
-  let(:node_ip) { YAML.load_file('spec/support/config_specs.yaml')['test_ip'] }
+  let(:node) { build(:node) }
 
-  before :each do
-    $stdout.stub(:write)
-  end
+  # before :each do
+  #   $stdout.stub(:write)
+  # end
 
   context '00: node not exist' do
+
+    before :each do
+      subject.stub(:node_exists?) { false }
+    end
 
     it 'creates a node with wizard' do
       Bebox::Node.any_instance.stub(:create) { true }
       # First try with a non-free IP (127.0.0.1) and then the free
-      $stdin.stub(:gets).and_return(node_hostname, '127.0.0.1', node_ip)
-      output = subject.create_new_node(project_root, environment)
+      $stdin.stub(:gets).and_return(node.hostname, '127.0.0.1', node.ip)
+      output = subject.create_new_node(node.project_root, node.environment)
       expect(output).to eq(true)
     end
 
-    it 'removes a node with wizard' do
-      Bebox::Node.any_instance.stub(:remove) { true }
-      output = subject.remove_node(project_root, environment, node_hostname)
+    it 'can not remove a node if not exist any' do
+      Bebox::Node.stub(:list) { [] }
+      output = subject.remove_node(node.project_root, node.environment, node.hostname)
       expect(output).to eq(true)
     end
 
-    it 'prepares a node with wizard' do
-      output = subject.prepare(project_root, environment)
+    it 'can not prepare a node if not exist any' do
+      subject.stub(:check_nodes_to_prepare) { [] }
+      output = subject.prepare(node.project_root, node.environment)
       expect(output).to eq(true)
     end
   end
 
   context '01: node exist' do
-    let(:node) { build(:node) }
 
-    before :all do
-      node.create
+    before :each do
+      subject.stub(:node_exists?) { true }
     end
 
-    after :all do
-      node.remove
+    it 'removes a node with wizard' do
+      Bebox::Node.stub(:list) { [node.hostname] }
+      Bebox::Node.any_instance.stub(:remove) { true }
+      $stdin.stub(:gets).and_return('1', 'y')
+      output = subject.remove_node(node.project_root, node.environment, node.hostname)
+      expect(output).to eq(true)
+    end
+
+    it 'prepares a node with wizard' do
+      Bebox::Node.any_instance.stub(:prepare) { true }
+      subject.stub(:check_nodes_to_prepare) { [node] }
+      Bebox::Node.stub(:regenerate_deploy_file) { true }
+      Bebox::VagrantHelper.stub(:generate_vagrantfile) { true }
+      Bebox::VagrantHelper.stub(:up_vagrant_nodes) { true }
+      subject.stub(:prepare_vagrant) { true }
+      output = subject.prepare(node.project_root, node.environment)
+      expect(output).to eq(true)
     end
 
     it 'creates a node with wizard' do
       Bebox::Node.any_instance.stub(:create) { true }
       # First try with an existing hostname and then an inexisting
       $stdin.stub(:gets).and_return(node.hostname, 'localhost', node.ip)
-      output = subject.create_new_node(project_root, environment)
-      expect(output).to eq(true)
-    end
-
-    it 'removes a node with wizard' do
-      Bebox::Node.any_instance.stub(:remove) { true }
-      $stdin.stub(:gets).and_return('1', 'y')
-      output = subject.remove_node(project_root, environment, node_hostname)
+      output = subject.create_new_node(node.project_root, node.environment)
       expect(output).to eq(true)
     end
 
     it 'sets the role for a node' do
+      Bebox::Role.stub(:list) {['a']}
+      Bebox::Node.stub(:list) {[node]}
       Bebox::Provision.stub(:associate_node_role) { true }
       $stdin.stub(:gets).and_return('1', '1')
-      output = subject.set_role(project_root, environment)
+      output = subject.set_role(node.project_root, node.environment)
       expect(output).to eq(true)
     end
 
-    it 'prepares a node with wizard' do
-      Bebox::Node.any_instance.stub(:prepare) { true }
-      Bebox::Node.stub(:regenerate_deploy_file) { true }
-      Bebox::VagrantHelper.stub(:generate_vagrantfile) { true }
-      Bebox::VagrantHelper.stub(:up_vagrant_nodes) { true }
-      subject.stub(:prepare_vagrant) { true }
-      output = subject.prepare(project_root, environment)
-      expect(output).to eq(true)
+    it 'checks for a no prepared_node with wizard' do
+      Bebox::Node.stub(:nodes_in_environment) { [node] }
+      Bebox::Node.stub(:list) { [] }
+      Bebox::Node.any_instance.stub(:checkpoint_parameter_from_file) { '' }
+      output = subject.check_nodes_to_prepare(node.project_root, node.environment)
+      expect(output).to eq([node])
     end
 
     it 'checks for an already prepared_node with wizard' do
+      Bebox::Node.stub(:nodes_in_environment) { [node] }
       Bebox::Node.stub(:list) { [node.hostname] }
       Bebox::Node.any_instance.stub(:checkpoint_parameter_from_file) { '' }
       $stdin.stub(:gets).and_return('n')
-      output = subject.check_nodes_to_prepare(project_root, environment)
+      output = subject.check_nodes_to_prepare(node.project_root, node.environment)
       expect(output).to eq([])
     end
   end
 
-
   it 'checks for node existence' do
-    output = subject.node_exists?(project_root, environment, node_hostname)
+    output = subject.node_exists?(node.project_root, node.environment, node.hostname)
     expect(output).to eq(false)
   end
 
   it 'checks for free IP' do
-    expect(subject.free_ip?(node_ip)).to eq(true)
+    expect(subject.free_ip?(node.ip)).to eq(true)
   end
 end
