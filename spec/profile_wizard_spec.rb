@@ -12,10 +12,6 @@ describe 'Test 10: Bebox::ProfileWizard' do
     $stdout.stub(:write)
   end
 
-  after :all do
-    profile.remove
-  end
-
   context '00: profile not exist' do
     it 'creates a new profile with wizard' do
       Bebox::Profile.any_instance.stub(:create) { true }
@@ -31,10 +27,9 @@ describe 'Test 10: Bebox::ProfileWizard' do
   end
 
   context '01: profile not exist' do
-    before :all do
-      profile.create
-    end
+
     it 'removes a profile with wizard' do
+      Bebox::Profile.stub(:list) { [profile.relative_path] }
       Bebox::Profile.any_instance.stub(:remove) { true }
       $stdin.stub(:gets).and_return(profile.relative_path, 'y')
       output = subject.remove_profile(profile.project_root)
