@@ -64,13 +64,15 @@ module Bebox
     def add_vagrant_node(project_name, vagrant_box_base, node)
       already_installed_boxes = installed_vagrant_box_names(node)
       box_name = "#{project_name}-#{node.hostname}"
-      info "Adding server to vagrant: #{node.hostname}..."
+      info "Adding server to vagrant: #{node.hostname}"
+      info "Please enter the network interface number if asked, and wait until the machine is up."
       `cd #{node.project_root} && vagrant box add #{box_name} #{vagrant_box_base}` unless already_installed_boxes.include? box_name
     end
 
     # Up the vagrant boxes in Vagrantfile
     def self.up_vagrant_nodes(project_root)
-      `cd #{project_root} && vagrant up --provision`
+      pid = fork {exec("cd #{project_root} && vagrant up --provision")}
+      Process.wait(pid)
     end
 
     # Halt the vagrant boxes running
