@@ -17,10 +17,11 @@ describe 'Test 00: Bebox::ProjectWizard' do
 
     before :all do
       `mkdir -p #{bebox_boxes_path}/tmp`
+      `rm -rf #{Dir.pwd}/tmp/bebox-pname`
     end
 
     before :each do
-      # $stdout.stub(:write)
+      $stdout.stub(:write)
     end
 
     after :all do

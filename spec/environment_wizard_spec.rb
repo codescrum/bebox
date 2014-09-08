@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../spec/factories/environment.rb'
 
-describe 'Test 02: Bebox::EnvironmentWizard' do
+describe 'Test 00: Bebox::EnvironmentWizard' do
 
   subject { Bebox::EnvironmentWizard.new }
 

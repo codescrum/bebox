@@ -8,9 +8,9 @@ describe 'Test 00: Bebox::NodeWizard' do
 
   let(:node) { build(:node) }
 
-  # before :each do
-  #   $stdout.stub(:write)
-  # end
+  before :each do
+    $stdout.stub(:write)
+  end
 
   context '00: node not exist' do
 
