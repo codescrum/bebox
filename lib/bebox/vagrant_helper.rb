@@ -43,8 +43,8 @@ module Bebox
 
     # Add the vagrant hosts to the local hosts file
     def add_to_local_hosts(node)
-      host_command = `echo '#{node.ip} #{node.hostname}     # Added by bebox' >> #{local_hosts_path}/hosts`
-      host_command if (file_content_trimmed("#{local_hosts_path}/hosts") =~ /#{node.ip}\s+#{node.hostname}/)
+      host_command = "sudo echo '#{node.ip} #{node.hostname}     # Added by bebox' >> #{local_hosts_path}/hosts"
+      `#{host_command}` unless (file_content_trimmed("#{local_hosts_path}/hosts") =~ /#{node.ip}\s+#{node.hostname}/)
     end
 
     # Obtain the local hosts file for the OS
