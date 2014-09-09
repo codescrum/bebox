@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../factories/node.rb'
 
-describe 'Test 02: Bebox::NodeWizard' do
+describe 'Test 03: Bebox::NodeWizard' do
 
   subject { Bebox::NodeWizard.new }
 

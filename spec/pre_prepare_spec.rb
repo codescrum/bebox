@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'tilt'
 require_relative '../spec/factories/node.rb'
 
-describe 'Test 09: Bebox::Node' do
+describe 'Test 10: Bebox::Node' do
 
   include Bebox::VagrantHelper
 

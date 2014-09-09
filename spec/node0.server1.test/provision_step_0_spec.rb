@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../factories/provision.rb'
 require_relative '../vagrant_spec_helper.rb'
 
-describe 'Test 16: Apply provision for fundamental step-0' do
+describe 'Test 17: Apply provision for fundamental step-0' do
 
   let(:provision) { build(:provision) }
   let(:fundamental_profiles) {['base/fundamental/ruby', 'base/fundamental/sudo', 'base/fundamental/users']}

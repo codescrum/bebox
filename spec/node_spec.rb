@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/node.rb'
 
-describe 'Test 08: Bebox::Node' do
+describe 'Test 09: Bebox::Node' do
 
   describe 'Nodes management' do
 

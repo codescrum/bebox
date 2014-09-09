@@ -3,7 +3,7 @@ require 'spec_helper'
 require_relative '../factories/role.rb'
 require_relative '../factories/profile.rb'
 
-describe 'Test 03: Bebox::RoleWizard' do
+describe 'Test 04: Bebox::RoleWizard' do
 
   subject { Bebox::RoleWizard.new }
 

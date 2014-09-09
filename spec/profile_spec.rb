@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../spec/factories/profile.rb'
 require_relative '../lib/bebox/wizards/wizards_helper'
 
-describe 'Test 12: Bebox::Profile' do
+describe 'Test 13: Bebox::Profile' do
 
   # include Wizard helper methods
   include Bebox::WizardsHelper

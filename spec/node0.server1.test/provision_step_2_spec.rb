@@ -4,7 +4,7 @@ require_relative '../factories/role.rb'
 require_relative '../factories/profile.rb'
 require_relative '../puppet_spec_helper.rb'
 
-describe 'Test 18: Apply provision for service layer step-2' do
+describe 'Test 19: Apply provision for service layer step-2' do
 
   let(:provision) { build(:provision, step: 'step-2') }
   let(:role) { build(:role) }

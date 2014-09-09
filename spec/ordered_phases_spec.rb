@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'cli_spec'
 require 'wizards/project_wizard_spec'
 require 'wizards/environment_wizard_spec'
 require 'wizards/node_wizard_spec'

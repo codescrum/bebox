@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../factories/profile.rb'
 
-describe 'Test 04: Bebox::ProfileWizard' do
+describe 'Test 05: Bebox::ProfileWizard' do
 
   subject { Bebox::ProfileWizard.new }
 
