@@ -1,0 +1,1 @@
+NAME profile - Manage profiles for the node provisioning phase. SYNOPSIS rspec [global options] profile list rspec [global options] profile new [-p path] [name] rspec [global options] profile remove COMMANDS list - List the profiles in the project new - Add a profile to the project remove - Remove a profile from the project
