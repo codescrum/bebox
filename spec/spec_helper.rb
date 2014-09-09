@@ -24,27 +24,6 @@ require 'colorize'
 include Serverspec::Helper::Ssh
 include Serverspec::Helper::Debian
 
-# require_relative '../lib/bebox/logger'
-# require_relative '../lib/bebox/files_helper'
-# require_relative '../lib/bebox/wizards/wizards_helper'
-# require_relative '../lib/bebox/vagrant_helper'
-# require_relative '../lib/bebox/wizards/project_wizard'
-# require_relative '../lib/bebox/project'
-# require_relative '../lib/bebox/wizards/environment_wizard'
-# require_relative '../lib/bebox/environment'
-# require_relative '../lib/bebox/wizards/node_wizard'
-# require_relative '../lib/bebox/node'
-# require_relative '../lib/bebox/wizards/provision_wizard'
-# require_relative '../lib/bebox/provision'
-# require_relative '../lib/bebox/wizards/role_wizard'
-# require_relative '../lib/bebox/role'
-# require_relative '../lib/bebox/wizards/profile_wizard'
-# require_relative '../lib/bebox/profile'
-# require_relative '../lib/bebox/vagrant_helper'
-# require_relative '../lib/bebox/commands/commands_helper'
-# require_relative '../lib/bebox/cli'
-# require_relative '../lib/bebox/commands/general_commands'
-# require_relative '../lib/bebox/commands/project_commands'
 require_relative '../lib/bebox'
 
 I18n.enforce_available_locales = false

@@ -12,7 +12,7 @@ describe 'Test 00: Bebox::Cli' do
   let(:role) { build(:role) }
 
   before :each do
-    # $stderr.stub(:write)
+    $stderr.stub(:write)
   end
 
   it 'shows the help for general commands' do
