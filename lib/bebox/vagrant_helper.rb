@@ -21,7 +21,7 @@ module Bebox
 
     # Remove the specified boxes from vagrant
     def remove_vagrant_box(node)
-      return unless (node.environment == 'vagrant' && node.prepared_nodes_count > 0)
+      (return false) unless ((node.environment == 'vagrant') && (node.prepared_nodes_count > 0))
       project_name = Bebox::Project.name_from_file(node.project_root)
       vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(node.project_root)
       `cd #{node.project_root} && vagrant destroy -f #{node.hostname}`

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../spec/factories/node.rb'
 
-describe 'Test 09: Bebox::Node' do
+describe 'Test 09: Bebox::Node'   do
 
   describe 'Nodes management' do
 
@@ -28,7 +28,6 @@ describe 'Test 09: Bebox::Node' do
       end
 
       it 'creates checkpoint' do
-        subject.create_node_checkpoint
         node_checkpoint_path = "#{subject.project_root}/.checkpoints/environments/#{subject.environment}/phases/phase-0/#{subject.hostname}.yml"
         expect(File.exist?(node_checkpoint_path)).to be (true)
         node_content = File.read(node_checkpoint_path).gsub(/\s+/, ' ').strip
@@ -44,7 +43,7 @@ describe 'Test 09: Bebox::Node' do
       end
 
       it 'gets a checkpoint parameter' do
-        hostname = subject.checkpoint_parameter_from_file('nodes', 'hostname')
+        hostname = subject.checkpoint_parameter_from_file('phase-0', 'hostname')
         expect(hostname).to eq(subject.hostname)
       end
     end
@@ -52,20 +51,20 @@ describe 'Test 09: Bebox::Node' do
     context '01: self methods' do
       it 'obtains the nodes in a given environment and phase' do
         expected_nodes = [subject.hostname]
-        object_nodes = Bebox::Node.nodes_in_environment(subject.project_root, subject.environment, 'nodes')
+        object_nodes = Bebox::Node.nodes_in_environment(subject.project_root, subject.environment, 'phase-0')
         expect(object_nodes.map{|node| node.hostname}).to include(*expected_nodes)
       end
 
       it 'obtains a node provision description state' do
-        message = "Allocated at #{subject.checkpoint_parameter_from_file('nodes', 'created_at')}"
+        message = "Allocated at #{subject.checkpoint_parameter_from_file('phase-0', 'created_at')}"
         description_state = Bebox::Node.node_provision_state(subject.project_root, subject.environment, subject.hostname)
         expect(description_state).to eq(message)
       end
 
       it 'obtains a state description for a checkpoint' do
-        checkpoints = %w{nodes prepared_nodes steps/step-0 steps/step-1 steps/step-2 steps/step-3}
-        expected_descriptions = ['Allocated',  'Prepared', 'Provisioned Fundamental step-0',
-          'Provisioned Users layer step-1', 'Provisioned Services layer step-2', 'Provisioned Security layer step-3']
+        checkpoints = %w{phase-0 phase-1 phase-2/steps/step-0 phase-2/steps/step-1 phase-2/steps/step-2 phase-2/steps/step-3}
+        expected_descriptions = ['Allocated',  'Prepared', 'Provisioned step-0',
+          'Provisioned step-1', 'Provisioned step-2', 'Provisioned step-3']
         descriptions = []
         checkpoints.each do |checkpoint|
           descriptions << Bebox::Node.state_from_checkpoint(checkpoint)
@@ -74,7 +73,7 @@ describe 'Test 09: Bebox::Node' do
       end
 
       it 'counts the nodes for types' do
-        nodes_count = Bebox::Node.count_all_nodes_by_type(subject.project_root, 'nodes')
+        nodes_count = Bebox::Node.count_all_nodes_by_type(subject.project_root, 'phase-0')
         expect(nodes_count).to eq(1)
       end
     end

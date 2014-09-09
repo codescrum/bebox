@@ -9,7 +9,7 @@ module Bebox
     def load_commands
       load_prepare_command
       # These commands are available if there are at least one node in the vagrant environment
-      (Bebox::Node.list(project_root, 'vagrant', 'prepared_nodes').count > 0) ? load_vagrant_commands : return
+      (Bebox::Node.list(project_root, 'vagrant', 'phase-1').count > 0) ? load_vagrant_commands : return
     end
 
     def load_prepare_command
@@ -44,7 +44,7 @@ module Bebox
     def vagrant_command(command, message)
       # Check if vagrant is installed
       return error(_('cli.prepare.not_vagrant')) unless Bebox::CommandsHelper.vagrant_installed?
-      nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
+      nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'phase-0')
       title _('cli.current_environment')%{environment: 'vagrant'}
       title message
       nodes.each{|node| msg(node.hostname)}

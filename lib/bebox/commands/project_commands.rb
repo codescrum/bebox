@@ -28,7 +28,7 @@ module Bebox
 
     # Load role/profile commands
     def load_role_profile_commands
-      if Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0
+      if Bebox::Node.count_all_nodes_by_type(project_root, 'phase-0') > 0
         self.extend Bebox::RoleCommands
         self.extend Bebox::ProfileCommands
       end
@@ -36,12 +36,12 @@ module Bebox
 
     # Load prepare commands if there are at least one node
     def load_prepare_commands
-      (self.extend Bebox::PrepareCommands) if Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0
+      (self.extend Bebox::PrepareCommands) if Bebox::Node.count_all_nodes_by_type(project_root, 'phase-0') > 0
     end
 
     # Load provision commands if there are nodes prepared
     def load_provision_commands
-      (self.extend Bebox::ProvisionCommands) if Bebox::Node.count_all_nodes_by_type(project_root, 'prepared_nodes') > 0
+      (self.extend Bebox::ProvisionCommands) if Bebox::Node.count_all_nodes_by_type(project_root, 'phase-1') > 0
     end
   end
 end

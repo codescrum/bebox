@@ -34,8 +34,8 @@ describe 'Test 06: Bebox::ProvisionWizard' do
   end
 
   it 'obtains the previous checkpoint for a node' do
-    steps = %w{prepared_nodes step-0 step-1 step-2 step-3}
-    expected_checkpoints = ['nodes',  'prepared_nodes', 'steps/step-0', 'steps/step-1', 'steps/step-2']
+    steps = %w{phase-1 step-0 step-1 step-2 step-3}
+    expected_checkpoints = ['phase-0', 'phase-1', 'phase-2/steps/step-0', 'phase-2/steps/step-1', 'phase-2/steps/step-2']
     checkpoints = []
     steps.each do |step|
       checkpoints << subject.previous_checkpoint(step)

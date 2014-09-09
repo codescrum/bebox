@@ -14,7 +14,7 @@ module Bebox
         generate_node_command(node_command, :new, :create_new_node, _('cli.node.new.desc'))
         node_remove_command(node_command)
         # These commands are available if there is at least one role and one node
-        generate_node_command(node_command, :set_role, :set_role, _('cli.node.set_role.desc')) if (Bebox::Role.roles_count(project_root) > 0 && Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0)
+        generate_node_command(node_command, :set_role, :set_role, _('cli.node.set_role.desc')) if (Bebox::Role.roles_count(project_root) > 0 && Bebox::Node.count_all_nodes_by_type(project_root, 'phase-0') > 0)
       end
     end
 
@@ -58,7 +58,7 @@ module Bebox
 
     def list_environments(environments)
       environments.each do |environment|
-        nodes = Node.list(project_root, environment, 'nodes')
+        nodes = Node.list(project_root, environment, 'phase-0')
         title _('cli.node.list.env_nodes_title')%{environment: environment}
         nodes.map{|node| msg("#{node}     (#{Bebox::Node.node_provision_state(project_root, environment, node)})")}
         warn(_('cli.node.list.no_nodes')) if nodes.empty?

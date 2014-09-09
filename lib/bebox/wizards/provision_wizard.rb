@@ -1,4 +1,4 @@
-
+require 'pry'
 module Bebox
   class ProvisionWizard
     include Bebox::Logger
@@ -12,7 +12,7 @@ module Bebox
       (return warn _('wizard.provision.no_provision_nodes')%{step: step}) unless nodes_to_step.count > 0
       nodes_for_provisioning(nodes_to_step, step)
       # Apply the nodes provisioning for step-N
-      in_step_nodes = Bebox::Node.list(project_root, environment, "steps/#{step}")
+      in_step_nodes = Bebox::Node.list(project_root, environment, "phase-2/steps/#{step}")
       outputs = []
       nodes_to_step.each do |node|
         next unless check_node_to_step(node, in_step_nodes, step)
@@ -41,7 +41,7 @@ module Bebox
 
     def check_node_to_step(node, in_step_nodes, step)
       return true unless in_step_nodes.include?(node.hostname)
-      confirm_action?(_('wizard.provision.confirm_reprovision')%{hostname: node.hostname, step: step, start: node.checkpoint_parameter_from_file('steps/' + step, 'started_at'), end: node.checkpoint_parameter_from_file('steps/' + step, 'finished_at')})
+      confirm_action?(_('wizard.provision.confirm_reprovision')%{hostname: node.hostname, step: step, start: node.checkpoint_parameter_from_file('phase-2/steps/' + step, 'started_at'), end: node.checkpoint_parameter_from_file('phase-2/steps/' + step, 'finished_at')})
     end
 
     def nodes_for_provisioning(nodes, step)
@@ -53,16 +53,16 @@ module Bebox
     # Obtain the previous checkpoint (step/phase) for a node
     def previous_checkpoint(step)
       case step
-        when 'prepared_nodes'
-          'nodes'
+        when 'phase-1'
+          'phase-0'
         when 'step-0'
-          'prepared_nodes'
+          'phase-1'
         when 'step-1'
-          'steps/step-0'
+          'phase-2/steps/step-0'
         when 'step-2'
-          'steps/step-1'
+          'phase-2/steps/step-1'
         when 'step-3'
-          'steps/step-2'
+          'phase-2/steps/step-2'
       end
     end
   end

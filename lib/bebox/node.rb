@@ -29,14 +29,14 @@ module Bebox
       remove_manifests_node
     end
 
-    # List existing nodes for environment and type (nodes, prepared_nodes)
-    def self.list(project_root, environment, node_type)
-      Dir["#{environments_path(project_root)}/#{environment}/phases/#{node_type}/*"].map { |f| File.basename(f, ".*") }
+    # List existing nodes for environment and type (phase-0, phase-1)
+    def self.list(project_root, environment, node_phase)
+      Dir["#{environments_path(project_root)}/#{environment}/phases/#{node_phase}/*"].map { |f| File.basename(f, ".*") }
     end
 
     # Get node checkpoint parameter from the yml file
-    def checkpoint_parameter_from_file(node_type, parameter)
-      Bebox::Node.checkpoint_parameter_from_file(self.project_root, self.environment, self.hostname, node_type, parameter)
+    def checkpoint_parameter_from_file(node_phase, parameter)
+      Bebox::Node.checkpoint_parameter_from_file(self.project_root, self.environment, self.hostname, node_phase, parameter)
     end
 
     # Get node checkpoint parameter from the yml file
@@ -143,7 +143,7 @@ module Bebox
 
     # Count the number of prepared nodes
     def prepared_nodes_count
-      Bebox::Node.list(self.project_root, self.environment, 'prepared_nodes').count
+      Bebox::Node.list(self.project_root, self.environment, 'phase-1').count
     end
 
     # Return a description string for the node provision state
@@ -179,15 +179,15 @@ module Bebox
     # Obtain the node creation_at parameter for a node
     def self.node_creation_date(project_root, environment, node_phase, node)
       node_config = YAML.load_file("#{project_root}/.checkpoints/environments/#{environment}/phases/#{node_phase}/#{node}.yml")
-      (node_type == 'phase-0') ? node_config['created_at'] : node_config['finished_at']
+      (node_phase == 'phase-0') ? node_config['created_at'] : node_config['finished_at']
     end
 
     # Count the number of nodes in all environments
-    def self.count_all_nodes_by_type(project_root, node_type)
+    def self.count_all_nodes_by_type(project_root, node_phase)
       nodes_count = 0
       environments = Bebox::Environment.list(project_root)
       environments.each do |environment|
-        nodes_count += Bebox::Node.list(project_root, environment, node_type).count
+        nodes_count += Bebox::Node.list(project_root, environment, node_phase).count
       end
       nodes_count
     end

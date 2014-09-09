@@ -21,7 +21,7 @@ module Bebox
     # Removes an existing node
     def remove_node(project_root, environment, hostname)
       # Ask for a node to remove
-      nodes = Bebox::Node.list(project_root, environment, 'nodes')
+      nodes = Bebox::Node.list(project_root, environment, 'phase-0')
       if nodes.count > 0
         hostname = choose_option(nodes, _('wizard.node.choose_node'))
       else
@@ -40,7 +40,7 @@ module Bebox
     # Associate a role with a node in a environment
     def set_role(project_root, environment)
       roles = Bebox::Role.list(project_root)
-      nodes = Bebox::Node.list(project_root, environment, 'nodes')
+      nodes = Bebox::Node.list(project_root, environment, 'phase-0')
       node = choose_option(nodes, _('wizard.choose_node'))
       role = choose_option(roles, _('wizard.choose_role'))
       output = Bebox::Provision.associate_node_role(project_root, environment, node, role)
@@ -81,11 +81,11 @@ module Bebox
     # Check the nodes already prepared and ask confirmation to re-do-it
     def check_nodes_to_prepare(project_root, environment)
       nodes_to_prepare = []
-      nodes = Bebox::Node.nodes_in_environment(project_root, environment, 'nodes')
-      prepared_nodes = Bebox::Node.list(project_root, environment, 'prepared_nodes')
+      nodes = Bebox::Node.nodes_in_environment(project_root, environment, 'phase-0')
+      prepared_nodes = Bebox::Node.list(project_root, environment, 'phase-1')
       nodes.each do |node|
         if prepared_nodes.include?(node.hostname)
-          message = _('wizard.node.confirm_preparation')%{hostname: node.hostname, start: node.checkpoint_parameter_from_file('prepared_nodes', 'started_at'), end: node.checkpoint_parameter_from_file('prepared_nodes', 'finished_at')}
+          message = _('wizard.node.confirm_preparation')%{hostname: node.hostname, start: node.checkpoint_parameter_from_file('phase-1', 'started_at'), end: node.checkpoint_parameter_from_file('phase-1', 'finished_at')}
           nodes_to_prepare << node if confirm_action?(message)
         else
           nodes_to_prepare << node
