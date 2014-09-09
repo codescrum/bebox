@@ -2,12 +2,14 @@ require 'spec_helper'
 require_relative 'factories/environment.rb'
 require_relative 'factories/node.rb'
 require_relative 'factories/profile.rb'
+require_relative 'factories/role.rb'
 
 describe 'Test 00: Bebox::Cli' do
 
   let(:environment) { build(:environment) }
   let(:node) { build(:node) }
   let(:profile) { build(:profile) }
+  let(:role) { build(:role) }
 
   before :each do
     # $stderr.stub(:write)
@@ -151,7 +153,6 @@ describe 'Test 00: Bebox::Cli' do
 
       before :each do
         Bebox::Node.stub(:count_all_nodes_by_type) { 1 }
-        Bebox::Environment.stub(:list) { [node.environment] }
         Bebox::Node.stub(:list) { [node] }
         Bebox::Node.stub(:nodes_in_environment) { [node] }
       end
@@ -186,10 +187,9 @@ describe 'Test 00: Bebox::Cli' do
 
       before :each do
         Bebox::Node.stub(:count_all_nodes_by_type) { 1 }
-        Bebox::Environment.stub(:list) { [node.environment] }
       end
 
-      it 'shows the help for node commands' do
+      it 'shows the help for profile commands' do
         argv = ['help', 'profile']
         output = capture(:stdout) { cli_command(argv, :success) }
         expected_content = File.read("spec/fixtures/commands/profile_help.test").gsub(/\s+/, ' ').strip
@@ -203,7 +203,7 @@ describe 'Test 00: Bebox::Cli' do
         expect(output).to match(/Current profiles:.*?#{profile.name}/m)
       end
 
-      it 'not list nodes if there are not any' do
+      it 'not list profiles if there are not any' do
         Bebox::ProfileWizard.any_instance.stub(:list_profiles) { [] }
         argv = ['profile', 'list']
         output = capture(:stdout) { cli_command(argv, :success) }
@@ -226,6 +226,83 @@ describe 'Test 00: Bebox::Cli' do
         Bebox::ProfileWizard.any_instance.stub(:remove_profile) { true }
         argv = ['profile', 'remove', profile.name]
         capture(:stdout) { cli_command(argv, :success) }
+      end
+    end
+
+    context '06: role commands' do
+
+      before :each do
+        Bebox::Profile.stub(:profiles_count) { 1 }
+        Bebox::Role.stub(:roles_count) { 1 }
+        Bebox::Node.stub(:count_all_nodes_by_type) { 1 }
+      end
+
+      it 'shows the help for role commands' do
+        argv = ['help', 'role']
+        output = capture(:stdout) { cli_command(argv, :success) }
+        expected_content = File.read("spec/fixtures/commands/role_help.test").gsub(/\s+/, ' ').strip
+        expect(output.gsub(/\s+/, ' ').strip).to eq(expected_content)
+      end
+
+      it 'list roles if there are any' do
+        Bebox::Role.stub(:list) { [role.name] }
+        argv = ['role', 'list']
+        output = capture(:stdout) { cli_command(argv, :success) }
+        expect(output).to match(/Current roles:.*?#{role.name}/m)
+      end
+
+      it 'not list roles if there are not any' do
+        Bebox::Role.stub(:list) { [] }
+        argv = ['role', 'list']
+        output = capture(:stdout) { cli_command(argv, :success) }
+        expect(output).to match(/There are not roles yet. You can create a new one with: 'bebox role new' command./m)
+      end
+
+      it 'can not create a new role without name' do
+        argv = ['role', 'new']
+        output = capture(:stdout) { cli_command(argv, :failure) }
+        expect(output).to match(/You did not supply a name/)
+      end
+
+      it 'creates a new role with name' do
+        Bebox::ProfileWizard.any_instance.stub(:create_new_role) { true }
+        argv = ['role', 'new', role.name]
+        capture(:stdout) { cli_command(argv, :success) }
+      end
+
+      it 'removes a role' do
+        Bebox::RoleWizard.any_instance.stub(:send) { true }
+        argv = ['role', 'remove']
+        capture(:stdout) { cli_command(argv, :success) }
+      end
+
+      it 'can not list role profiles without a role name' do
+        argv = ['role', 'list_profiles']
+        output = capture(:stdout) { cli_command(argv, :failure) }
+        expect(output).to match(/You did not supply a role name./m)
+      end
+
+      it 'can not list role profiles if role not exist' do
+        Bebox::RoleWizard.any_instance.stub(:role_exists?) { false }
+        argv = ['role', 'list_profiles', role.name]
+        output = capture(:stdout) { cli_command(argv, :success) }
+        expect(output).to match(/The '#{role.name}' role does not exist./m)
+      end
+
+      it 'not list role profiles if there are not any' do
+        Bebox::RoleWizard.any_instance.stub(:role_exists?) { true }
+        Bebox::Role.stub(:list_profiles) { [] }
+        argv = ['role', 'list_profiles', role.name]
+        output = capture(:stdout) { cli_command(argv, :success) }
+        expect(output).to match(/There are not profiles in role '#{role.name}'. You can add a new one with: 'bebox role add_profile' command./m)
+      end
+
+      it 'list role profiles if there are any' do
+        Bebox::RoleWizard.any_instance.stub(:role_exists?) { true }
+        Bebox::Role.stub(:list_profiles) { [profile.name] }
+        argv = ['role', 'list_profiles', role.name]
+        output = capture(:stdout) { cli_command(argv, :success) }
+        expect(output).to match(/Current profiles in '#{role.name}' role:.*?#{profile.name}/m)
       end
     end
   end
