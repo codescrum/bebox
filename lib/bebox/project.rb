@@ -83,8 +83,9 @@ module Bebox
 
     # Create rbenv local
     def generate_ruby_version
+      ruby_version = (RUBY_PATCHLEVEL == 0) ? RUBY_VERSION : "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}"
       File.open("#{self.path}/.ruby-version", 'w') do |f|
-        f.write RUBY_VERSION
+        f.write ruby_version
       end
     end
 

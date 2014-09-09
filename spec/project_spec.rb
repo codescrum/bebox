@@ -55,8 +55,9 @@ describe 'Test 06: Bebox::Project' do
       end
 
       it 'generates a .ruby-version file' do
+        ruby_version = (RUBY_PATCHLEVEL == 0) ? RUBY_VERSION : "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}"
         version = File.read("#{subject.path}/.ruby-version").strip
-        expect(version).to eq(RUBY_VERSION)
+        expect(version).to eq(ruby_version)
       end
 
       it 'creates a Capfile' do
