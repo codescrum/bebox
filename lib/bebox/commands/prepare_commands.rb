@@ -14,7 +14,7 @@ module Bebox
         prepare_command.action do |global_options,options,args|
           environment = get_environment(options)
           # Check if vagrant is installed
-          return error('Vagrant is not installed in the system. No changes were made.') unless vagrant_installed?
+          return error('Vagrant is not installed in the system. No changes were made.') unless Bebox::CommandsHelper.vagrant_installed?
           title "Environment: #{environment}"
           Bebox::NodeWizard.new.prepare(project_root, environment)
         end
@@ -40,7 +40,7 @@ module Bebox
 
     def vagrant_command(command, message)
       # Check if vagrant is installed
-      return error('Vagrant is not installed in the system. No changes were made.') unless vagrant_installed?
+      return error('Vagrant is not installed in the system. No changes were made.') unless Bebox::CommandsHelper.vagrant_installed?
       nodes = Bebox::Node.nodes_in_environment(project_root, 'vagrant', 'nodes')
       environment = 'vagrant'
       title "Environment: #{environment}\n#{message}"

@@ -11,6 +11,7 @@ module Bebox
     def load_commands
       load_environment_commands
       load_node_commands
+      load_role_profile_commands
       load_prepare_commands
       load_provision_commands
     end
@@ -22,17 +23,25 @@ module Bebox
 
     # Load node commands if there are environments configured
     def load_node_commands
-       Bebox::Environment.list(project_root).count > 0 ? (self.extend Bebox::NodeCommands) : return
+      (self.extend Bebox::NodeCommands) if Bebox::Environment.list(project_root).count > 0
+    end
+
+    # Load role/profile commands
+    def load_role_profile_commands
+      if Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0
+        self.extend Bebox::RoleCommands
+        self.extend Bebox::ProfileCommands
+      end
     end
 
     # Load prepare commands if there are at least one node
     def load_prepare_commands
-      Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0 ? (self.extend Bebox::PrepareCommands) : return
+      (self.extend Bebox::PrepareCommands) if Bebox::Node.count_all_nodes_by_type(project_root, 'nodes') > 0
     end
 
     # Load provision commands if there are nodes prepared
     def load_provision_commands
-      Bebox::Node.count_all_nodes_by_type(project_root, 'prepared_nodes') > 0 ? (self.extend Bebox::ProvisionCommands) : return
+      (self.extend Bebox::ProvisionCommands) if Bebox::Node.count_all_nodes_by_type(project_root, 'prepared_nodes') > 0
     end
   end
 end

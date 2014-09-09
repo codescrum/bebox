@@ -8,8 +8,6 @@ module Bebox
 
     def load_commands
       load_provision_commands
-      self.extend Bebox::RoleCommands
-      self.extend Bebox::ProfileCommands
     end
 
     def load_provision_commands

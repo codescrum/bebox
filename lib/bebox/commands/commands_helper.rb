@@ -1,7 +1,9 @@
 
 module Bebox
   module CommandsHelper
+
     include Bebox::WizardsHelper
+
     # Obtain the environment from command parameters or menu
     def get_environment(options)
       environment = options[:environment]
@@ -22,7 +24,7 @@ module Bebox
     end
 
     # Check if vagrant is installed on the machine
-    def vagrant_installed?
+    def self.vagrant_installed?
       (`which vagrant`) == 'vagrant not found' ? false : true
     end
 
