@@ -34,7 +34,7 @@ module Bebox
     def apply(environment, args)
       step = args.first
       help_now!(error('You did not specify an step')) if args.count == 0
-      help_now!(error('You did not specify a valid step')) unless valid_step?(step)
+      help_now!(error('You did not specify a valid step')) unless Bebox::CommandsHelper.valid_step?(step)
       Bebox::ProvisionWizard.new.apply_step(project_root, environment, step)
     end
   end

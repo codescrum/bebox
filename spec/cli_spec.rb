@@ -305,6 +305,37 @@ describe 'Test 00: Bebox::Cli' do
         expect(output).to match(/Current profiles in '#{role.name}' role:.*?#{profile.name}/m)
       end
     end
+
+    context '07: provision commands' do
+
+      before :each do
+        Bebox::Node.stub(:count_all_nodes_by_type) { 1 }
+      end
+
+      it 'can not apply provision if the step is not supplied' do
+        argv = ['apply']
+        output = capture(:stdout) { cli_command(argv, :failure) }
+        expect(output).to match(/You did not specify an step/m)
+      end
+
+      it 'can not apply provision if the step is not valid' do
+        argv = ['apply', 'step']
+        output = capture(:stdout) { cli_command(argv, :failure) }
+        expect(output).to match(/You did not specify a valid step/m)
+      end
+
+      it 'applies provision if the step is valid' do
+        Bebox::ProvisionWizard.any_instance.stub(:apply_step) { true }
+        argv = ['apply', 'step-0']
+        output = capture(:stdout) { cli_command(argv, :success) }
+      end
+
+      it 'applies provision in all steps' do
+        Bebox::ProvisionWizard.any_instance.stub(:apply_step) { true }
+        argv = ['apply', '--all']
+        output = capture(:stdout) { cli_command(argv, :success) }
+      end
+    end
   end
 end
 

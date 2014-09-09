@@ -29,7 +29,7 @@ module Bebox
     end
 
     # Check if the step argument is valid
-    def valid_step?(step)
+    def self.valid_step?(step)
       steps = %w{step-0 step-1 step-2 step-3}
       steps.include?(step)
     end
