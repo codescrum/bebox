@@ -9,7 +9,7 @@ module Bebox
     # Asks for the project parameters and create the project skeleton
     def create_new_project(project_name)
       # Check project existence
-      return error('Project not created. There is already a project with that name in the current directory.') if project_exists?(Dir.pwd, project_name)
+      (error('Project not created. There is already a project with that name in the current directory.'); return false) if project_exists?(Dir.pwd, project_name)
       # Setup the bebox boxes directory
       bebox_boxes_setup
       # Asks to choose an existing box

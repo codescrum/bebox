@@ -17,6 +17,7 @@ describe 'Test 01: Bebox::ProjectWizard' do
 
     before :all do
       `mkdir -p #{bebox_boxes_path}/tmp`
+      `rm #{bebox_boxes_path}/test_box.box`
       `rm -rf #{Dir.pwd}/tmp/bebox-pname`
     end
 
@@ -28,25 +29,21 @@ describe 'Test 01: Bebox::ProjectWizard' do
       `rm #{bebox_boxes_path}/test_box.box`
     end
 
+    it 'not create a project that already exist' do
+      subject.stub(:project_exists?) { true }
+      output = subject.create_new_project(project_name)
+      expect(output).to eq(false)
+    end
+
     it 'creates a project with wizard' do
       Bebox::Project.any_instance.stub(:create) { true }
       subject.stub(:bebox_boxes_setup)
       subject.stub(:choose_box) { 'test_box.box' }
+      subject.stub(:get_valid_box_uri) { 'test_box.box' }
+      subject.stub(:choose_option) { 'virtualbox' }
       $stdin.stub(:gets).and_return('1')
       output = subject.create_new_project(project_name)
       expect(output).to eq(true)
-    end
-
-    it 'chooses a box from a menu' do
-      $stdin.stub(:gets).and_return('1')
-      output = subject.choose_box(['test_box.box'])
-      expect(output).to eq('test_box.box')
-    end
-
-    it 'gets a valid box uri from user' do
-      $stdin.stub(:gets).and_return(local_box_uri, 'y')
-      subject.get_valid_box_uri(nil)
-      expect(File.symlink?("#{bebox_boxes_path}/test_box.box")).to eq(true)
     end
 
     it 'checks for project existence' do
@@ -60,13 +57,49 @@ describe 'Test 01: Bebox::ProjectWizard' do
       expect(Dir["#{bebox_boxes_path}/tmp/*"].count).to eq(0)
     end
 
-    it 'validates an http box uri' do
-      output = subject.uri_valid?(http_box_uri)
+    it 'chooses a box from a menu' do
+      $stdin.stub(:gets).and_return('1')
+      output = subject.choose_box(['test_box.box'])
+      expect(output).to eq('test_box.box')
+    end
+
+    it 'not chooses a box from a menu' do
+      $stdin.stub(:gets).and_return('2')
+      output = subject.choose_box(['test_box.box'])
+      expect(output).to eq(nil)
+    end
+
+    it 'gets a valid box uri from user when box not exist' do
+      subject.stub(:set_box) { true }
+      subject.stub(:ask_uri) { local_box_uri }
+      subject.stub(:box_exists?) { false }
+      output = subject.get_valid_box_uri(nil)
       expect(output).to eq(true)
     end
 
-    it 'validates a local-file box uri' do
+    it 'gets a valid box uri from user when box already exist' do
+      subject.stub(:set_box) { true }
+      subject.stub(:ask_uri) { local_box_uri }
+      subject.stub(:box_exists?) { true }
+      $stdin.stub(:gets).and_return('y')
+      output = subject.get_valid_box_uri(nil)
+      expect(output).to eq(true)
+    end
+
+    it 'asks for a uri that is valid' do
+      subject.stub(:uri_valid?) { true }
+      $stdin.stub(:gets).and_return(local_box_uri)
+      output = subject.ask_uri
+      expect(output).to eq(local_box_uri)
+    end
+
+    it 'validates a local uri' do
       output = subject.uri_valid?(local_box_uri)
+      expect(output).to eq(true)
+    end
+
+    it 'validates a remote uri' do
+      output = subject.uri_valid?(http_box_uri)
       expect(output).to eq(true)
     end
 
@@ -85,6 +118,5 @@ describe 'Test 01: Bebox::ProjectWizard' do
       expect(File.exists?("#{bebox_boxes_path}/LICENSE")).to eq(true)
       `rm #{bebox_boxes_path}/LICENSE`
     end
-
   end
 end
