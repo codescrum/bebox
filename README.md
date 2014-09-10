@@ -381,4 +381,4 @@ By project's nature the specs must be run in order. To do this all specs has a '
 
     rspec spec/ordered_phases_spec.rb
 
-It would take a large time (at least 20 minutes) because it creates a vagrant machine and do a basic provision downloading packages and installing them in the machine. The vagrant machine and the bebox test project would be destroyed after completion.
+It would take a large time (at least 20 minutes) because it creates a vagrant machine and do a basic provision downloading packages and installing them in the machine. Also it can ask for some input (password, interface selection) during the process. The vagrant machine and the bebox test project would be destroyed after completion.
