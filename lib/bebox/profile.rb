@@ -65,7 +65,7 @@ module Bebox
       #Split the name and validate each path part
       pathname.split('/').each do |path_child|
         valid_name = (path_child =~ /\A[a-z][a-z0-9_]*\Z/).nil? ? false : true
-        valid_name && !Bebox::RESERVED_WORDS.include?(path_child)
+        valid_name &&= !Bebox::RESERVED_WORDS.include?(path_child)
         return false unless valid_name
       end
       # Return true if all parts are valid

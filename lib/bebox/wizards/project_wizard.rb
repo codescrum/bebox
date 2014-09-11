@@ -9,20 +9,20 @@ module Bebox
     # Asks for the project parameters and create the project skeleton
     def create_new_project(project_name)
       # Check project existence
-      (error('Project not created. There is already a project with that name in the current directory.'); return false) if project_exists?(Dir.pwd, project_name)
+      (error(_('wizard.project.name_exist')); return false) if project_exists?(Dir.pwd, project_name)
       # Setup the bebox boxes directory
       bebox_boxes_setup
       # Asks to choose an existing box
       current_box = choose_box(get_existing_boxes)
       vagrant_box_base = "#{BEBOX_BOXES_PATH}/#{get_valid_box_uri(current_box)}"
       # Asks user to choose vagrant box provider
-      vagrant_box_provider = choose_option(%w{virtualbox vmware}, 'Choose the vagrant box provider')
+      vagrant_box_provider = choose_option(%w{virtualbox vmware}, _('wizard.project.choose_box_provider'))
       # Set default environments
       default_environments = %w{vagrant staging production}
       # Project creation
       project = Bebox::Project.new(project_name, vagrant_box_base, Dir.pwd, vagrant_box_provider, default_environments)
       output = project.create
-      ok "Project '#{project_name}' created!.\nMake: cd #{project_name}\nNow you can add new environments or new nodes to your project.\nSee bebox help."
+      ok _('wizard.project.creation_success')%{project_name: project_name}
       return output
     end
 
@@ -35,7 +35,7 @@ module Bebox
         # Asks vagrant box location to user if not choose an existing box
         valid_box_uri = ask_uri
         # Confirm if the box already exist
-        confirm = box_exists?(valid_box_uri) ? confirm_action?('There is already a box with that name, do you want to overwrite it?') : true
+        confirm = box_exists?(valid_box_uri) ? confirm_action?(_('wizard.project.box_exist')) : true
       end while !confirm
       # Setup the box with the valid uri
       set_box(valid_box_uri)
@@ -56,7 +56,7 @@ module Bebox
 
     # Asks vagrant box location to user until is valid
     def ask_uri
-      vbox_uri = write_input('Write the URI (http, local_path) for the vagrant box to be used in the project:', 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box')
+      vbox_uri = write_input(_('wizard.project.ask_box_uri'), 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box')
       # If valid return uri if not keep asking for uri
       uri_valid?(vbox_uri) ? (return vbox_uri) : ask_uri
     end
@@ -66,7 +66,7 @@ module Bebox
       require 'uri'
       uri = URI.parse(box_uri)
       if %w{http https}.include?(uri.scheme)
-        info 'Downloading box ...'
+        info _('wizard.project.downloading_box')
         download_box(uri)
       else
         `ln -fs #{uri.path} #{BEBOX_BOXES_PATH}/#{uri.path.split('/').last}`
@@ -84,12 +84,12 @@ module Bebox
       require 'net/http'
       request = Net::HTTP.new uri.host
       response = request.request_head uri.path
-      error('Redirections not supported.') if response.code.to_i == 302
-      ( response.code.to_i == 200) ? (return true) : error('Download link not valid!.')
+      error(_('wizard.project.no_redirections')) if response.code.to_i == 302
+      ( response.code.to_i == 200) ? (return true) : error(_('wizard.project.not_valid_link'))
     end
 
     def file_uri_valid?(uri)
-      File.file?(uri.path) ? (return true) : error('File path not exist!.')
+      File.file?(uri.path) ? (return true) : error(_('wizard.project.not_exist_file'))
     end
 
     # Check if a box with the same name already exist
@@ -111,36 +111,42 @@ module Bebox
     # Asks to choose an existing box in the bebox boxes directory
     def choose_box(boxes)
       # Menu to choose vagrant box provider
-      other_box_message = 'Download/Select a new box'
+      other_box_message = _('wizard.project.download_select_box')
       boxes << other_box_message
-      current_box = choose_option(boxes, 'Choose an existing box or download/select a new box')
+      current_box = choose_option(boxes, _('wizard.project.choose_box'))
       current_box = (current_box == other_box_message) ? nil : current_box
     end
 
     # Download a box by the specified uri
     def download_box(uri)
+      require 'net/http'
+      require 'uri'
+      url = uri.path
+      # Download file to bebox boxes tmp
+      Net::HTTP.start(uri.host) do |http|
+        response = http.request_head(URI.escape(url))
+        write_remote_file(uri, http, response)
+      end
+    end
+
+    def write_remote_file(uri, http, response)
       @counter = 0
       url = uri.path
       file_name = uri.path.split('/').last
       expanded_directory = File.expand_path(BEBOX_BOXES_PATH)
-      # Download file to bebox boxes tmp
-      require 'net/http'
-      require 'uri'
-      Net::HTTP.start(uri.host) do |http|
-        response = http.request_head(URI.escape(url))
-        ProgressBar
-        pbar = ProgressBar.new('file name:', response['content-length'].to_i)
-        File.open("#{expanded_directory}/tmp/#{file_name}", 'w') {|f|
-          http.get(URI.escape(url)) do |str|
-            f.write str
-            @counter += str.length
-            pbar.set(@counter)
-          end
-        }
-        # In download completion move from tmp to bebox boxes dir
-        pbar.finish
-        `mv #{BEBOX_BOXES_PATH}/tmp/#{file_name} #{BEBOX_BOXES_PATH}/`
-      end
+
+      ProgressBar
+      pbar = ProgressBar.new('file name:', response['content-length'].to_i)
+      File.open("#{expanded_directory}/tmp/#{file_name}", 'w') {|f|
+        http.get(URI.escape(url)) do |str|
+          f.write str
+          @counter += str.length
+          pbar.set(@counter)
+        end
+      }
+      # In download completion move from tmp to bebox boxes dir
+      pbar.finish
+      `mv #{BEBOX_BOXES_PATH}/tmp/#{file_name} #{BEBOX_BOXES_PATH}/`
     end
   end
 end

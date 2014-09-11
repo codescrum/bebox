@@ -8,9 +8,9 @@ module Bebox
     def get_environment(options)
       environment = options[:environment]
       # Ask for environment of node if flag environment not set
-      environment ||= choose_option(Environment.list(project_root), 'Choose an existing environment:')
+      environment ||= choose_option(Environment.list(project_root), _('cli.choose_environment'))
       # Check environment existence
-      Bebox::Environment.environment_exists?(project_root, environment) ? (return environment) : exit_now!(error("The '#{environment}' environment does not exist."))
+      Bebox::Environment.environment_exists?(project_root, environment) ? (return environment) : exit_now!(error(_('cli.not_exist_environment')%{environment: environment}))
     end
 
     # Obtain the default environment for a project

@@ -6,10 +6,16 @@ module Bebox
     attr_accessor :project_root
 
     def initialize(*args)
+
+      # Configure the i18n directory and locale
+      FastGettext.add_text_domain('bebox', path: File.join((File.expand_path '..', File.dirname(__FILE__)), 'i18n'), type: :yaml)
+      FastGettext.set_locale('en')
+      FastGettext.text_domain = 'bebox'
+
       # add the GLI magic on to the Bebox::Cli instance
       self.extend GLI::App
 
-      program_desc 'Create basic provisioning of remote servers.'
+      program_desc _('cli.desc')
       version Bebox::VERSION
 
       if inside_project?

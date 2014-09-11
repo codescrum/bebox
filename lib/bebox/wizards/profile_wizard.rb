@@ -6,34 +6,33 @@ module Bebox
 
     # Create a new profile
     def create_new_profile(project_root, profile_name, profile_base_path)
+      # Clean the profile_path to make it a valid path
+      profile_base_path = Bebox::Profile.cleanpath(profile_base_path)
       # Check if the profile name is valid
-      return error "The profile name can only contain:\n
-      \n* Lowercase letters
-      \n* Numbers
-      \n* Underscores
-      \n* Must begin with an Lowercase letter
-      \n* Can not be any of: #{Bebox::RESERVED_WORDS.join(', ')}
-      \n\nNo changes were made." unless valid_puppet_class_name?(profile_name)
-      unless profile_base_path.empty?
-        # Clean the profile_path to make it a valid path
-        profile_base_path = Bebox::Profile.cleanpath(profile_base_path)
-        # Check if the path name is valid
-        return error "Each part of the path can only contain:\n
-          \n* Lowercase letters
-          \n* Numbers
-          \n* Underscores
-          \n* Must begin with an Lowercase letter
-          \n* Can not be any of: #{Bebox::RESERVED_WORDS.join(', ')}
-          \n\nNo changes were made." unless Bebox::Profile.valid_pathname?(profile_base_path)
-      end
+      return unless name_valid?(profile_name, profile_base_path)
       # Check if the profile exist
       profile_path = profile_base_path.empty? ? profile_name : profile_complete_path(profile_base_path, profile_name)
-      return error("The profile '#{profile_path}' already exist. No changes were made.") if profile_exists?(project_root, profile_path)
+      return error(_('wizard.profile.name_exist')%{profile: profile_path}) if profile_exists?(project_root, profile_path)
       # Profile creation
       profile = Bebox::Profile.new(profile_name, project_root, profile_base_path)
       output = profile.create
-      ok "Profile '#{profile_path}' created!."
+      ok _('wizard.profile.creation_success')%{profile: profile_path}
       return output
+    end
+
+    # Check if the profile name is valid
+    def name_valid?(profile_name, profile_base_path)
+      unless valid_puppet_class_name?(profile_name)
+        error _('wizard.profile.invalid_name')%{words: Bebox::RESERVED_WORDS.join(', ')}
+        return false
+      end
+      return true if profile_base_path.empty?
+      # Check if the path name is valid
+      unless Bebox::Profile.valid_pathname?(profile_base_path)
+        error _('wizard.profile.invalid_path')%{words: Bebox::RESERVED_WORDS.join(', ')}
+        return false
+      end
+      true
     end
 
     # Removes an existing profile
@@ -42,18 +41,18 @@ module Bebox
       profiles = Bebox::Profile.list(project_root)
       # Get a profile if exist
       if profiles.count > 0
-        profile = choose_option(profiles, 'Choose the profile to remove:')
+        profile = choose_option(profiles, _('wizard.choose_remove_profile'))
       else
-        return error "There are no profiles to remove. No changes were made."
+        return error _('wizard.profile.no_deletion_profiles')
       end
       # Ask for deletion confirmation
-      return warn('No changes were made.') unless confirm_action?('Are you sure that you want to delete the profile?')
+      return warn(_('wizard.no_changes')) unless confirm_action?(_('wizard.profile.confirm_deletion'))
       # Profile deletion
       profile_name = profile.split('/').last
       profile_base_path = profile.split('/')[0...-1].join('/')
       profile = Bebox::Profile.new(profile_name, project_root, profile_base_path)
       output = profile.remove
-      ok 'Profile removed!.'
+      ok _('wizard.profile.deletion_success')
       return output
     end
 

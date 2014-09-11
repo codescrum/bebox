@@ -7,7 +7,7 @@ module Bebox
     end
 
     def load_commands
-      desc 'Manage profiles for the node provisioning phase.'
+      desc _('cli.profile.desc')
       command :profile do |profile_command|
         profile_new_command(profile_command)
         profile_remove_command(profile_command)
@@ -17,13 +17,13 @@ module Bebox
 
     # Profile new command
     def profile_new_command(profile_command)
-      profile_command.desc 'Add a profile to the project'
+      profile_command.desc _('cli.profile.new.desc')
       profile_command.arg_name "[name]"
       profile_command.command :new do |profile_new_command|
-        profile_new_command.flag :p, :arg_name => 'path', :desc => 'A relative path of the category folders tree to store the profile. Ex. basic/security/iptables'
+        profile_new_command.flag :p, :arg_name => 'path', :desc => _('cli.profile.new.path_flag_desc')
         profile_new_command.action do |global_options,options,args|
           path = options[:p] || ''
-          help_now!(error('You did not supply a name')) if args.count == 0
+          help_now!(error(_('cli.profile.new.name_arg_missing'))) if args.count == 0
           Bebox::ProfileWizard.new.create_new_profile(project_root, args.first, path)
         end
       end
@@ -31,7 +31,7 @@ module Bebox
 
     # Profile remove command
     def profile_remove_command(profile_command)
-      profile_command.desc "Remove a profile from the project"
+      profile_command.desc _('cli.profile.remove.desc')
       profile_command.command :remove do |profile_remove_command|
         profile_remove_command.action do |global_options,options,args|
           Bebox::ProfileWizard.new.remove_profile(project_root)
@@ -41,13 +41,13 @@ module Bebox
 
     # Profile list command
     def profile_list_command(profile_command)
-      profile_command.desc 'List the profiles in the project'
+      profile_command.desc _('cli.profile.list.desc')
       profile_command.command :list do |profile_list_command|
         profile_list_command.action do |global_options,options,args|
           profiles = Bebox::ProfileWizard.new.list_profiles(project_root)
-          title 'Current profiles:'
+          title _('cli.profile.list.current_profiles')
           profiles.map{|profile| msg(profile)}
-          warn('There are not profiles yet. You can create a new one with: \'bebox profile new\' command.') if profiles.empty?
+          warn(_('cli.profile.list.no_profiles')) if profiles.empty?
           linebreak
         end
       end

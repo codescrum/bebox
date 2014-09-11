@@ -8,11 +8,11 @@ module Bebox
 
     def load_commands
       # Environment management phase commands
-      desc 'Manage environments for the project. The \'vagrant\', \'production\' and \'staging\' environments are present by default.'
+      desc _('cli.environment.desc')
       command :environment do |environment_command|
         environment_list_command(environment_command)
-        generate_environment_command(environment_command, :new, :create_new_environment, 'Add a remote environment to the project')
-        generate_environment_command(environment_command, :remove, :remove_environment, 'Remove a remote environment in the project')
+        generate_environment_command(environment_command, :new, :create_new_environment, _('cli.environment.new.desc'))
+        generate_environment_command(environment_command, :remove, :remove_environment, _('cli.environment.remove.desc'))
       end
     end
 
@@ -21,7 +21,7 @@ module Bebox
       environment_command.arg_name "[environment]"
       environment_command.command command do |generated_command|
         generated_command.action do |global_options,options,args|
-          help_now!(error('You did not supply an environment')) if args.count == 0
+          help_now!(error(_('cli.environment.name_arg_missing'))) if args.count == 0
           Bebox::EnvironmentWizard.new.send(send_command, project_root, args.first)
         end
       end
@@ -33,9 +33,9 @@ module Bebox
       environment_command.command :list do |environment_list_command|
         environment_list_command.action do |global_options,options,args|
           environments = Bebox::Environment.list(project_root)
-          title 'Current environments:'
+          title _('cli.environment.list.current_envs')
           environments.map{|environment| msg(environment)}
-          warn('There are not environments yet. You can create a new one with: \'bebox environment new\' command.') if environments.empty?
+          warn(_('cli.environment.list.no_envs')) if environments.empty?
         end
       end
     end

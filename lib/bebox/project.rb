@@ -25,7 +25,6 @@ module Bebox
       create_puppet_base
       create_project_config
       create_checkpoints
-      info "Bundle project ..."
       bundle_project
     end
 
@@ -200,6 +199,7 @@ module Bebox
 
     # Bundle install packages for project
     def bundle_project
+      info _('model.project.bundle')
       system("cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install")
     end
 

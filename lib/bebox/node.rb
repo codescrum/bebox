@@ -2,7 +2,6 @@
 module Bebox
   class Node
 
-    include Bebox::Logger
     include Bebox::FilesHelper
     include Bebox::VagrantHelper
 

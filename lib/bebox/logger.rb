@@ -3,6 +3,8 @@
 module Bebox
   module Logger
 
+    include FastGettext::Translation
+
     def self.included(base)
       base.extend(self)
     end

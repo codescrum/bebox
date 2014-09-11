@@ -1,0 +1,198 @@
+en:
+  cli:
+    desc:                               'Create basic provisioning of remote servers.'
+    current_environment:                "Environment: %{environment}"
+    choose_environment:                 'Choose an existing environment:'
+    not_exist_environment:              "The '%{environment}' environment does not exist."
+    project:
+      new:
+        desc:                           'Create a new bebox project through a simple wizard.'
+        name_arg_missing:               'You did not supply a project name.'
+    environment:
+      desc:                             "Manage environments for the project. The 'vagrant', 'production' and 'staging' environments are present by default."
+      name_arg_missing:                 'You did not supply an environment'
+      new:
+        desc:                           'Add a remote environment to the project'
+      remove:
+        desc:                           'Remove a remote environment in the project'
+      list:
+        desc:                           'List the remote environments in the project'
+        current_envs:                   'Current environments:'
+        no_envs:                        "There are not environments yet. You can create a new one with: 'bebox environment new' command."
+    node:
+      desc:                             'Manage nodes for a environment in the project.'
+      new:
+        desc:                           'Add a node to a environment'
+      remove:
+        desc:                           'Remove a node in a environment'
+      set_role:
+        desc:                           'Associate a node with a role in a environment'
+      list:
+        env_flag_desc:                  'Set the environment for nodes'
+        desc:                           'list the nodes in a environment'
+        env_nodes_title:                "Nodes for '%{environment}' environment:"
+        no_nodes:                       "There are not nodes yet in the environment. You can create a new one with: 'bebox node new' command."
+    role:
+      desc:                             'Manage roles for the node provisioning phase.'
+      new:
+        desc:                           'Add a role to the project'
+        name_arg_missing:               'You did not supply a name'
+      remove:
+        desc:                           'Remove a role from the project'
+      list:
+        desc:                           'List the roles in the project'
+        current_roles:                  'Current roles:'
+        no_roles:                       "There are not roles yet. You can create a new one with: 'bebox role new' command."
+      add_profile:
+        desc:                           'Add a profile to a role'
+      remove_profile:
+        desc:                           'Remove a profile from a role'
+      list_profiles:
+        desc:                           'List the profiles in a role'
+        name_arg_missing:               'You did not supply a role name.'
+        name_not_exist:                 "The '%{role}' role does not exist."
+        current_profiles:               "Current profiles in '%{role}' role:"
+        no_profiles:                    "There are not profiles in role '%{role}'. You can add a new one with: 'bebox role add_profile' command."
+    profile:
+      desc:                             'Manage profiles for the node provisioning phase.'
+      new:
+        desc:                           'Add a profile to the project'
+        path_flag_desc:                 'A relative path of the category folders tree to store the profile. Ex. basic/security/iptables'
+        name_arg_missing:               'You did not supply a name'
+      remove:
+        desc:                           'Remove a profile from the project'
+      list:
+        desc:                           'List the profiles in the project'
+        current_profiles:               'Current profiles:'
+        no_profiles:                    "There are not profiles yet. You can create a new one with: 'bebox profile new' command."
+    prepare:
+      desc:                             'Prepare the nodes for the environment.'
+      env_flag_desc:                    'Set the environment of node'
+      not_vagrant:                      'Vagrant is not installed in the system. No changes were made.'
+      vagrant_halt:
+        desc:                           'Halt the nodes for vagrant environment.'
+        halt_title:                     'Halting nodes:'
+      vagrant_up:
+        desc:                           'Up the nodes for vagrant environment.'
+        up_title:                       'Running up nodes:'
+    provision:
+      desc:                             'Apply the Puppet step for the nodes in a environment. (step-0: Fundamental, step-1: User layer, step-2: Service layer, step-3: Security layer)'
+      all_switch_desc:                  'Apply all steps in sequence.'
+      env_flag_desc:                    'Set the environment of nodes'
+      title:                            'Provisioning all steps...'
+      name_missing:                     'You did not specify an step'
+      name_invalid:                     'You did not specify a valid step'
+
+  wizard:
+    no_changes:                         'No changes were made.'
+    choose_node:                        'Choose an existing node:'
+    choose_role:                        'Choose an existing role:'
+    choose_remove_profile:              'Choose the profile to remove:'
+    project:
+      name_exist:                       'Project not created. There is already a project with that name in the current directory.'
+      choose_box_provider:              'Choose the vagrant box provider'
+      creation_success:                 |
+                                        Project '%{project_name}' created!.
+                                        Make: cd %{project_name}
+                                        Now you can add new environments or new nodes to your project.
+                                        See bebox help.
+      box_exist:                        'There is already a box with that name, do you want to overwrite it?'
+      ask_box_uri:                      'Write the URI (http, local_path) for the vagrant box to be used in the project:'
+      default_http_box:                 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'
+      downloading_box:                  'Downloading box ...'
+      no_redirections:                  'Redirections not supported.'
+      not_valid_link:                   'Download link not valid!.'
+      not_exist_file:                   'File path not exist!.'
+      download_select_box:              'Download/Select a new box'
+      choose_box:                       'Choose an existing box or download/select a new box'
+    environment:
+      name_exist:                       "The '%{environment}' environment already exist!."
+      creation_success:                 'Environment created!.'
+      name_not_exist:                   "The '%{environment}' environment do not exist!."
+      confirm_deletion:                 'Are you sure that want to delete the environment?'
+      deletion_success:                 'Environment removed!.'
+    node:
+      creation_success:                 'Node created!.'
+      choose_node:                      'Choose the node to remove:'
+      no_nodes:                         "There are no nodes in the '%{environment}' environment to remove. No changes were made."
+      confirm_deletion:                 'Are you sure that you want to delete the node?'
+      deletion_success:                 'Node removed!.'
+      role_set_success:                 'Role associated to node!.'
+      prepare_title:                    'Preparing nodes:'
+      preparation_success:              'Node prepared!.'
+      no_prepare_nodes:                 'There are no nodes to prepare. No changes were made.'
+      confirm_preparation:              |
+                                        The node '%{hostname}' was already prepared (start: %{start} - end: %{end}).
+                                        Do you want to re-prepare it?
+      hostname_exist:                   'A hostname with that name already exist. Try a new one.'
+      ask_hostname:                     'Write the hostname for the node:'
+      valid_hostname:                   'Enter valid hostname. Ex. host.server1.com'
+      ask_ip:                           'Write the IP address for the node:'
+      valid_ip:                         'Enter a valid IP address. Ex. 192.168.0.50'
+      non_free_ip:                      'The IP address is not free. Try a new one.'
+    role:
+      invalid_name:                     |
+                                        The role name can only contain:
+                                        * Lowercase letters
+                                        * Numbers
+                                        * Underscores
+                                        * Must begin with an Lowercase letter
+                                        * Can not be any of: %{words}
+                                        No changes were made.
+      name_exist:                       "The '%{role}' role already exist. No changes were made."
+      creation_success:                 'Role created!.'
+      choose_deletion_role:             'Choose the role to remove:'
+      no_deletion_roles:                'There are no roles to remove. No changes were made.'
+      confirm_deletion:                 'Are you sure that you want to delete the role?'
+      deletion_success:                 'Role removed!.'
+      choose_add_profile:               'Choose the profile to add:'
+      profile_exist:                    "Profile '%{profile}' already in the Role '%{role}'. No changes were made."
+      add_profile_success:              "Profile '%{profile}' added to Role '%{role}'."
+      remove_profile_success:           "Profile '%{profile}' removed from Role '%{role}'."
+      profile_not_exist:                "Profile '%{profile}' is not in the Role '%{role}'. No changes were made."
+    profile:
+      invalid_name:                     |
+                                        The profile name can only contain:
+
+                                        * Lowercase letters
+                                        * Numbers
+                                        * Underscores
+                                        * Must begin with an Lowercase letter
+                                        * Can not be any of: %{words}
+
+                                        No changes were made.
+      invalid_path:                     |
+                                        Each part of the path can only contain:
+
+                                        * Lowercase letters
+                                        * Numbers
+                                        * Underscores
+                                        * Must begin with an Lowercase letter
+                                        * Can not be any of: %{words}
+
+                                        No changes were made.
+      name_exist:                       "The profile '%{profile}' already exist. No changes were made."
+      creation_success:                 "Profile '%{profile}' created!."
+      no_deletion_profiles:             'There are no profiles to remove. No changes were made.'
+      confirm_deletion:                 'Are you sure that you want to delete the profile?'
+      deletion_success:                 'Profile removed!.'
+    provision:
+      ssh_key_advice:                   "Please add a ssh key pair (id_rsa, id_rsa.pub) in config/keys/environments/%{environment} to do this step."
+      no_provision_nodes:               "There are no nodes for provision in %{step}. No changes were made."
+      title:                            "Provisioning %{step} in node %{hostname}:"
+      apply_success:                    "Node '%{hostname}' provisioned to %{step}."
+      apply_failure:                    "An error ocurred in the provision of %{step} for node '%{hostname}'"
+      confirm_reprovision:              |
+                                        The node '%{hostname}' was already provisioned in %{step} (start: %{start} - end: %{end}).
+                                        Do you want to re-provision it?
+      nodes_title:                      "Nodes for provisioning %{step}:"
+
+  model:
+    project:
+      bundle:                           'Bundle project ...'
+    vagrant_helper:
+      local_password_advice:            'Please provide your local password, if asked, to configure the local hosts file.'
+      add_to_vagrant:                   "Adding server to vagrant: %{node}"
+      network_interface_advice:         'Please enter the network interface number if asked, and wait until the machine is up.'
+      nodes_halted:                     'Vagrant nodes halted!'
+      nodes_running:                    'Vagrant nodes running up!'

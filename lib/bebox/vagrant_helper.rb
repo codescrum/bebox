@@ -30,7 +30,7 @@ module Bebox
 
     # Backup and add the vagrant hosts to local hosts file
     def configure_local_hosts(project_name, node)
-      info "\nPlease provide your local password, if asked, to configure the local hosts file."
+      info _('model.vagrant_helper.local_password_advice')
       backup_local_hosts(project_name)
       add_to_local_hosts(node)
     end
@@ -64,8 +64,8 @@ module Bebox
     def add_vagrant_node(project_name, vagrant_box_base, node)
       already_installed_boxes = installed_vagrant_box_names(node)
       box_name = "#{project_name}-#{node.hostname}"
-      info "Adding server to vagrant: #{node.hostname}"
-      info "Please enter the network interface number if asked, and wait until the machine is up."
+      info _('model.vagrant_helper.add_to_vagrant')%{node: node.hostname}
+      info _('model.vagrant_helper.network_interface_advice')
       `cd #{node.project_root} && vagrant box add #{box_name} #{vagrant_box_base}` unless already_installed_boxes.include? box_name
     end
 
@@ -73,11 +73,13 @@ module Bebox
     def self.up_vagrant_nodes(project_root)
       pid = fork {exec("cd #{project_root} && vagrant up --provision")}
       Process.wait(pid)
+      ok _('model.vagrant_helper.nodes_running')
     end
 
     # Halt the vagrant boxes running
     def self.halt_vagrant_nodes(project_root)
       `cd #{project_root} && vagrant halt`
+      ok _('model.vagrant_helper.nodes_halted')
     end
 
     # Generate the Vagrantfile
