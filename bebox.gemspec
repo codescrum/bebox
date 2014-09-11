@@ -26,7 +26,6 @@ spec = Gem::Specification.new do |s|
   s.executables << 'bebox'
   s.required_ruby_version = '>= 1.9.2'
   s.add_development_dependency('rake', '10.3.1')
-  s.add_development_dependency('aruba', '0.5.4')
   s.add_development_dependency('rspec', '2.14.1')
   s.add_development_dependency('jazz_hands', '0.5.2')
   s.add_development_dependency('serverspec', '1.6.0')
@@ -38,4 +37,5 @@ spec = Gem::Specification.new do |s|
   s.add_runtime_dependency('highline', '1.6.21')
   s.add_runtime_dependency('progressbar', '0.21.0')
   s.add_runtime_dependency('colorize', '0.6.0')
+  s.add_runtime_dependency('fast_gettext', '0.9.0')
 end
