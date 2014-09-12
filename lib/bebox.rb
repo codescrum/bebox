@@ -1,4 +1,3 @@
-require 'pry'
 require 'fast_gettext'
 require 'progressbar'
 require 'colorize'

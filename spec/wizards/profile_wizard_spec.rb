@@ -19,6 +19,18 @@ describe 'Test 05: Bebox::ProfileWizard' do
       expect(output).to eq(true)
     end
 
+    it 'not creates a new profile with invalid name' do
+      invalid_name = '0_profile'
+      output = subject.create_new_profile(profile.project_root, invalid_name, profile.path)
+      expect(output).to eq(nil)
+    end
+
+    it 'not creates a new profile with invalid path' do
+      invalid_path = 'and/00'
+      output = subject.create_new_profile(profile.project_root, profile.name, invalid_path)
+      expect(output).to eq(nil)
+    end
+
     it 'list profiles with wizard' do
         Bebox::Profile.stub(:list) {[]}
        output = subject.list_profiles(profile.project_root)

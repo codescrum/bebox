@@ -1,0 +1,1 @@
+NAME node - <%= node_desc %> SYNOPSIS rspec [global options] node [command options] list [--all] rspec [global options] node [command options] new rspec [global options] node [command options] remove COMMAND OPTIONS --environment=arg - <%= env_flag_desc %> (default: vagrant) COMMANDS list - <%= list_desc %> new - <%= new_desc %> remove - <%= remove_desc %>

@@ -1,0 +1,1 @@
+NAME profile - <%= profile_desc %> SYNOPSIS rspec [global options] profile list rspec [global options] profile new [-p path] [name] rspec [global options] profile remove COMMANDS list - <%= list_desc %> new - <%= new_desc %> remove - <%= remove_desc %>

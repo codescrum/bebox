@@ -29,6 +29,12 @@ require_relative '../lib/bebox'
 I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
+
+  # Initialize internationalization
+  FastGettext.add_text_domain('bebox', path: "#{Dir.pwd}/lib/i18n", type: :yaml)
+  FastGettext.set_locale('en')
+  FastGettext.text_domain = 'bebox'
+
   config.treat_symbols_as_metadata_keys_with_true_values = true
 
   config.before(:each) do
@@ -36,7 +42,7 @@ RSpec.configure do |config|
   end
 
   config.after(:each) do
-      ENV['RUBY_ENV'] = 'development'
+    ENV['RUBY_ENV'] = 'development'
   end
 
   # Factory Girl methods
