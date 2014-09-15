@@ -7,6 +7,7 @@ PATH
       gli (= 2.10.0)
       highline (= 1.6.21)
       progressbar (= 0.21.0)
+      sshkey (= 1.6.1)
       tilt (= 2.0.1)
 
 GEM
@@ -50,6 +51,8 @@ GEM
     erubis (2.7.0)
     factory_girl (4.3.0)
       activesupport (>= 3.0.0)
+    fakecmd (0.0.3)
+    fakefs (0.5.2)
     fast_gettext (0.9.0)
     gli (2.10.0)
     grit (2.5.0)
@@ -130,6 +133,7 @@ GEM
     simplecov-html (0.8.0)
     slop (3.5.0)
     specinfra (1.12.0)
+    sshkey (1.6.1)
     thor (0.19.1)
     thread_safe (0.3.3)
     tilt (2.0.1)
@@ -144,6 +148,8 @@ DEPENDENCIES
   bebox!
   codeclimate-test-reporter (= 0.4.0)
   factory_girl (= 4.3.0)
+  fakecmd (= 0.0.3)
+  fakefs (= 0.5.2)
   jazz_hands (= 0.5.2)
   rake (= 10.3.1)
   rspec (= 2.14.1)

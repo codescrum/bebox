@@ -32,10 +32,13 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency('factory_girl', '4.3.0')
   s.add_development_dependency('codeclimate-test-reporter', '0.4.0')
   s.add_development_dependency('simplecov', '0.9.0')
+  s.add_development_dependency('fakefs', '0.5.2')
+  s.add_development_dependency('fakecmd', '0.0.3')
   s.add_runtime_dependency('gli','2.10.0')
   s.add_runtime_dependency('tilt', '2.0.1')
   s.add_runtime_dependency('highline', '1.6.21')
   s.add_runtime_dependency('progressbar', '0.21.0')
   s.add_runtime_dependency('colorize', '0.6.0')
   s.add_runtime_dependency('fast_gettext', '0.9.0')
+  s.add_runtime_dependency('sshkey', '1.6.1')
 end
