@@ -23,7 +23,6 @@ module Bebox
     def remove
       remove_checkpoints
       remove_config
-      # remove_deploy_file
       remove_hiera_template
     end
 
@@ -34,26 +33,28 @@ module Bebox
 
     # Create checkpoints base directories
     def create_checkpoints
-      `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/phases/{phase-0,phase-1,phase-2}`
-      (0..3).each{|i| `cd #{self.project_root} && mkdir -p .checkpoints/environments/#{self.name}/phases/phase-2/steps/step-#{i}`}
+      FileUtils.cd(self.project_root) { FileUtils.mkdir_p ".checkpoints/environments/#{self.name}/phases" }
+      FileUtils.cd("#{project_root}/.checkpoints/environments/#{self.name}/phases") { FileUtils.mkdir_p %w{phase-0 phase-1 phase-2} }
+      (0..3).each{ |i| FileUtils.cd(self.project_root) { FileUtils.mkdir_p ".checkpoints/environments/#{self.name}/phases/phase-2/steps/step-#{i}" } }
     end
 
     # Remove checkpoints base directories
     def remove_checkpoints
-      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.name}`
+      FileUtils.cd(self.project_root) { FileUtils.rm_rf ".checkpoints/environments/#{self.name}" }
     end
 
     # Create config base for environment
     def create_config_base
       # Create keys directory for environment
-      `cd #{self.project_root} && mkdir -p config/environments/#{self.name}/{steps,keys}`
+      FileUtils.cd(self.project_root) { FileUtils.mkdir_p "config/environments/#{self.name}" }
+      FileUtils.cd("#{project_root}/config/environments/#{self.name}") { FileUtils.mkdir_p %w{steps keys} }
       # Create ssh key for puppet user if environment is vagrant
       generate_puppet_user_keys('vagrant') if self.name == 'vagrant'
     end
 
     # Remove config for environment
     def remove_config
-      `cd #{self.project_root} && rm -rf config/environments/#{self.name}`
+      FileUtils.cd(self.project_root) { FileUtils.rm_rf "config/environments/#{self.name}" }
     end
 
     # Generate the deploy files for the environment
@@ -79,19 +80,24 @@ module Bebox
 
     # Remove the hiera data template file for the environment
     def remove_hiera_template
-      Bebox::PROVISION_STEP_NAMES.each {|step| `cd #{self.project_root} && rm -rf puppet/steps/#{step}/hiera/data/#{self.name}.yaml` }
+      Bebox::PROVISION_STEP_NAMES.each {|step| FileUtils.cd(self.project_root) { FileUtils.rm_rf "puppet/steps/#{step}/hiera/data/#{self.name}.yaml" } }
     end
 
     # Path to the templates directory in the gem
     def templates_path
-      # File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib/templates"))
-      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+      Pathname(__FILE__).dirname.parent + 'templates'
+      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
     # Generate ssh keys for connection with puppet user in environment
     def generate_puppet_user_keys(environment)
-      `rm -f #{self.project_root}/config/environments/#{environment}/keys/{id_rsa,id_rsa.pub}`
-      `cd #{self.project_root}/config/environments/#{environment}/keys && ssh-keygen -q -f id_rsa -t rsa -N ''`
+      require 'sshkey'
+      FileUtils.cd("#{self.project_root}/config/environments/#{environment}/keys") { FileUtils.rm Dir.glob('*') }
+      sshkey = SSHKey.generate(:type => "RSA", :bits => 1024)
+      FileUtils.cd("#{self.project_root}/config/environments/#{environment}/keys") do
+        write_content_to_file("#{self.project_root}/config/environments/#{environment}/keys/id_rsa", sshkey.private_key)
+        write_content_to_file("#{self.project_root}/config/environments/#{environment}/keys/id_rsa.pub", sshkey.ssh_public_key)
+      end
     end
 
     # Check if the environment has ssh keys configured

@@ -1,11 +1,29 @@
 require 'spec_helper'
+require 'fakefs/safe'
+require_relative '../spec/factories/project.rb'
 require_relative '../spec/factories/environment.rb'
 
 describe 'Test 08: Bebox::Environment' do
 
   describe 'Environment management' do
 
+    let(:project) { build(:project) }
     subject { build(:environment) }
+    let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
+    let(:fixtures_path) { Pathname(__FILE__).dirname.parent + 'spec/fixtures' }
+
+    before :all do
+      FakeFS::FileSystem.clone(fixtures_path)
+      FakeFS::FileSystem.clone("#{lib_path}/templates")
+      FakeFS::FileSystem.clone("#{lib_path}/deb")
+      FakeFS.activate!
+      project.create
+    end
+
+    after :all do
+      FakeFS.deactivate!
+      FakeFS::FileSystem.clear
+    end
 
     it 'list the current environments' do
       current_environments = %w{vagrant staging production}
@@ -39,11 +57,11 @@ describe 'Test 08: Bebox::Environment' do
       it 'generates the deploy files' do
         # Generate capistrano recipe for environment
         deploy_content = File.read("#{subject.project_root}/config/environments/#{subject.name}/deploy.rb").gsub(/\s+/, ' ').strip
-        deploy_output_content = File.read("spec/fixtures/config/deploy/environment.test").gsub(/\s+/, ' ').strip
+        deploy_output_content = File.read("#{fixtures_path}/config/deploy/environment.test").gsub(/\s+/, ' ').strip
         expect(deploy_content).to eq(deploy_output_content)
         # Generate capistrano specific steps recipes
         Bebox::PROVISION_STEPS.each do |step|
-          content = File.read("spec/fixtures/config/deploy/steps/#{step}.test")
+          content = File.read("#{fixtures_path}/config/deploy/steps/#{step}.test")
           output = File.read("#{subject.project_root}/config/environments/#{subject.name}/steps/#{step}.rb")
           expect(output).to eq(content)
         end
@@ -51,7 +69,7 @@ describe 'Test 08: Bebox::Environment' do
 
       it 'generates a hiera data file' do
         Bebox::PROVISION_STEPS.each do |step|
-          content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/#{subject.name}.yaml.test")
+          content = File.read("#{fixtures_path}/puppet/steps/#{step}/hiera/data/#{subject.name}.yaml.test")
           output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.name}.yaml")
           expect(output).to eq(content)
         end
