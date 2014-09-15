@@ -35,7 +35,7 @@ module Bebox
 
     # Create project directory
     def create_project_directory
-      `mkdir -p #{self.parent_path}/#{self.name}`
+      FileUtils.mkdir_p "#{self.parent_path}/#{self.name}"
     end
 
     # Generate project config files
@@ -103,22 +103,22 @@ module Bebox
 
     # Create templates directories
     def create_templates_directories
-      `cd #{self.path} && mkdir -p templates/{roles,profiles}`
+      FileUtils.cd(self.path) { FileUtils.mkdir_p %w{templates/roles templates/profiles} }
     end
 
     # Create the default base roles and profiles in the project
     def copy_default_roles_profiles
       # Copy default roles and profiles to project templates directory
-      `cp -R #{Bebox::Project.templates_path}/puppet/default_roles/* #{self.path}/templates/roles/`
-      `cp -R #{Bebox::Project.templates_path}/puppet/default_profiles/* #{self.path}/templates/profiles/`
+      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_roles/.", "#{self.path}/templates/roles"
+      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_profiles/.", "#{self.path}/templates/profiles"
       # Copy default roles and profiles to project roles and profiles available
-      `cp -R #{Bebox::Project.templates_path}/puppet/default_roles/* #{self.path}/puppet/roles/`
-      `cp -R #{Bebox::Project.templates_path}/puppet/default_profiles/* #{self.path}/puppet/profiles/`
+      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_roles/.", "#{self.path}/puppet/roles"
+      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_profiles/.", "#{self.path}/puppet/profiles"
     end
 
     # Create config deploy and keys directories
     def create_config_deploy_directories
-      `cd #{self.path} && mkdir -p config/environments`
+      FileUtils.cd(self.path) { FileUtils.mkdir_p 'config/environments' }
     end
 
     # Create the default environments
@@ -154,8 +154,11 @@ module Bebox
 
     # Generate steps directories
     def generate_steps_directories
-      Bebox::PROVISION_STEP_NAMES.each{|step| `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`}
-      `cd #{self.path} && mkdir -p puppet/{roles,profiles}`
+      Bebox::PROVISION_STEP_NAMES.each do |step|
+        FileUtils.cd(self.path) { FileUtils.mkdir_p "puppet/steps/#{step}" }
+        FileUtils.cd("#{self.path}/puppet/steps/#{step}") { FileUtils.mkdir_p %w{ hiera/data manifests modules } }
+      end
+      FileUtils.cd(self.path) { FileUtils.mkdir_p %w{ puppet/roles puppet/profiles } }
     end
 
     # Generate steps templates for hiera and manifests files
@@ -175,13 +178,13 @@ module Bebox
 
     # Copy puppet install files
     def copy_puppet_install_files
-      `cd #{self.path} && mkdir -p puppet/lib/deb`
-      `cp -R #{lib_path}/deb/* #{self.path}/puppet/lib/deb/`
+      FileUtils.cd(self.path) { FileUtils.mkdir_p 'puppet/lib/deb' }
+      FileUtils.cp_r "#{lib_path}/deb/.", "#{self.path}/puppet/lib/deb"
     end
 
     # Generate SO dependencies files
     def generate_so_dependencies_files
-      `cd #{self.path} && mkdir -p puppet/prepare/dependencies/ubuntu`
+      FileUtils.cd(self.path) { FileUtils.mkdir_p 'puppet/prepare/dependencies/ubuntu' }
       ubuntu_dependencies_content = File.read("#{Bebox::Project.templates_path}/project/ubuntu_dependencies")
       File::open("#{self.path}/puppet/prepare/dependencies/ubuntu/packages", "w")do |f|
         f.write(ubuntu_dependencies_content)
@@ -194,7 +197,7 @@ module Bebox
 
     # Create checkpoints base directories
     def create_checkpoints
-      `cd #{self.path} && mkdir -p .checkpoints/environments`
+      FileUtils.cd(self.path) { FileUtils.mkdir_p '.checkpoints/environments' }
     end
 
     # Bundle install packages for project
@@ -210,13 +213,14 @@ module Bebox
 
     # Path to the lib directory in the gem
     def lib_path
-      File.expand_path '..', File.dirname(__FILE__)
+      Pathname(__FILE__).dirname.parent
+      # File.expand_path '..', File.dirname(__FILE__)
     end
 
     # Path to the templates directory in the gem
     def self.templates_path
-      # File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib/templates"))
-      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+      Pathname(__FILE__).dirname.parent + 'templates'
+      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
     # Obtain the ssh public key from file in environment
@@ -227,7 +231,7 @@ module Bebox
 
     # Delete all files referent to a project
     def destroy
-      `cd #{self.parent_path} && rm -rf #{self.name}`
+      FileUtils.cd(self.parent_path) { FileUtils.rm_rf self.name }
     end
   end
 end

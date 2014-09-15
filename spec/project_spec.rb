@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'fakefs/safe'
+require 'fakecmd'
 require_relative '../spec/factories/project.rb'
 
 describe 'Test 07: Bebox::Project' do
@@ -7,10 +9,23 @@ describe 'Test 07: Bebox::Project' do
 
     subject { build(:project) }
     let(:temporary_project) { build(:project, name: 'temporary_project') }
+    let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
+    let(:fixtures_path) { Pathname(__FILE__).dirname.parent + 'spec/fixtures' }
 
     before :all do
+      FakeFS::FileSystem.clone(fixtures_path)
+      FakeFS::FileSystem.clone("#{lib_path}/templates")
+      FakeFS::FileSystem.clone("#{lib_path}/deb")
+      FakeFS.activate!
+      FakeCmd.on!
       subject.create
       temporary_project.create
+    end
+
+    after :all do
+      FakeCmd.off!
+      FakeFS.deactivate!
+      FakeFS::FileSystem.clear
     end
 
     it 'creates the project directory' do
@@ -38,14 +53,14 @@ describe 'Test 07: Bebox::Project' do
 
       it 'generates a .bebox file' do
         dotbebox_content = File.read("#{subject.path}/.bebox").gsub(/\s+/, ' ').strip
-        ouput_template = Tilt::ERBTemplate.new('spec/fixtures/dot_bebox.test.erb')
-        dotbebox_expected_content = ouput_template.render(nil, created_at: subject.created_at, bebox_path: Dir.pwd).gsub(/\s+/, ' ').strip
+        ouput_template = Tilt::ERBTemplate.new("#{fixtures_path}/dot_bebox.test.erb")
+        dotbebox_expected_content = ouput_template.render(nil, created_at: subject.created_at, bebox_path: Pathname(__FILE__).dirname.parent).gsub(/\s+/, ' ').strip
         expect(dotbebox_content).to eq(dotbebox_expected_content)
       end
 
       it 'generates a .gitignore file' do
         expected_content = File.read("#{subject.path}/.gitignore")
-        output_file = File.read('spec/fixtures/dot_gitignore.test')
+        output_file = File.read("#{fixtures_path}/dot_gitignore.test")
         expect(output_file).to eq(expected_content)
       end
 
@@ -57,20 +72,20 @@ describe 'Test 07: Bebox::Project' do
 
       it 'creates a Capfile' do
         expected_content = File.read("#{subject.path}/Capfile")
-        output_file = File.read('spec/fixtures/Capfile.test')
+        output_file = File.read("#{fixtures_path}/Capfile.test")
         expect(output_file).to eq(expected_content)
       end
 
       it 'generates the deploy files' do
         # Generate deploy.rb file
         config_deploy_content = File.read("#{subject.path}/config/deploy.rb").gsub(/\s+/, ' ').strip
-        config_deploy_output_content = File.read("spec/fixtures/config/deploy.test").gsub(/\s+/, ' ').strip
+        config_deploy_output_content = File.read("#{fixtures_path}/config/deploy.test").gsub(/\s+/, ' ').strip
         expect(config_deploy_content).to eq(config_deploy_output_content)
       end
 
       it 'creates a Gemfile' do
         content = File.read("#{subject.path}/Gemfile").gsub(/\s+/, ' ').strip
-        output = File.read("spec/fixtures/Gemfile.test").gsub(/\s+/, ' ').strip
+        output = File.read("#{fixtures_path}/Gemfile.test").gsub(/\s+/, ' ').strip
         expect(output).to eq(content)
       end
     end
@@ -78,7 +93,7 @@ describe 'Test 07: Bebox::Project' do
     context '01: Create puppet base' do
       it 'generates the SO dependencies files' do
         content = File.read("#{subject.path}/puppet/prepare/dependencies/ubuntu/packages")
-        output = File.read("spec/fixtures/puppet/ubuntu_dependencies.test")
+        output = File.read("#{fixtures_path}/puppet/ubuntu_dependencies.test")
         expect(output).to eq(content)
       end
 
@@ -101,31 +116,31 @@ describe 'Test 07: Bebox::Project' do
 
       it 'copy the default roles and profiles' do
         expected_roles_directories = ['fundamental', 'security', 'users']
-        expected_profiles_directories = ['profiles', 'base', 'fundamental', 'ruby', 'manifests', 'sudo', 'users', 'security', 'fail2ban', 'iptables', 'ssh', 'sysctl']
+        expected_profiles_directories = ['base', 'fundamental', 'ruby', 'manifests', 'sudo', 'users', 'security', 'fail2ban', 'iptables', 'ssh', 'sysctl']
         directories = Dir["#{subject.path}/puppet/roles/*/"].map { |f| File.basename(f) }.uniq
         expect(directories).to include(*expected_roles_directories)
-        directories = Dir["#{subject.path}/puppet/profiles/**/"].map { |f| File.basename(f) }.uniq
+        directories = Dir["#{subject.path}/puppet/profiles/**/*"].map{|f|File.basename(f)}.uniq
         expect(directories).to include(*expected_profiles_directories)
       end
 
       context '02: generate steps templates' do
         it 'generates the manifests templates' do
           Bebox::PROVISION_STEPS.each do |step|
-            content = File.read("spec/fixtures/puppet/steps/#{step}/manifests/site.pp.test")
+            content = File.read("#{fixtures_path}/puppet/steps/#{step}/manifests/site.pp.test")
             output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp")
             expect(output).to eq(content)
           end
         end
         it 'generates the hiera config template' do
           Bebox::PROVISION_STEPS.each do |step|
-            content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/hiera.yaml.test")
+            content = File.read("#{fixtures_path}/puppet/steps/#{step}/hiera/hiera.yaml.test")
             output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/hiera.yaml")
             expect(output).to eq(content)
           end
         end
         it 'generates the hiera data common' do
           Bebox::PROVISION_STEPS.each do |step|
-            content = File.read("spec/fixtures/puppet/steps/#{step}/hiera/data/common.yaml.test")
+            content = File.read("#{fixtures_path}/puppet/steps/#{step}/hiera/data/common.yaml.test")
             output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/common.yaml")
             expect(output).to eq(content)
           end
@@ -145,6 +160,7 @@ describe 'Test 07: Bebox::Project' do
 
     context '04: bundle project' do
       it 'install project dependencies' do
+        FakeCmd.add :bundle, 0, FileUtils.touch("#{subject.path}/Gemfile.lock")
         expect(File).to exist("#{subject.path}/Gemfile.lock")
       end
     end
@@ -153,7 +169,7 @@ describe 'Test 07: Bebox::Project' do
       it 'generates the deploy environment files' do
         subject.environments.each do |environment|
           config_deploy_vagrant_content = File.read("#{subject.path}/config/environments/#{environment.name}/deploy.rb").gsub(/\s+/, ' ').strip
-          config_deploy_vagrant_output_content = File.read("spec/fixtures/config/deploy/#{environment.name}.test").gsub(/\s+/, ' ').strip
+          config_deploy_vagrant_output_content = File.read("#{fixtures_path}/config/deploy/#{environment.name}.test").gsub(/\s+/, ' ').strip
           expect(config_deploy_vagrant_content).to eq(config_deploy_vagrant_output_content)
         end
       end

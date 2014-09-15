@@ -31,7 +31,8 @@ module Bebox
 
     # Get the templates path inside the gem
     def self.templates_path
-      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+      Pathname(__FILE__).dirname.parent + 'templates'
+      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
   end
 end
