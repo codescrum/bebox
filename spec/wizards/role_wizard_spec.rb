@@ -3,7 +3,7 @@ require 'spec_helper'
 require_relative '../factories/role.rb'
 require_relative '../factories/profile.rb'
 
-describe 'Test 04: Bebox::RoleWizard' do
+describe 'Bebox::RoleWizard' do
 
   subject { Bebox::RoleWizard.new }
 
@@ -19,7 +19,7 @@ describe 'Test 04: Bebox::RoleWizard' do
     expect(output).to eq(false)
   end
 
-  context '00: role not exist' do
+  context 'role not exist' do
 
     before :each do
       subject.stub(:role_exists?) { false }
@@ -38,7 +38,7 @@ describe 'Test 04: Bebox::RoleWizard' do
     end
   end
 
-  context '01: role exist' do
+  context 'role exist' do
 
     before :each do
       subject.stub(:role_exists?) { true }
@@ -53,7 +53,7 @@ describe 'Test 04: Bebox::RoleWizard' do
     end
   end
 
-  context '02: role and profile exist' do
+  context 'role and profile exist' do
 
     before :each do
       subject.stub(:role_exists?) { true }
@@ -69,24 +69,32 @@ describe 'Test 04: Bebox::RoleWizard' do
       expect(output).to eq(true)
     end
 
-    context '03: profile included in a role' do
+    context 'profile not included in a role' do
+
+      before :each do
+        Bebox::Role.stub(:profile_in_role?) { false }
+      end
+
+      it 'can not remove a profile that not exist in a role with wizard' do
+        $stdin.stub(:gets).and_return(role.name, profile.relative_path)
+        output = subject.remove_profile(role.project_root)
+        expect(output).to eq(false)
+      end
+    end
+
+    context 'profile included in a role' do
+
+      before :each do
+        Bebox::Role.stub(:profile_in_role?) { true }
+      end
 
       it 'adds a profile to a role with wizard' do
-        Bebox::Role.stub(:profile_in_role?) { true }
         $stdin.stub(:gets).and_return(role.name, profile.relative_path)
         output = subject.add_profile(role.project_root)
         expect(output).to eq(false)
       end
 
-      it 'can not remove a profile that not exist in a role with wizard' do
-        Bebox::Role.stub(:profile_in_role?) { false }
-        $stdin.stub(:gets).and_return(role.name, profile.relative_path)
-        output = subject.remove_profile(role.project_root)
-        expect(output).to eq(false)
-      end
-
       it 'removes a profile from a role with wizard' do
-        Bebox::Role.stub(:profile_in_role?) { true }
         Bebox::Role.stub(:remove_profile) { true }
         $stdin.stub(:gets).and_return(role.name, profile.relative_path)
         output = subject.remove_profile(role.project_root)

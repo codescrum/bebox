@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../factories/environment.rb'
 
-describe 'Test 02: Bebox::EnvironmentWizard' do
+describe 'Bebox::EnvironmentWizard' do
 
   subject { Bebox::EnvironmentWizard.new }
 
@@ -12,18 +12,26 @@ describe 'Test 02: Bebox::EnvironmentWizard' do
     $stdout.stub(:write)
   end
 
-  context '00: environment not exist' do
-    it 'creates a new environment with wizard' do
+  context 'environment not exist' do
+
+    before :each do
       Bebox::Environment.stub(:environment_exists?) { false }
+    end
+
+    it 'creates a new environment with wizard' do
       Bebox::Environment.any_instance.stub(:create) { true }
       output = subject.create_new_environment(environment.project_root, environment.name)
       expect(output).to eq(true)
     end
   end
 
-  context '01: environment exist' do
-    it 'removes an environment with wizard' do
+  context 'environment exist' do
+
+    before :each do
       Bebox::Environment.stub(:environment_exists?) { true }
+    end
+
+    it 'removes an environment with wizard' do
       Bebox::Environment.any_instance.stub(:remove) { true }
       $stdin.stub(:gets).and_return('y')
       output = subject.remove_environment(environment.project_root, environment.name)

@@ -3,7 +3,7 @@ FactoryGirl.define do
     environment   'vagrant'
     project_root  "#{Dir.pwd}/tmp/bebox-pname"
     hostname      'node0.server1.test'
-    ip            YAML.load_file('spec/support/config_specs.yaml')['test_ip']
+    ip            '192.168.0.81'
 
     initialize_with { new(environment, project_root, hostname, ip) }
 

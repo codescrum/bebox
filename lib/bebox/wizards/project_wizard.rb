@@ -4,8 +4,7 @@ module Bebox
     include Bebox::Logger
     include Bebox::WizardsHelper
     # Bebox boxes directory
-    BEBOX_BOXES_PATH = '~/.bebox/boxes'
-
+      BEBOX_BOXES_PATH = File.expand_path('~/.bebox/boxes')
     # Asks for the project parameters and create the project skeleton
     def create_new_project(project_name)
       # Check project existence
@@ -49,9 +48,9 @@ module Bebox
     # Setup the bebox boxes directory
     def bebox_boxes_setup
       # Create user project directories
-      `mkdir -p #{BEBOX_BOXES_PATH}/tmp`
+      FileUtils.mkdir_p "#{BEBOX_BOXES_PATH}/tmp"
       # Clear partial downloaded boxes
-      `rm -f #{BEBOX_BOXES_PATH}/tmp/*`
+      FileUtils.rm_f Dir.glob("#{BEBOX_BOXES_PATH}/tmp/*")
     end
 
     # Asks vagrant box location to user until is valid
@@ -69,7 +68,7 @@ module Bebox
         info _('wizard.project.downloading_box')
         download_box(uri)
       else
-        `ln -fs #{uri.path} #{BEBOX_BOXES_PATH}/#{uri.path.split('/').last}`
+        FileUtils.ln_sf uri.path, "#{BEBOX_BOXES_PATH}/#{uri.path.split('/').last}"
       end
     end
 
@@ -133,11 +132,10 @@ module Bebox
       @counter = 0
       url = uri.path
       file_name = uri.path.split('/').last
-      expanded_directory = File.expand_path(BEBOX_BOXES_PATH)
 
       ProgressBar
       pbar = ProgressBar.new('file name:', response['content-length'].to_i)
-      File.open("#{expanded_directory}/tmp/#{file_name}", 'w') {|f|
+      File.open("#{BEBOX_BOXES_PATH}/tmp/#{file_name}", 'w') {|f|
         http.get(URI.escape(url)) do |str|
           f.write str
           @counter += str.length
@@ -146,7 +144,7 @@ module Bebox
       }
       # In download completion move from tmp to bebox boxes dir
       pbar.finish
-      `mv #{BEBOX_BOXES_PATH}/tmp/#{file_name} #{BEBOX_BOXES_PATH}/`
+      FileUtils.mv "#{BEBOX_BOXES_PATH}/tmp/#{file_name}", "#{BEBOX_BOXES_PATH}/"
     end
   end
 end

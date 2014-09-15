@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require_relative '../factories/node.rb'
 
-describe 'Test 03: Bebox::NodeWizard' do
+describe 'Bebox::NodeWizard' do
 
   subject { Bebox::NodeWizard.new }
 
@@ -12,7 +12,7 @@ describe 'Test 03: Bebox::NodeWizard' do
     $stdout.stub(:write)
   end
 
-  context '00: node not exist' do
+  context 'node not exist' do
 
     before :each do
       subject.stub(:node_exists?) { false }
@@ -39,7 +39,7 @@ describe 'Test 03: Bebox::NodeWizard' do
     end
   end
 
-  context '01: node exist' do
+  context 'node exist' do
 
     before :each do
       subject.stub(:node_exists?) { true }

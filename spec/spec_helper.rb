@@ -16,13 +16,8 @@ require 'awesome_print'
 require 'jazz_hands'
 require 'pry'
 require 'factory_girl'
-require 'serverspec'
-require 'pathname'
 require 'net/ssh'
-require 'colorize'
 
-include Serverspec::Helper::Ssh
-include Serverspec::Helper::Debian
 
 require_relative '../lib/bebox'
 
@@ -30,10 +25,11 @@ I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
 
-  # Initialize internationalization
-  FastGettext.add_text_domain('bebox', path: "#{Dir.pwd}/lib/i18n", type: :yaml)
-  FastGettext.set_locale('en')
-  FastGettext.text_domain = 'bebox'
+  config.before(:suite) do
+    FastGettext.add_text_domain('bebox', path: "#{Dir.pwd}/lib/i18n", type: :yaml)
+    FastGettext.set_locale('en')
+    FastGettext.text_domain = 'bebox'
+  end
 
   config.treat_symbols_as_metadata_keys_with_true_values = true
 

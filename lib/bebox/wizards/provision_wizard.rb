@@ -1,4 +1,4 @@
-require 'pry'
+
 module Bebox
   class ProvisionWizard
     include Bebox::Logger

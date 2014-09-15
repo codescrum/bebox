@@ -1,9 +1,10 @@
 require 'spec_helper'
 require 'progressbar'
+require 'fakefs/safe'
 
 require_relative '../factories/project.rb'
 
-describe 'Test 01: Bebox::ProjectWizard' do
+describe 'Bebox::ProjectWizard' do
 
   describe 'Project data provision' do
 
@@ -13,20 +14,14 @@ describe 'Test 01: Bebox::ProjectWizard' do
     let(:parent_path) { "#{Dir.pwd}/tmp" }
     let(:http_box_uri) {'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'}
     let(:local_box_uri) {"#{Dir.pwd}/spec/fixtures/test_box.box"}
-    let(:bebox_boxes_path) {File.expand_path(Bebox::ProjectWizard::BEBOX_BOXES_PATH)}
-
-    before :all do
-      `mkdir -p #{bebox_boxes_path}/tmp`
-      `rm #{bebox_boxes_path}/test_box.box`
-      `rm -rf #{Dir.pwd}/tmp/bebox-pname`
-    end
+    let(:bebox_boxes_path) { Bebox::ProjectWizard::BEBOX_BOXES_PATH }
 
     before :each do
       $stdout.stub(:write)
     end
 
     after :all do
-      `rm #{bebox_boxes_path}/test_box.box`
+      FakeFS::FileSystem.clear
     end
 
     it 'not create a project that already exist' do
@@ -41,20 +36,23 @@ describe 'Test 01: Bebox::ProjectWizard' do
       subject.stub(:choose_box) { 'test_box.box' }
       subject.stub(:get_valid_box_uri) { 'test_box.box' }
       subject.stub(:choose_option) { 'virtualbox' }
-      $stdin.stub(:gets).and_return('1')
       output = subject.create_new_project(project_name)
       expect(output).to eq(true)
     end
 
     it 'checks for project existence' do
-      output = subject.project_exists?(parent_path, project_name)
-      expect(output).to eq(Dir.exists?("#{Dir.pwd}/tmp/#{project_name}"))
+      FakeFS do
+        output = subject.project_exists?(parent_path, project_name)
+        expect(output).to eq(Dir.exists?("#{Dir.pwd}/tmp/#{project_name}"))
+      end
     end
 
     it 'setup the bebox boxes directory' do
-      subject.bebox_boxes_setup
-      expect(Dir.exist?("#{bebox_boxes_path}/tmp")).to eq(true)
-      expect(Dir["#{bebox_boxes_path}/tmp/*"].count).to eq(0)
+      FakeFS do
+        subject.bebox_boxes_setup
+        expect(Dir.exist?("#{bebox_boxes_path}/tmp")).to eq(true)
+        expect(Dir["#{bebox_boxes_path}/tmp/*"].count).to eq(0)
+      end
     end
 
     it 'chooses a box from a menu' do
@@ -104,19 +102,24 @@ describe 'Test 01: Bebox::ProjectWizard' do
     end
 
     it 'links to a local file box' do
-      subject.set_box(local_box_uri)
-      expect(File.symlink?("#{bebox_boxes_path}/test_box.box")).to eq(true)
+      FakeFS do
+        subject.set_box(local_box_uri)
+        expect(File.symlink?("#{bebox_boxes_path}/test_box.box")).to eq(true)
+      end
     end
 
     it 'checks for a local file box existence' do
-      expect(subject.box_exists?(local_box_uri)).to eq(true)
+      FakeFS do
+        expect(subject.box_exists?(local_box_uri)).to eq(true)
+      end
     end
 
     it 'links to a remote file box' do
-      remote_box_uri = 'https://github.com/codescrum/bebox/blob/master/LICENSE'
-      subject.set_box(remote_box_uri)
-      expect(File.exists?("#{bebox_boxes_path}/LICENSE")).to eq(true)
-      `rm #{bebox_boxes_path}/LICENSE`
+      FakeFS do
+        remote_box_uri = 'https://github.com/codescrum/bebox/blob/master/LICENSE'
+        subject.set_box(remote_box_uri)
+        expect(File.exists?("#{bebox_boxes_path}/LICENSE")).to eq(true)
+      end
     end
   end
 end
