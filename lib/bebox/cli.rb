@@ -8,8 +8,8 @@ module Bebox
     def initialize(*args)
 
       # Configure the i18n directory and locale
-      FastGettext.add_text_domain('bebox', path: File.join((File.expand_path '..', File.dirname(__FILE__)), 'i18n'), type: :yaml)
-      FastGettext.set_locale('en')
+      FastGettext.add_text_domain('bebox', path: Pathname(__FILE__).dirname.parent + 'i18n', type: :yaml)
+      FastGettext.locale = 'en'
       FastGettext.text_domain = 'bebox'
 
       # add the GLI magic on to the Bebox::Cli instance
@@ -29,15 +29,11 @@ module Bebox
     # Search recursively for .bebox file to see
     # if current directory is a bebox project or not
     def inside_project?
-      project_found = false
-      cwd = Pathname(Dir.pwd)
-      home_directory = File.expand_path('~')
-      cwd.ascend do |current_path|
-        project_found = File.file?("#{current_path.to_s}/.bebox")
-        self.project_root = current_path.to_s if project_found
-        break if project_found || (current_path.to_s == home_directory)
+      home_path = Pathname('~').expand_path
+      Pathname.pwd.ascend do |directory|
+        self.project_root = directory.to_s and return true if (directory + '.bebox').file?
+        return false if directory == home_path
       end
-      project_found
     end
   end
 end
