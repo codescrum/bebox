@@ -1,9 +1,7 @@
 require 'spec_helper'
-require 'fakefs/safe'
-require 'fakecmd'
 require_relative '../spec/factories/project.rb'
 
-describe 'Test 07: Bebox::Project' do
+describe 'Bebox::Project' do
 
   describe 'Project creation' do
 
@@ -18,12 +16,16 @@ describe 'Test 07: Bebox::Project' do
       FakeFS::FileSystem.clone("#{lib_path}/deb")
       FakeFS.activate!
       FakeCmd.on!
-      subject.create
-      temporary_project.create
+      FakeCmd.add 'bundle', 0, true
+      FakeCmd do
+        subject.create
+        temporary_project.create
+      end
+      FakeCmd.off!
     end
 
     after :all do
-      FakeCmd.off!
+      FakeCmd.clear!
       FakeFS.deactivate!
       FakeFS::FileSystem.clear
     end
@@ -37,7 +39,7 @@ describe 'Test 07: Bebox::Project' do
       expect(Dir.exist?(temporary_project.path)).to be false
     end
 
-    context '00: Project config files creation' do
+    context 'Project config files creation' do
       it 'creates the support directories' do
         expected_directories = ['templates', 'roles', 'profiles']
         directories = []
@@ -90,7 +92,7 @@ describe 'Test 07: Bebox::Project' do
       end
     end
 
-    context '01: Create puppet base' do
+    context 'Create puppet base' do
       it 'generates the SO dependencies files' do
         content = File.read("#{subject.path}/puppet/prepare/dependencies/ubuntu/packages")
         output = File.read("#{fixtures_path}/puppet/ubuntu_dependencies.test")
@@ -123,7 +125,7 @@ describe 'Test 07: Bebox::Project' do
         expect(directories).to include(*expected_profiles_directories)
       end
 
-      context '02: generate steps templates' do
+      context 'generate steps templates' do
         it 'generates the manifests templates' do
           Bebox::PROVISION_STEPS.each do |step|
             content = File.read("#{fixtures_path}/puppet/steps/#{step}/manifests/site.pp.test")
@@ -148,7 +150,7 @@ describe 'Test 07: Bebox::Project' do
       end
     end
 
-    context '03: checkpoints' do
+    context 'checkpoints' do
       it 'creates checkpoints directories' do
         expected_directories = ['.checkpoints', 'environments']
         directories = []
@@ -158,14 +160,15 @@ describe 'Test 07: Bebox::Project' do
       end
     end
 
-    context '04: bundle project' do
+    context 'bundle project' do
       it 'install project dependencies' do
-        FakeCmd.add :bundle, 0, FileUtils.touch("#{subject.path}/Gemfile.lock")
+        # Fake the Gemfile.lock file creation by the bundle install command (because FakeFS)
+        FileUtils.touch("#{subject.path}/Gemfile.lock")
         expect(File).to exist("#{subject.path}/Gemfile.lock")
       end
     end
 
-    context '05: create default environments' do
+    context 'create default environments' do
       it 'generates the deploy environment files' do
         subject.environments.each do |environment|
           config_deploy_vagrant_content = File.read("#{subject.path}/config/environments/#{environment.name}/deploy.rb").gsub(/\s+/, ' ').strip
@@ -195,7 +198,7 @@ describe 'Test 07: Bebox::Project' do
       end
     end
 
-    context '06: self methods' do
+    context 'self methods' do
       it 'obtains a vagrant box provider' do
         vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(subject.path)
         expect(vagrant_box_provider).to eq(subject.vagrant_box_provider)

@@ -1,9 +1,8 @@
 require 'spec_helper'
-require 'fakefs/safe'
 require_relative '../spec/factories/project.rb'
 require_relative '../spec/factories/environment.rb'
 
-describe 'Test 08: Bebox::Environment' do
+describe 'Bebox::Environment' do
 
   describe 'Environment management' do
 
@@ -17,10 +16,16 @@ describe 'Test 08: Bebox::Environment' do
       FakeFS::FileSystem.clone("#{lib_path}/templates")
       FakeFS::FileSystem.clone("#{lib_path}/deb")
       FakeFS.activate!
-      project.create
+      FakeCmd.on!
+      FakeCmd.add 'bundle', 0, true
+      FakeCmd do
+        project.create
+      end
+      FakeCmd.off!
     end
 
     after :all do
+      FakeCmd.clear!
       FakeFS.deactivate!
       FakeFS::FileSystem.clear
     end

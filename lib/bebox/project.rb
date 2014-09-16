@@ -30,7 +30,7 @@ module Bebox
 
     # Obtain the project name without 'bebox-' prefix
     def shortname
-      self.name.gsub("bebox-", "")
+      self.name.gsub('bebox-', '')
     end
 
     # Create project directory
@@ -203,7 +203,7 @@ module Bebox
     # Bundle install packages for project
     def bundle_project
       info _('model.project.bundle')
-      system("cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install")
+      `cd #{self.path} && BUNDLE_GEMFILE=Gemfile bundle install`
     end
 
     # Generate the deploy file for the project

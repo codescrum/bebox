@@ -5,7 +5,7 @@ require_relative 'factories/node.rb'
 require_relative 'factories/profile.rb'
 require_relative 'factories/role.rb'
 
-describe 'Test 00: Bebox::Cli' do
+describe 'Bebox::Cli' do
 
   include FastGettext::Translation
 

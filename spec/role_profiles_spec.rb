@@ -1,15 +1,34 @@
 require 'spec_helper'
+require_relative '../spec/factories/project.rb'
 require_relative '../spec/factories/role.rb'
 require_relative '../spec/factories/profile.rb'
 
-describe 'Test 14: Associate roles and profiles' do
+describe 'Bebox::Role, Bebox::Profile association' do
 
+  let(:project) { build(:project) }
   let(:role) { build(:role) }
   let(:profile) { build(:profile) }
+  let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
 
   before :all do
-    role.create
-    profile.create
+    FakeFS::FileSystem.clone(Pathname(__FILE__).dirname.parent + 'spec/fixtures')
+    FakeFS::FileSystem.clone("#{lib_path}/templates")
+    FakeFS::FileSystem.clone("#{lib_path}/deb")
+    FakeFS.activate!
+    FakeCmd.on!
+    FakeCmd.add 'bundle', 0, true
+    FakeCmd do
+      project.create
+      role.create
+      profile.create
+    end
+    FakeCmd.off!
+  end
+
+  after :all do
+    FakeCmd.clear!
+    FakeFS.deactivate!
+    FakeFS::FileSystem.clear
   end
 
   context 'add profiles' do

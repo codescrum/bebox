@@ -21,7 +21,8 @@ module Bebox
 
     # Delete all files and directories related to a profile
     def remove
-      `cd #{self.project_root} && rm -r puppet/profiles/#{relative_path}`
+      FileUtils.cd("#{project_root}/puppet/profiles") { FileUtils.rm_r relative_path, force: true }
+      # `cd #{self.project_root} && rm -r puppet/profiles/#{relative_path}`
     end
 
     # Lists existing profiles
@@ -32,7 +33,8 @@ module Bebox
 
     # Create the directories for the profile
     def create_profile_directory
-      `cd #{self.project_root} && mkdir -p puppet/profiles/#{relative_path}/manifests`
+      FileUtils.cd(project_root) { FileUtils.mkdir_p "puppet/profiles/#{relative_path}/manifests", force: true }
+      # `cd #{self.project_root} && mkdir -p puppet/profiles/#{relative_path}/manifests`
     end
 
     # Generate the manifests init.pp file
@@ -47,7 +49,8 @@ module Bebox
 
     # Path to the templates directory in the gem
     def templates_path
-      File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+      Pathname(__FILE__).dirname.parent + 'templates'
+      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
     # Path to the profile directory in the project

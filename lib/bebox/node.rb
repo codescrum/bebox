@@ -117,7 +117,9 @@ module Bebox
 
     # Remove checkpoints for node
     def remove_checkpoints
-      `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/phases/{phase-0,phase-1,phase-2/steps/step-{0..3}}/#{self.hostname}.yml`
+      %w{phase-0 phase-1}.each{ |phase| FileUtils.cd("#{project_root}/.checkpoints/environments/#{self.environment}/phases/#{phase}") { FileUtils.rm "#{self.hostname}.yml", force: true } }
+      FileUtils.cd("#{project_root}/.checkpoints/environments/#{self.environment}/phases/phase-2/steps") { (0..3).each{ |i| FileUtils.rm "step-#{i}/#{self.hostname}.yml", force: true } }
+      # `cd #{self.project_root} && rm -rf .checkpoints/environments/#{self.environment}/phases/{phase-0,phase-1,phase-2/steps/step-{0..3}}/#{self.hostname}.yml`
     end
 
     # Remove puppet hiera template file
@@ -194,8 +196,10 @@ module Bebox
 
     # Restore the previous local hosts file
     def restore_local_hosts(project_name)
-      `sudo cp #{local_hosts_path}/hosts_before_#{project_name} #{local_hosts_path}/hosts`
-      `sudo rm #{local_hosts_path}/hosts_before_#{project_name}`
+      FileUtils.cp "#{local_hosts_path}/hosts_before_#{project_name}", "#{local_hosts_path}/hosts"
+      # `sudo cp #{local_hosts_path}/hosts_before_#{project_name} #{local_hosts_path}/hosts`
+      FileUtils.mkdir_p "#{local_hosts_path}/hosts_before_#{project_name}"
+      # `sudo rm #{local_hosts_path}/hosts_before_#{project_name}`
     end
   end
 end

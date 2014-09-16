@@ -17,7 +17,8 @@ require 'jazz_hands'
 require 'pry'
 require 'factory_girl'
 require 'net/ssh'
-
+require 'fakefs/safe'
+require 'fakecmd'
 
 require_relative '../lib/bebox'
 
