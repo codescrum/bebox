@@ -1,31 +1,18 @@
 require 'spec_helper'
-require_relative '../spec/factories/project.rb'
-require_relative '../spec/factories/node.rb'
 
-describe 'Bebox::Node'   do
+describe 'Bebox::Node', :fakefs do
 
   let(:project) { build(:project) }
   subject { build(:node) }
-  let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
   let(:fixtures_path) { Pathname(__FILE__).dirname.parent + 'spec/fixtures' }
 
   before :all do
-    FakeFS::FileSystem.clone(fixtures_path)
-    FakeFS::FileSystem.clone("#{lib_path}/templates")
-    FakeFS::FileSystem.clone("#{lib_path}/deb")
-    FakeFS.activate!
     FakeCmd.on!
     FakeCmd.add 'bundle', 0, true
     FakeCmd do
       project.create
     end
     FakeCmd.off!
-  end
-
-  after :all do
-    FakeCmd.clear!
-    FakeFS.deactivate!
-    FakeFS::FileSystem.clear
   end
 
   context 'node creation' do

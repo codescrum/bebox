@@ -1,4 +1,3 @@
-require_relative '../factories/node.rb'
 
 FactoryGirl.define do
   factory :provision, :class => Bebox::Provision do

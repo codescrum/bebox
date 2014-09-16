@@ -35,13 +35,11 @@ module Bebox
     def check_puppetfile_content
       puppetfile_content = File.read("#{project_root}/puppet/steps/#{step_name}/Puppetfile").strip
       (FileUtils.rm "#{project_root}/puppet/steps/#{step_name}/Puppetfile", force: true) if puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten.empty?
-      # `rm "#{project_root}/puppet/steps/#{step_name}/Puppetfile"` if puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten.empty?
     end
 
     # Copy the static modules to the step-N modules path
     def copy_static_modules
       FileUtils.cp_r "#{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/modules/.", "#{self.project_root}/puppet/steps/#{step_name}/modules"
-      # `cp -R #{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/modules/* #{self.project_root}/puppet/steps/#{step_name}/modules/`
     end
 
     # Generate the hiera templates for each step
@@ -56,20 +54,15 @@ module Bebox
     def self.generate_roles_and_profiles(project_root, step, role, profiles)
       # Re-create the roles and profiles puppet module directories
       FileUtils.cd("#{project_root}/puppet/steps/#{step_name(step)}/modules") { FileUtils.rm %w{roles profiles}, force: true }
-      # `rm -rf #{project_root}/puppet/steps/#{step_name(step)}/modules/{roles,profiles}`
       FileUtils.cd("#{project_root}/puppet/steps/#{step_name(step)}/modules") { FileUtils.mkdir_p %w{roles/manifests profiles/manifests} }
-      # `mkdir -p #{project_root}/puppet/steps/#{step_name(step)}/modules/{roles,profiles}/manifests`
       # Copy role to puppet roles module
       FileUtils.cp_r "#{project_root}/puppet/roles/#{role}/manifests/init.pp", "#{project_root}/puppet/steps/#{step_name(step)}/modules/roles/manifests/#{role}.pp"
-      # `cp #{project_root}/puppet/roles/#{role}/manifests/init.pp #{project_root}/puppet/steps/#{step_name(step)}/modules/roles/manifests/#{role}.pp`
       # Copy profiles to puppet profiles module
       profiles.each do |profile|
         profile_tree = profile.gsub('::','/')
         profile_tree_parent = profile_tree.split('/')[0...-1].join('/')
         FileUtils.mkdir_p "#{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree_parent}"
-        # `mkdir -p #{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree_parent}`
         FileUtils.cp_r "#{project_root}/puppet/profiles/#{profile_tree}/manifests/init.pp", "#{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree}.pp"
-        # `cp #{project_root}/puppet/profiles/#{profile_tree}/manifests/init.pp #{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree}.pp`
       end
     end
 
@@ -128,7 +121,6 @@ module Bebox
     # Remove hiera data file for node
     def self.remove_hiera_for_steps(project_root, node_name)
       Bebox::PROVISION_STEP_NAMES.each{ |step| FileUtils.cd("#{project_root}/puppet/steps/#{step}/hiera/data") { FileUtils.rm "#{node_name}.yaml", :force => true } }
-        # `cd #{project_root} && rm -rf #{project_root}/puppet/steps/#{step}/hiera/data/#{node_name}.yaml`
     end
 
     # Remove node in manifests file for each step

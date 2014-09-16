@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require_relative '../factories/node.rb'
-
 describe 'Bebox::NodeWizard' do
 
   subject { Bebox::NodeWizard.new }
@@ -20,10 +18,16 @@ describe 'Bebox::NodeWizard' do
 
     it 'creates a node with wizard' do
       Bebox::Node.any_instance.stub(:create) { true }
-      # First try with a non-free IP (127.0.0.1) and then the free
       $stdin.stub(:gets).and_return(node.hostname, '127.0.0.1', node.ip)
-      output = subject.create_new_node(node.project_root, node.environment)
-      expect(output).to eq(true)
+      FakeCmd.on!
+      FakeCmd.add /ping.*?127.0.0.1/, 0, true
+      FakeCmd.add /ping.*?#{node.ip}/, 1, true
+      FakeCmd do
+        output = subject.create_new_node(node.project_root, node.environment)
+        expect(output).to eq(true)
+      end
+      FakeCmd.off!
+      FakeCmd.clear!
     end
 
     it 'can not remove a node if not exist any' do
@@ -68,8 +72,14 @@ describe 'Bebox::NodeWizard' do
       Bebox::Node.any_instance.stub(:create) { true }
       # First try with an existing hostname and then an inexisting
       $stdin.stub(:gets).and_return(node.hostname, 'localhost', node.ip)
-      output = subject.create_new_node(node.project_root, node.environment)
-      expect(output).to eq(true)
+      FakeCmd.on!
+      FakeCmd.add "ping #{node.ip}", 1, true
+      FakeCmd do
+        output = subject.create_new_node(node.project_root, node.environment)
+        expect(output).to eq(true)
+      end
+      FakeCmd.off!
+      FakeCmd.clear!
     end
 
     it 'sets the role for a node' do
@@ -105,6 +115,12 @@ describe 'Bebox::NodeWizard' do
   end
 
   it 'checks for free IP' do
-    expect(subject.free_ip?(node.ip)).to eq(true)
+      FakeCmd.on!
+      FakeCmd.add 'ping', 1, true
+      FakeCmd do
+        expect(subject.free_ip?(node.ip)).to eq(true)
+      end
+      FakeCmd.off!
+      FakeCmd.clear!
   end
 end

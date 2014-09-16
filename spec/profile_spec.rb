@@ -1,23 +1,15 @@
 require 'spec_helper'
-require_relative '../spec/factories/project.rb'
-require_relative '../spec/factories/profile.rb'
-require_relative '../lib/bebox/wizards/wizards_helper'
 
-describe 'Bebox::Profile' do
+describe 'Bebox::Profile', :fakefs do
 
   # include Wizards helper methods
   include Bebox::WizardsHelper
 
   subject { build(:profile) }
   let(:project) { build(:project) }
-  let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
   let(:fixtures_path) { Pathname(__FILE__).dirname.parent + 'spec/fixtures' }
 
   before :all do
-    FakeFS::FileSystem.clone(fixtures_path)
-    FakeFS::FileSystem.clone("#{lib_path}/templates")
-    FakeFS::FileSystem.clone("#{lib_path}/deb")
-    FakeFS.activate!
     FakeCmd.on!
     FakeCmd.add 'bundle', 0, true
     FakeCmd do
@@ -27,13 +19,7 @@ describe 'Bebox::Profile' do
     FakeCmd.off!
   end
 
-  after :all do
-    FakeCmd.clear!
-    FakeFS.deactivate!
-    FakeFS::FileSystem.clear
-  end
-
-  context '00: profile creation' do
+  context 'profile creation' do
 
     it 'validates the profile name' do
       # Test not valid reserved words
@@ -74,7 +60,7 @@ describe 'Bebox::Profile' do
     end
   end
 
-  context '01: profile list' do
+  context 'profile list' do
     it 'list the profiles' do
       current_profiles = [subject.relative_path]
       profiles = Bebox::Profile.list(subject.project_root)
@@ -82,14 +68,14 @@ describe 'Bebox::Profile' do
     end
   end
 
-  context '02: profile deletion' do
+  context 'profile deletion' do
     it 'deletes the profile directory' do
       subject.remove
       expect(Dir.exist?("#{subject.absolute_path}")).to be (false)
     end
   end
 
-  context '03: self methods' do
+  context 'self methods' do
     it 'counts the number of profiles in the project' do
       profiles_count = Bebox::Profile.profiles_count(subject.project_root)
       expect(profiles_count).to eq(9)

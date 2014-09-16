@@ -1,22 +1,13 @@
 require 'spec_helper'
-require_relative '../spec/factories/project.rb'
-require_relative '../spec/factories/role.rb'
-require_relative '../spec/factories/node.rb'
-require_relative '../spec/factories/provision.rb'
 
-describe 'Bebox::Node, Bebox::Role association' do
+describe 'Bebox::Node, Bebox::Role association', :fakefs do
 
   let(:project) { build(:project) }
   let(:role) { build(:role) }
   let(:node) { build(:node) }
-  let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
   let(:fixtures_path) { Pathname(__FILE__).dirname.parent + 'spec/fixtures' }
 
   before :all do
-    FakeFS::FileSystem.clone(fixtures_path)
-    FakeFS::FileSystem.clone("#{lib_path}/templates")
-    FakeFS::FileSystem.clone("#{lib_path}/deb")
-    FakeFS.activate!
     FakeCmd.on!
     FakeCmd.add 'bundle', 0, true
     FakeCmd do
@@ -24,12 +15,6 @@ describe 'Bebox::Node, Bebox::Role association' do
       node.create
     end
     FakeCmd.off!
-  end
-
-  after :all do
-    FakeCmd.clear!
-    FakeFS.deactivate!
-    FakeFS::FileSystem.clear
   end
 
   context 'set role' do

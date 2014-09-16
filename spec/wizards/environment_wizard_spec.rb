@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require_relative '../factories/environment.rb'
-
 describe 'Bebox::EnvironmentWizard' do
 
   subject { Bebox::EnvironmentWizard.new }

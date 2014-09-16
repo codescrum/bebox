@@ -1,9 +1,4 @@
 require 'spec_helper'
-require 'tilt'
-require_relative 'factories/environment.rb'
-require_relative 'factories/node.rb'
-require_relative 'factories/profile.rb'
-require_relative 'factories/role.rb'
 
 describe 'Bebox::Cli' do
 
@@ -29,7 +24,7 @@ describe 'Bebox::Cli' do
     expect(output.gsub(/\s+/, ' ').strip).to eq(expected_content)
   end
 
-  context '00: general commands' do
+  context 'general commands' do
     it 'shows error for new without project name' do
       argv = ['new']
       output = capture(:stdout) { cli_command(argv, :failure) }
@@ -43,7 +38,7 @@ describe 'Bebox::Cli' do
     end
   end
 
-  context '01: project commands' do
+  context 'project commands' do
 
     before :each do
       Bebox::Cli.any_instance.stub(:inside_project?) { true }
@@ -61,7 +56,7 @@ describe 'Bebox::Cli' do
       expect(output.gsub(/\s+/, ' ').strip).to eq(expected_content)
     end
 
-    context '02: environment commands' do
+    context 'environment commands' do
 
       it 'shows the help for environment commands' do
         argv = ['help', 'environment']
@@ -116,7 +111,7 @@ describe 'Bebox::Cli' do
       end
     end
 
-    context '03: node commands' do
+    context 'node commands' do
 
       before :each do
         Bebox::Environment.stub(:list) { [node.environment] }
@@ -172,7 +167,7 @@ describe 'Bebox::Cli' do
       end
     end
 
-    context '04: prepare commands' do
+    context 'prepare commands' do
 
       before :each do
         Bebox::Node.stub(:count_all_nodes_by_type) { 1 }
@@ -206,7 +201,7 @@ describe 'Bebox::Cli' do
       end
     end
 
-    context '05: profile commands' do
+    context 'profile commands' do
 
       before :each do
         Bebox::Node.stub(:count_all_nodes_by_type) { 1 }
@@ -258,7 +253,7 @@ describe 'Bebox::Cli' do
       end
     end
 
-    context '06: role commands' do
+    context 'role commands' do
 
       before :each do
         Bebox::Profile.stub(:profiles_count) { 1 }
@@ -346,7 +341,7 @@ describe 'Bebox::Cli' do
       end
     end
 
-    context '07: provision commands' do
+    context 'provision commands' do
 
       before :each do
         Bebox::Node.stub(:count_all_nodes_by_type) { 1 }

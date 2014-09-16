@@ -1,23 +1,15 @@
 require 'spec_helper'
-require 'tilt'
-require_relative '../spec/factories/node.rb'
-require_relative '../spec/factories/project.rb'
 
-describe 'Bebox::Node prepare' do
+describe 'Bebox::Node prepare', :fakefs do
 
   include Bebox::VagrantHelper
 
   let(:project) { build(:project) }
   let(:nodes) { [ build(:node) ] }
-  let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
   let(:fixtures_path) { Pathname(__FILE__).dirname.parent + 'spec/fixtures' }
 
   before :all do
-    FakeFS::FileSystem.clone(fixtures_path)
-    FakeFS::FileSystem.clone("#{lib_path}/templates")
-    FakeFS::FileSystem.clone("#{lib_path}/deb")
     FakeFS::FileSystem.clone("#{local_hosts_path}/hosts")
-    FakeFS.activate!
     FakeCmd.on!
     FakeCmd.add 'bundle', 0, true
     FakeCmd do
@@ -25,12 +17,6 @@ describe 'Bebox::Node prepare' do
       nodes.each{ |node| node.create}
     end
     FakeCmd.off!
-  end
-
-  after :all do
-    FakeCmd.clear!
-    FakeFS.deactivate!
-    FakeFS::FileSystem.clear
   end
 
   context 'pre vagrant prepare' do
@@ -146,5 +132,46 @@ describe 'Bebox::Node prepare' do
   end
 
   context 'destroy machine' do
+
+    before :all do
+      # Fake hosts backup file
+      FileUtils.cp "#{local_hosts_path}/hosts", "#{local_hosts_path}/hosts_before_#{project.name}"
+      FakeCmd.clear!
+      node = nodes.first
+      FakeCmd.on!
+      FakeCmd.add 'vagrant box list', 0, ""
+      FakeCmd.add 'vagrant halt', 0, true
+      FakeCmd.add 'vagrant destroy', 0, true
+      FakeCmd.add 'vagrant box remove', 0, true
+      FakeCmd.add 'vagrant status', 0, ''
+      FakeCmd do
+        Bebox::VagrantHelper.halt_vagrant_nodes(node.project_root)
+        remove_vagrant_box(node)
+      end
+    end
+
+    after :all do
+      FakeCmd.off!
+    end
+
+    it 'checks that vagrant box not be running' do
+      FakeCmd do
+        expect(vagrant_box_running?(nodes.first)).to be(false)
+      end
+    end
+
+    it 'checks that vagrant box not exist' do
+      FakeCmd do
+        expect(vagrant_box_exist?(nodes.first)).to be(false)
+      end
+    end
+
+    it 'restores the local hosts file' do
+      hosts_backup_content = File.read("#{local_hosts_path}/hosts_before_#{project.name}").gsub(/\s+/, ' ').strip
+      nodes.first.restore_local_hosts(project.name)
+      hosts_content = File.read("#{local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
+      expect(hosts_content).to eq(hosts_backup_content)
+      expect(File.exist?("#{local_hosts_path}/hosts_before_#{project.name}")).to be(false)
+    end
   end
 end

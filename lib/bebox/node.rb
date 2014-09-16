@@ -198,7 +198,7 @@ module Bebox
     def restore_local_hosts(project_name)
       FileUtils.cp "#{local_hosts_path}/hosts_before_#{project_name}", "#{local_hosts_path}/hosts"
       # `sudo cp #{local_hosts_path}/hosts_before_#{project_name} #{local_hosts_path}/hosts`
-      FileUtils.mkdir_p "#{local_hosts_path}/hosts_before_#{project_name}"
+      FileUtils.rm "#{local_hosts_path}/hosts_before_#{project_name}", force: true
       # `sudo rm #{local_hosts_path}/hosts_before_#{project_name}`
     end
   end

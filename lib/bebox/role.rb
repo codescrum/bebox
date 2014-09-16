@@ -18,7 +18,6 @@ module Bebox
     # Delete all files and directories related to a role
     def remove
       FileUtils.cd("#{project_root}/puppet/roles") { FileUtils.rm_r name, force: true }
-      # `cd #{self.project_root} && rm -r puppet/roles/#{self.name}`
     end
 
     # Lists existing roles
@@ -29,18 +28,11 @@ module Bebox
     # Create the directories for the role
     def create_role_directory
       FileUtils.cd(project_root) { FileUtils.mkdir_p "puppet/roles/#{self.name}/manifests", force: true }
-    # `cd #{self.project_root} && mkdir -p puppet/roles/#{self.name}/manifests`
     end
 
     # Generate the manifests init.pp file
     def generate_manifests_file
-      generate_file_from_template("#{templates_path}/puppet/roles/manifests/init.pp.erb", "#{self.path}/manifests/init.pp", {role: self})
-    end
-
-    # Path to the templates directory in the gem
-    def templates_path
-      Pathname(__FILE__).dirname.parent + 'templates'
-      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/puppet/roles/manifests/init.pp.erb", "#{self.path}/manifests/init.pp", {role: self})
     end
 
     # Path to the role directory in the project

@@ -93,12 +93,12 @@ module Bebox
       # Set the creation time for the project
       self.created_at = DateTime.now.to_s
       # Create the .bebox file from template
-      generate_file_from_template("#{Bebox::Project.templates_path}/project/dot_bebox.erb", "#{self.path}/.bebox", {project: self})
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/project/dot_bebox.erb", "#{self.path}/.bebox", {project: self})
     end
 
     # Generate .gitignore file
     def generate_gitignore_file
-      generate_file_from_template("#{Bebox::Project.templates_path}/project/gitignore.erb", "#{self.path}/.gitignore", {steps: Bebox::PROVISION_STEP_NAMES})
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/project/gitignore.erb", "#{self.path}/.gitignore", {steps: Bebox::PROVISION_STEP_NAMES})
     end
 
     # Create templates directories
@@ -109,11 +109,11 @@ module Bebox
     # Create the default base roles and profiles in the project
     def copy_default_roles_profiles
       # Copy default roles and profiles to project templates directory
-      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_roles/.", "#{self.path}/templates/roles"
-      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_profiles/.", "#{self.path}/templates/profiles"
+      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_roles/.", "#{self.path}/templates/roles"
+      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_profiles/.", "#{self.path}/templates/profiles"
       # Copy default roles and profiles to project roles and profiles available
-      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_roles/.", "#{self.path}/puppet/roles"
-      FileUtils.cp_r "#{Bebox::Project.templates_path}/puppet/default_profiles/.", "#{self.path}/puppet/profiles"
+      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_roles/.", "#{self.path}/puppet/roles"
+      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_profiles/.", "#{self.path}/puppet/profiles"
     end
 
     # Create config deploy and keys directories
@@ -128,12 +128,12 @@ module Bebox
 
     # Create Capfile for the project
     def create_capfile
-      write_content_to_file("#{path}/Capfile", File.read("#{Bebox::Project.templates_path}/project/Capfile.erb"))
+      write_content_to_file("#{path}/Capfile", File.read("#{Bebox::FilesHelper.templates_path}/project/Capfile.erb"))
     end
 
     # Create Gemfile for the project
     def create_gemfile
-      write_content_to_file("#{self.path}/Gemfile", File.read("#{Bebox::Project.templates_path}/project/Gemfile.erb"))
+      write_content_to_file("#{self.path}/Gemfile", File.read("#{Bebox::FilesHelper.templates_path}/project/Gemfile.erb"))
     end
 
     # Create puppet base directories and files
@@ -166,7 +166,7 @@ module Bebox
       Bebox::PROVISION_STEPS.each do |step|
         ssh_key = ''
         step_dir = Bebox::Provision.step_name(step)
-        templates_path = Bebox::Project::templates_path
+        templates_path = Bebox::FilesHelper::templates_path
         # Generate site.pp template
         generate_file_from_template("#{templates_path}/puppet/#{step}/manifests/site.pp.erb", "#{self.path}/puppet/steps/#{step_dir}/manifests/site.pp", {nodes: []})
         # Generate hiera.yaml template
@@ -185,14 +185,14 @@ module Bebox
     # Generate SO dependencies files
     def generate_so_dependencies_files
       FileUtils.cd(self.path) { FileUtils.mkdir_p 'puppet/prepare/dependencies/ubuntu' }
-      ubuntu_dependencies_content = File.read("#{Bebox::Project.templates_path}/project/ubuntu_dependencies")
+      ubuntu_dependencies_content = File.read("#{Bebox::FilesHelper.templates_path}/project/ubuntu_dependencies")
       File::open("#{self.path}/puppet/prepare/dependencies/ubuntu/packages", "w")do |f|
         f.write(ubuntu_dependencies_content)
       end
     end
 
     def self.so_dependencies
-      File.read("#{Bebox::Project.templates_path}/project/ubuntu_dependencies").gsub(/\s+/, ' ')
+      File.read("#{Bebox::FilesHelper.templates_path}/project/ubuntu_dependencies").gsub(/\s+/, ' ')
     end
 
     # Create checkpoints base directories
@@ -208,19 +208,12 @@ module Bebox
 
     # Generate the deploy file for the project
     def generate_deploy_files
-      generate_file_from_template("#{Bebox::Project.templates_path}/project/config/deploy.erb", "#{self.path}/config/deploy.rb", {project: self})
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/project/config/deploy.erb", "#{self.path}/config/deploy.rb", {project: self})
     end
 
     # Path to the lib directory in the gem
     def lib_path
       Pathname(__FILE__).dirname.parent
-      # File.expand_path '..', File.dirname(__FILE__)
-    end
-
-    # Path to the templates directory in the gem
-    def self.templates_path
-      Pathname(__FILE__).dirname.parent + 'templates'
-      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
     # Obtain the ssh public key from file in environment

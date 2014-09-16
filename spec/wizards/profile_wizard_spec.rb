@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require_relative '../factories/profile.rb'
-
 describe 'Bebox::ProfileWizard' do
 
   subject { Bebox::ProfileWizard.new }

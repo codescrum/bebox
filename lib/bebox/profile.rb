@@ -39,18 +39,12 @@ module Bebox
 
     # Generate the manifests init.pp file
     def generate_manifests_file
-      generate_file_from_template("#{templates_path}/puppet/profiles/manifests/init.pp.erb", "#{absolute_path}/manifests/init.pp", {profile: self})
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/puppet/profiles/manifests/init.pp.erb", "#{absolute_path}/manifests/init.pp", {profile: self})
     end
 
     # Generate the Puppetfile
     def generate_puppetfile
-      generate_file_from_template("#{templates_path}/puppet/profiles/Puppetfile.erb", "#{absolute_path}/Puppetfile", {})
-    end
-
-    # Path to the templates directory in the gem
-    def templates_path
-      Pathname(__FILE__).dirname.parent + 'templates'
-      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/puppet/profiles/Puppetfile.erb", "#{absolute_path}/Puppetfile", {})
     end
 
     # Path to the profile directory in the project

@@ -1,8 +1,5 @@
 require 'spec_helper'
 
-require_relative '../factories/role.rb'
-require_relative '../factories/profile.rb'
-
 describe 'Bebox::RoleWizard' do
 
   subject { Bebox::RoleWizard.new }

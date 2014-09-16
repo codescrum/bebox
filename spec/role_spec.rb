@@ -1,9 +1,6 @@
 require 'spec_helper'
-require_relative '../spec/factories/project.rb'
-require_relative '../spec/factories/role.rb'
-require_relative '../lib/bebox/wizards/wizards_helper'
 
-describe 'Bebox::Role' do
+describe 'Bebox::Role', :fakefs do
 
   # include Wizard helper methods
   include Bebox::WizardsHelper
@@ -11,14 +8,9 @@ describe 'Bebox::Role' do
   let(:project) { build(:project) }
   subject { build(:role) }
   let(:temporary_role_profile) {Bebox::Profile.list(subject.project_root).first}
-  let(:lib_path) { Pathname(__FILE__).dirname.parent + 'lib' }
   let(:fixtures_path) { Pathname(__FILE__).dirname.parent + 'spec/fixtures' }
 
   before :all do
-    FakeFS::FileSystem.clone(fixtures_path)
-    FakeFS::FileSystem.clone("#{lib_path}/templates")
-    FakeFS::FileSystem.clone("#{lib_path}/deb")
-    FakeFS.activate!
     FakeCmd.on!
     FakeCmd.add 'bundle', 0, true
     FakeCmd do
@@ -26,12 +18,6 @@ describe 'Bebox::Role' do
       subject.create
     end
     FakeCmd.off!
-  end
-
-  after :all do
-    FakeCmd.clear!
-    FakeFS.deactivate!
-    FakeFS::FileSystem.clear
   end
 
   context 'role creation' do

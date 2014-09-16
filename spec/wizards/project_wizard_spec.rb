@@ -1,8 +1,5 @@
 require 'spec_helper'
 require 'progressbar'
-require 'fakefs/safe'
-
-require_relative '../factories/project.rb'
 
 describe 'Bebox::ProjectWizard' do
 

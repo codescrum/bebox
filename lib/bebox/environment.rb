@@ -62,10 +62,10 @@ module Bebox
       template_name = (self.name == 'vagrant') ? 'vagrant' : "environment"
       # Generate capistrano specific steps recipes
       Bebox::PROVISION_STEPS.each do |step|
-        generate_file_from_template("#{templates_path}/project/config/deploy/steps/#{step}.erb", "#{self.project_root}/config/environments/#{name}/steps/#{step}.rb", {})
+        generate_file_from_template("#{Bebox::FilesHelper.templates_path}/project/config/deploy/steps/#{step}.erb", "#{self.project_root}/config/environments/#{name}/steps/#{step}.rb", {})
       end
       # Generate capistrano recipe for environment
-      generate_file_from_template("#{templates_path}/project/config/deploy/#{template_name}.erb", "#{self.project_root}/config/environments/#{name}/deploy.rb", {nodes: nil, environment: self.name})
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/project/config/deploy/#{template_name}.erb", "#{self.project_root}/config/environments/#{name}/deploy.rb", {nodes: nil, environment: self.name})
     end
 
     # Generate the hiera data template for the environment
@@ -74,19 +74,13 @@ module Bebox
       project_name = Bebox::Project.shortname_from_file(self.project_root)
       Bebox::PROVISION_STEPS.each do |step|
         step_dir = Bebox::Provision.step_name(step)
-        generate_file_from_template("#{templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb", "#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", {step_dir: step_dir, ssh_key: ssh_key, project_name: project_name})
+        generate_file_from_template("#{Bebox::FilesHelper.templates_path}/puppet/#{step}/hiera/data/environment.yaml.erb", "#{self.project_root}/puppet/steps/#{step_dir}/hiera/data/#{self.name}.yaml", {step_dir: step_dir, ssh_key: ssh_key, project_name: project_name})
       end
     end
 
     # Remove the hiera data template file for the environment
     def remove_hiera_template
       Bebox::PROVISION_STEP_NAMES.each {|step| FileUtils.cd(self.project_root) { FileUtils.rm_rf "puppet/steps/#{step}/hiera/data/#{self.name}.yaml" } }
-    end
-
-    # Path to the templates directory in the gem
-    def templates_path
-      Pathname(__FILE__).dirname.parent + 'templates'
-      # File.join((File.expand_path '..', File.dirname(__FILE__)), 'templates')
     end
 
     # Generate ssh keys for connection with puppet user in environment
