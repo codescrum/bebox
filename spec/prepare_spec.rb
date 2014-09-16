@@ -21,10 +21,11 @@ describe 'Bebox::Node prepare', :fakefs do
 
   context 'pre vagrant prepare' do
     it 'should regenerate the Vagrantfile' do
+      network_interface = RUBY_PLATFORM =~ /darwin/ ? 'en0' : 'eth0'
       Bebox::VagrantHelper.generate_vagrantfile(nodes)
       vagrantfile_content = File.read("#{project.path}/Vagrantfile").gsub(/\s+/, ' ').strip
       output_template = Tilt::ERBTemplate.new("#{fixtures_path}/node/Vagrantfile.test.erb")
-      vagrantfile_output_content = output_template.render(nil, ip_address: nodes.first.ip).gsub(/\s+/, ' ').strip
+      vagrantfile_output_content = output_template.render(nil, ip_address: nodes.first.ip, network_interface: network_interface).gsub(/\s+/, ' ').strip
       expect(vagrantfile_content).to eq(vagrantfile_output_content)
     end
     it 'should regenerate the vagrant deploy file' do

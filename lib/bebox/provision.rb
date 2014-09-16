@@ -61,8 +61,9 @@ module Bebox
       profiles.each do |profile|
         profile_tree = profile.gsub('::','/')
         profile_tree_parent = profile_tree.split('/')[0...-1].join('/')
-        FileUtils.mkdir_p "#{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree_parent}"
-        FileUtils.cp_r "#{project_root}/puppet/profiles/#{profile_tree}/manifests/init.pp", "#{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests/#{profile_tree}.pp"
+        profile_path = "#{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests"
+        FileUtils.mkdir_p "#{profile_path}/#{profile_tree_parent}"
+        FileUtils.cp_r "#{project_root}/puppet/profiles/#{profile_tree}/manifests/init.pp", "#{profile_path}/#{profile_tree}.pp"
       end
     end
 

@@ -10,7 +10,7 @@ describe 'Bebox::ProjectWizard' do
     let(:project_name) { 'bebox-pname' }
     let(:parent_path) { "#{Dir.pwd}/tmp" }
     let(:http_box_uri) {'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'}
-    let(:local_box_uri) {"#{Dir.pwd}/spec/fixtures/test_box.box"}
+    let(:local_box_uri) {"#{Dir.pwd}/spec/fixtures/box.test"}
     let(:bebox_boxes_path) { Bebox::ProjectWizard::BEBOX_BOXES_PATH }
 
     before :each do
@@ -30,8 +30,8 @@ describe 'Bebox::ProjectWizard' do
     it 'creates a project with wizard' do
       Bebox::Project.any_instance.stub(:create) { true }
       subject.stub(:bebox_boxes_setup)
-      subject.stub(:choose_box) { 'test_box.box' }
-      subject.stub(:get_valid_box_uri) { 'test_box.box' }
+      subject.stub(:choose_box) { 'box.test' }
+      subject.stub(:get_valid_box_uri) { 'box.test' }
       subject.stub(:choose_option) { 'virtualbox' }
       output = subject.create_new_project(project_name)
       expect(output).to eq(true)
@@ -54,13 +54,13 @@ describe 'Bebox::ProjectWizard' do
 
     it 'chooses a box from a menu' do
       $stdin.stub(:gets).and_return('1')
-      output = subject.choose_box(['test_box.box'])
-      expect(output).to eq('test_box.box')
+      output = subject.choose_box(['box.test'])
+      expect(output).to eq('box.test')
     end
 
     it 'not chooses a box from a menu' do
       $stdin.stub(:gets).and_return('2')
-      output = subject.choose_box(['test_box.box'])
+      output = subject.choose_box(['box.test'])
       expect(output).to eq(nil)
     end
 
@@ -101,7 +101,7 @@ describe 'Bebox::ProjectWizard' do
     it 'links to a local file box' do
       FakeFS do
         subject.set_box(local_box_uri)
-        expect(File.symlink?("#{bebox_boxes_path}/test_box.box")).to eq(true)
+        expect(File.symlink?("#{bebox_boxes_path}/box.test")).to eq(true)
       end
     end
 
