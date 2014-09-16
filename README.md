@@ -400,24 +400,3 @@ To use the project in development mode, you need to do this:
 * Execute any project commands preceded by **bundle exec**
 
         bundle exec bebox environment
-
-Tests
------
-
-Running the bebox tests require first to do some configurations:
-
-* First you need to have the [ubuntu-server-12042-x64-vbox4210-nocm.box](http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box) in the bebox root folder to run the tests. This is the vagrant box used for the test project.
-
-* Configure a free IP address for the test vagrant machine. To do this create the file *spec/support/config_specs.yaml* from the *spec/support/config_specs.yaml.example* and edit the file with the free IP address from your local network.
-
-        cp spec/support/config_specs.yaml.example spec/support/config_specs.yaml
-
-* Make a tmp directory inside bebox root folder. This is the directory where the test project would be created temporarily.
-
-        mkdir tmp
-
-By project's nature the specs must be run in order. To do this all specs has a 'Test XX:' naming convention. If you want to run all tests in order we have a ordered_phases_spec.rb file than you can run with:
-
-    rspec spec/ordered_phases_spec.rb
-
-It would take a large time (at least 20 minutes) because it creates a vagrant machine and do a basic provision downloading packages and installing them in the machine. Also it can ask for some input (password, interface selection) during the process. The vagrant machine and the bebox test project would be destroyed after completion.
