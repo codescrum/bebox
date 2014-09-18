@@ -60,7 +60,7 @@ describe 'Bebox::Environment', :fakefs do
     it 'generates a hiera data file' do
       Bebox::PROVISION_STEPS.each do |step|
         content = File.read("#{fixtures_path}/puppet/steps/#{step}/hiera/data/#{subject.name}.yaml.test")
-        output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.name}.yaml")
+        output = File.read("#{subject.project_root}/puppet/steps/#{step}/hiera/data/#{subject.name}.yaml")
         expect(output).to eq(content)
       end
     end
@@ -89,7 +89,7 @@ describe 'Bebox::Environment', :fakefs do
 
     it 'removes the hiera node files' do
       Bebox::PROVISION_STEPS.each do |step|
-        expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.name}.yaml")).to be (false)
+        expect(File.exist?("#{subject.project_root}/puppet/steps/#{step}/hiera/data/#{subject.name}.yaml")).to be (false)
       end
     end
   end

@@ -3,7 +3,7 @@
 # deploy_user and deploy_environment is set in the puppet apply command executed by capistrano
 :backends: yaml
 :yaml:
-  :datadir: %{::deploy_to}/current/steps/0-fundamental/hiera/data
+  :datadir: %{::deploy_to}/current/steps/step-0/hiera/data
 :hierarchy:
   - %{::fqdn}
   - %{::deploy_environment}

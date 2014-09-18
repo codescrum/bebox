@@ -31,7 +31,7 @@ describe 'Bebox::Project', :fakefs do
 
   context 'Project config files creation' do
     it 'creates the support directories' do
-      expected_directories = ['templates', 'roles', 'profiles']
+      expected_directories = ['templates', 'roles', 'profiles', 'spec', 'factories']
       directories = []
       directories << Dir["#{subject.path}/*/"].map { |f| File.basename(f) }
       directories << Dir["#{subject.path}/*/*/"].map { |f| File.basename(f) }
@@ -39,8 +39,20 @@ describe 'Bebox::Project', :fakefs do
       expect(directories.flatten).to include(*expected_directories)
     end
 
-    it 'creates the config deploy directories' do
-      expect(Dir.exist?("#{subject.path}/config/environments")).to be (true)
+    it 'creates the spec helper' do
+      expect(File.exist?("#{subject.path}/spec/spec_helper.rb")).to be (true)
+      spec_content = File.read("#{subject.path}/spec/spec_helper.rb").gsub(/\s+/, ' ').strip
+      spec_template = Tilt::ERBTemplate.new("#{fixtures_path}/spec_helper.test")
+      expected_spec_content = spec_template.render(nil).gsub(/\s+/, ' ').strip
+      expect(spec_content).to eq(expected_spec_content)
+    end
+
+    it 'creates the spec factories' do
+      expect(File.exist?("#{subject.path}/spec/factories/node.rb")).to be (true)
+    end
+
+    it 'creates the .rspec file' do
+      expect(File.exist?("#{subject.path}/.rspec")).to be (true)
     end
 
     it 'generates a .bebox file' do
@@ -96,7 +108,7 @@ describe 'Bebox::Project', :fakefs do
 
     it 'generates the step directories' do
       expected_directories = ['prepare', 'profiles', 'roles', 'steps',
-        '0-fundamental', '1-users', '2-services', '3-security',
+        'step-0', 'step-1', 'step-2', 'step-3',
         'hiera', 'manifests', 'modules', 'data']
       directories = []
       directories << Dir["#{subject.path}/puppet/*/"].map { |f| File.basename(f) }
@@ -119,21 +131,21 @@ describe 'Bebox::Project', :fakefs do
       it 'generates the manifests templates' do
         Bebox::PROVISION_STEPS.each do |step|
           content = File.read("#{fixtures_path}/puppet/steps/#{step}/manifests/site.pp.test")
-          output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp")
+          output = File.read("#{subject.path}/puppet/steps/#{step}/manifests/site.pp")
           expect(output).to eq(content)
         end
       end
       it 'generates the hiera config template' do
         Bebox::PROVISION_STEPS.each do |step|
           content = File.read("#{fixtures_path}/puppet/steps/#{step}/hiera/hiera.yaml.test")
-          output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/hiera.yaml")
+          output = File.read("#{subject.path}/puppet/steps/#{step}/hiera/hiera.yaml")
           expect(output).to eq(content)
         end
       end
       it 'generates the hiera data common' do
         Bebox::PROVISION_STEPS.each do |step|
           content = File.read("#{fixtures_path}/puppet/steps/#{step}/hiera/data/common.yaml.test")
-          output = File.read("#{subject.path}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/common.yaml")
+          output = File.read("#{subject.path}/puppet/steps/#{step}/hiera/data/common.yaml")
           expect(output).to eq(content)
         end
       end
@@ -200,8 +212,8 @@ describe 'Bebox::Project', :fakefs do
     end
 
     it 'obtains the SO dependencies' do
-      expected_dependencies = "git-core build-essential curl whois openssl libxslt1-dev autoconf bison libreadline5 libsqlite3-dev"
-      dependencies = Bebox::Project.so_dependencies
+      expected_dependencies = File.read("#{subject.path}/puppet/prepare/dependencies/ubuntu/packages").gsub(/\s+/, ' ').strip
+      dependencies = Bebox::Project.so_dependencies.gsub(/\s+/, ' ').strip
       expect(dependencies).to eq(expected_dependencies)
     end
   end

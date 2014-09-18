@@ -21,16 +21,32 @@ describe 'Bebox::Node', :fakefs do
       subject.create
     end
 
+    it 'creates the serverspec node' do
+      expect(Dir.exist?("#{subject.project_root}/spec/#{subject.hostname}")).to be true
+    end
+
+    it 'creates the serverspec connectors' do
+      expect(File.exist?("#{subject.project_root}/spec/#{subject.hostname}/vagrant_connector.rb")).to be true
+      expect(File.exist?("#{subject.project_root}/spec/#{subject.hostname}/puppet_connector.rb")).to be true
+    end
+
+    it 'creates the serverspec spec files' do
+      expect(File.exist?("#{subject.project_root}/spec/#{subject.hostname}/phase-1_prepare_spec.rb")).to be true
+      Bebox::PROVISION_STEPS.each do |step|
+        expect(File.exist?("#{subject.project_root}/spec/#{subject.hostname}/phase-2_#{step}_prepare_spec.rb")).to be true
+      end
+    end
+
     it 'creates hiera data template' do
       Bebox::PROVISION_STEPS.each do |step|
-        expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.hostname}.yaml")).to eq(true)
+        expect(File.exist?("#{subject.project_root}/puppet/steps/#{step}/hiera/data/#{subject.hostname}.yaml")).to eq(true)
       end
     end
 
     it 'creates node in manifests file' do
       Bebox::PROVISION_STEPS.each do |step|
         content = File.read("#{fixtures_path}/puppet/steps/#{step}/manifests/site_with_node.pp.test").gsub(/\s+/, ' ').strip
-        output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp").gsub(/\s+/, ' ').strip
+        output = File.read("#{subject.project_root}/puppet/steps/#{step}/manifests/site.pp").gsub(/\s+/, ' ').strip
         expect(output).to eq(content)
       end
     end
@@ -91,6 +107,10 @@ describe 'Bebox::Node', :fakefs do
       subject.remove
     end
 
+    it 'removes serverspec node directory' do
+      expect(Dir.exist?("#{subject.project_root}/spec/#{subject.hostname}")).to be (false)
+    end
+
     it 'removes the checkpoints' do
       checkpoint_phases = %w{phase-0 phase-1 phase-2/steps/step-0 phase-2/steps/step-1 phase-2/steps/step-2 phase-2/steps/step-3}
       checkpoint_phases.each do |checkpoint_phase|
@@ -105,14 +125,14 @@ describe 'Bebox::Node', :fakefs do
 
     it 'removes hiera data' do
       Bebox::PROVISION_STEPS.each do |step|
-        expect(File.exist?("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/hiera/data/#{subject.hostname}.yaml")).to be (false)
+        expect(File.exist?("#{subject.project_root}/puppet/steps/#{step}/hiera/data/#{subject.hostname}.yaml")).to be (false)
       end
     end
 
     it 'removes node from manifests' do
       Bebox::PROVISION_STEPS.each do |step|
         content = File.read("#{fixtures_path}/puppet/steps/#{step}/manifests/site.pp.test").gsub(/\s+/, ' ').strip
-        output = File.read("#{subject.project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp").gsub(/\s+/, ' ').strip
+        output = File.read("#{subject.project_root}/puppet/steps/#{step}/manifests/site.pp").gsub(/\s+/, ' ').strip
         expect(output).to eq(content)
       end
     end

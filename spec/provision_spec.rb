@@ -19,7 +19,7 @@ describe 'Bebox::Provision', :fakefs do
       Bebox::Role.add_profile(role.project_root, role.name, profile.relative_path)
       FileUtils.cp "#{fixtures_path}/puppet/profiles/#{profile.relative_path}/manifests/init_with_content.pp.test", "#{profile.absolute_path}/manifests/init.pp"
       FileUtils.cp "#{fixtures_path}/puppet/profiles/#{profile.relative_path}/Puppetfile_with_modules.test", "#{profile.absolute_path}/Puppetfile"
-      FileUtils.cp "#{fixtures_path}/puppet/hiera/data/#{provision.node.hostname}.yaml.test", "#{provision.project_root}/puppet/steps/#{provision.step_name}/hiera/data/#{provision.node.hostname}.yaml"
+      FileUtils.cp "#{fixtures_path}/puppet/hiera/data/#{provision.node.hostname}.yaml.test", "#{provision.project_root}/puppet/steps/#{provision.step}/hiera/data/#{provision.node.hostname}.yaml"
     end
     FakeCmd.off!
   end
@@ -27,7 +27,7 @@ describe 'Bebox::Provision', :fakefs do
   context 'pre provision' do
     it 'should generate a Puppetfile' do
       Bebox::Provision.generate_puppetfile(provision.project_root, provision.step, profiles)
-      output_file = File.read("#{provision.project_root}/puppet/steps/#{Bebox::Provision.step_name(provision.step)}/Puppetfile").gsub(/\s+/, ' ').strip
+      output_file = File.read("#{provision.project_root}/puppet/steps/#{provision.step}/Puppetfile").gsub(/\s+/, ' ').strip
       expected_content = File.read("#{fixtures_path}/puppet/steps/#{provision.step}/Puppetfile.test").gsub(/\s+/, ' ').strip
       expect(output_file).to eq(expected_content)
     end
@@ -35,12 +35,12 @@ describe 'Bebox::Provision', :fakefs do
     it 'should generate the roles and profiles modules' do
       Bebox::Provision.generate_roles_and_profiles(provision.project_root, provision.step, role.name, [profile.relative_path])
       # Expect the role is created
-      output_file = File.read("#{provision.project_root}/puppet/steps/#{Bebox::Provision.step_name(provision.step)}/modules/roles/manifests/#{role.name}.pp").gsub(/\s+/, ' ').strip
+      output_file = File.read("#{provision.project_root}/puppet/steps/#{provision.step}/modules/roles/manifests/#{role.name}.pp").gsub(/\s+/, ' ').strip
       expected_content = File.read("#{fixtures_path}/puppet/steps/#{provision.step}/modules/roles/manifests/#{role.name}.pp.test").gsub(/\s+/, ' ').strip
       expect(output_file).to eq(expected_content)
       # Expect the profiles are created
       [profile.relative_path].each do |profile_name|
-        output_file = File.read("#{provision.project_root}/puppet/steps/#{Bebox::Provision.step_name(provision.step)}/modules/profiles/manifests/#{profile_name}.pp").gsub(/\s+/, ' ').strip
+        output_file = File.read("#{provision.project_root}/puppet/steps/#{provision.step}/modules/profiles/manifests/#{profile_name}.pp").gsub(/\s+/, ' ').strip
         expected_content = File.read("#{fixtures_path}/puppet/profiles/#{profile.relative_path}/manifests/init_with_content.pp.test").gsub(/\s+/, ' ').strip
         expect(output_file).to eq(expected_content)
       end

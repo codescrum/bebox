@@ -2,7 +2,7 @@
 .bundle/
 .checkpoints/
 config/keys/
-puppet/steps/0-fundamental/hiera/data/
-puppet/steps/1-users/hiera/data/
-puppet/steps/2-services/hiera/data/
-puppet/steps/3-security/hiera/data/
+puppet/steps/step-0/hiera/data/
+puppet/steps/step-1/hiera/data/
+puppet/steps/step-2/hiera/data/
+puppet/steps/step-3/hiera/data/

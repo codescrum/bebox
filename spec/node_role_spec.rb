@@ -21,7 +21,7 @@ describe 'Bebox::Node, Bebox::Role association', :fakefs do
     it 'should add a role to a node' do
       Bebox::Provision.associate_node_role(node.project_root, node.environment, node.hostname, role.name)
       expected_content = File.read("#{fixtures_path}/puppet/steps/step-2/manifests/site_with_node_role_association.pp.test").strip
-      output_file = File.read("#{node.project_root}/puppet/steps/2-services/manifests/site.pp").strip
+      output_file = File.read("#{node.project_root}/puppet/steps/step-2/manifests/site.pp").strip
       expect(output_file).to eq(expected_content)
     end
 
