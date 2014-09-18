@@ -1,0 +1,14 @@
+RSpec.configure do |config|
+  config.before do
+    host = '<%= node.hostname %>'
+    ssh_key = '<%= key_path %>'
+    config.disable_sudo = true
+    config.ssh.close if config.ssh
+    config.host  = host
+    options = Net::SSH::Config.for(config.host)
+    options[:keys] = [ssh_key]
+    options[:forward_agent] = true
+    user = '<%= user %>'
+    config.ssh   = Net::SSH.start(config.host, user, options)
+  end
+end

@@ -17,7 +17,7 @@ module Bebox
 
     # Delete all files and directories related to a role
     def remove
-      FileUtils.cd("#{project_root}/puppet/roles") { FileUtils.rm_r name, force: true }
+      FileUtils.rm_r "#{project_root}/puppet/roles/#{name}", force: true
     end
 
     # Lists existing roles
@@ -27,7 +27,7 @@ module Bebox
 
     # Create the directories for the role
     def create_role_directory
-      FileUtils.cd(project_root) { FileUtils.mkdir_p "puppet/roles/#{self.name}/manifests", force: true }
+      FileUtils.mkdir_p "#{project_root}/puppet/roles/#{self.name}/manifests"
     end
 
     # Generate the manifests init.pp file
@@ -47,8 +47,8 @@ module Bebox
 
     # Add a profile to a role
     def self.add_profile(project_root, role, profile)
-      tempfile_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp.tmp"
       manifest_path = "#{project_root}/puppet/roles/#{role}/manifests/init.pp"
+      tempfile_path = "#{manifest_path}.tmp"
       tempfile = File.open(tempfile_path, 'w')
       manifest_file = File.new(manifest_path)
       manifest_file.each do |line|

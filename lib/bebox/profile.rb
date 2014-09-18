@@ -21,20 +21,17 @@ module Bebox
 
     # Delete all files and directories related to a profile
     def remove
-      FileUtils.cd("#{project_root}/puppet/profiles") { FileUtils.rm_r relative_path, force: true }
-      # `cd #{self.project_root} && rm -r puppet/profiles/#{relative_path}`
+      FileUtils.rm_r "#{project_root}/puppet/profiles/#{relative_path}", force: true
     end
 
     # Lists existing profiles
     def self.list(project_root)
       Dir.chdir("#{project_root}/puppet/profiles") { Dir.glob("**/manifests").map{ |f| File.dirname(f) } }
-      # Dir["#{project_root}/puppet/profiles/*"].map { |f| File.basename(f) }
     end
 
     # Create the directories for the profile
     def create_profile_directory
-      FileUtils.cd(project_root) { FileUtils.mkdir_p "puppet/profiles/#{relative_path}/manifests", force: true }
-      # `cd #{self.project_root} && mkdir -p puppet/profiles/#{relative_path}/manifests`
+      FileUtils.mkdir_p "#{project_root}/puppet/profiles/#{relative_path}/manifests"
     end
 
     # Generate the manifests init.pp file
@@ -71,6 +68,7 @@ module Bebox
 
     # Clean a path to make it valid
     def self.cleanpath(path_name)
+      return path_name if path_name.empty?
       valid_path = Pathname.new(path_name).cleanpath.to_path.split('/').reject{|c| c.empty? }
       return valid_path.nil? ? '' : valid_path.join('/')
     end

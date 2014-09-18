@@ -14,9 +14,7 @@ module Bebox
       self.vagrant_box_provider = vagrant_box_provider
       self.environments = []
       self.path = "#{self.parent_path}/#{self.name}"
-      default_environments.each do |env|
-        self.environments << Bebox::Environment.new(env, self.path)
-      end
+      default_environments.each{ |env| self.environments << Bebox::Environment.new(env, self.path) }
     end
 
 		# Project creation phase
@@ -54,6 +52,21 @@ module Bebox
       create_gemfile
       # Create the default environments
       create_default_environments
+      # Generate spec files
+      generate_spec_files
+    end
+
+    # Generate spec files for project
+    def generate_spec_files
+      spec_template_path = "#{Bebox::FilesHelper.templates_path}/project/spec"
+      # Create spec directory
+      FileUtils.mkdir_p "#{path}/spec/factories"
+      # Generate spec_helper file
+      generate_file_from_template("#{spec_template_path}/spec_helper.erb", "#{self.path}/spec/spec_helper.rb", {})
+      # Create factories
+      write_content_to_file("#{path}/spec/factories/node.rb", File.read("#{spec_template_path}/factories/node.rb"))
+      # Create .rspec file
+      write_content_to_file("#{path}/.rspec", File.read("#{spec_template_path}/dot_rspec.rb"))
     end
 
     # Get Project vagrant box provider from the .bebox file
@@ -71,7 +84,7 @@ module Bebox
     # Get short project name from the .bebox file
     def self.shortname_from_file(project_root)
       project_name = self.name_from_file(project_root)
-      project_name.gsub("bebox-", "")
+      project_name.gsub('bebox-', '')
     end
 
     # Get Project name from the .bebox file
@@ -98,22 +111,23 @@ module Bebox
 
     # Generate .gitignore file
     def generate_gitignore_file
-      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/project/gitignore.erb", "#{self.path}/.gitignore", {steps: Bebox::PROVISION_STEP_NAMES})
+      generate_file_from_template("#{Bebox::FilesHelper.templates_path}/project/gitignore.erb", "#{self.path}/.gitignore", {steps: Bebox::PROVISION_STEPS})
     end
 
-    # Create templates directories
-    def create_templates_directories
-      FileUtils.cd(self.path) { FileUtils.mkdir_p %w{templates/roles templates/profiles} }
+    # Create role/profile directories
+    def create_role_profile_directories
+      %w{templates/roles templates/profiles puppet/roles puppet/profiles }.each {|dir| FileUtils.mkdir_p "#{path}/#{dir}" }
     end
 
     # Create the default base roles and profiles in the project
     def copy_default_roles_profiles
+      puppet_template_path = "#{Bebox::FilesHelper.templates_path}/puppet"
       # Copy default roles and profiles to project templates directory
-      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_roles/.", "#{self.path}/templates/roles"
-      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_profiles/.", "#{self.path}/templates/profiles"
+      FileUtils.cp_r "#{puppet_template_path}/default_roles/.", "#{self.path}/templates/roles"
+      FileUtils.cp_r "#{puppet_template_path}/default_profiles/.", "#{self.path}/templates/profiles"
       # Copy default roles and profiles to project roles and profiles available
-      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_roles/.", "#{self.path}/puppet/roles"
-      FileUtils.cp_r "#{Bebox::FilesHelper.templates_path}/puppet/default_profiles/.", "#{self.path}/puppet/profiles"
+      FileUtils.cp_r "#{puppet_template_path}/default_roles/.", "#{self.path}/puppet/roles"
+      FileUtils.cp_r "#{puppet_template_path}/default_profiles/.", "#{self.path}/puppet/profiles"
     end
 
     # Create config deploy and keys directories
@@ -138,8 +152,8 @@ module Bebox
 
     # Create puppet base directories and files
     def create_puppet_base
-      # Create templates directories
-      create_templates_directories
+      # Create role/profile directories
+      create_role_profile_directories
       # Generate SO dependencies files
       generate_so_dependencies_files
       # Copy puppet install files
@@ -154,25 +168,20 @@ module Bebox
 
     # Generate steps directories
     def generate_steps_directories
-      Bebox::PROVISION_STEP_NAMES.each do |step|
-        FileUtils.cd(self.path) { FileUtils.mkdir_p "puppet/steps/#{step}" }
-        FileUtils.cd("#{self.path}/puppet/steps/#{step}") { FileUtils.mkdir_p %w{ hiera/data manifests modules } }
-      end
-      FileUtils.cd(self.path) { FileUtils.mkdir_p %w{ puppet/roles puppet/profiles } }
+      Bebox::PROVISION_STEPS.each{ |step| %w{hiera/data manifests modules}.each {|dir| FileUtils.mkdir_p "#{path}/puppet/steps/#{step}/#{dir}"} }
     end
 
     # Generate steps templates for hiera and manifests files
     def generate_steps_templates
       Bebox::PROVISION_STEPS.each do |step|
-        ssh_key = ''
-        step_dir = Bebox::Provision.step_name(step)
-        templates_path = Bebox::FilesHelper::templates_path
+        step_template_path = "#{Bebox::FilesHelper::templates_path}/puppet/#{step}"
+        step_path = "#{path}/puppet/steps/#{step}"
         # Generate site.pp template
-        generate_file_from_template("#{templates_path}/puppet/#{step}/manifests/site.pp.erb", "#{self.path}/puppet/steps/#{step_dir}/manifests/site.pp", {nodes: []})
+        generate_file_from_template("#{step_template_path}/manifests/site.pp.erb", "#{step_path}/manifests/site.pp", {nodes: []})
         # Generate hiera.yaml template
-        generate_file_from_template("#{templates_path}/puppet/#{step}/hiera/hiera.yaml.erb", "#{self.path}/puppet/steps/#{step_dir}/hiera/hiera.yaml", {step_dir: step_dir})
+        generate_file_from_template("#{step_template_path}/hiera/hiera.yaml.erb", "#{step_path}/hiera/hiera.yaml", {step_dir: step})
         # Generate common.yaml template
-        generate_file_from_template("#{templates_path}/puppet/#{step}/hiera/data/common.yaml.erb", "#{self.path}/puppet/steps/#{step_dir}/hiera/data/common.yaml", {step_dir: step_dir, ssh_key: ssh_key, project_name: self.shortname})
+        generate_file_from_template("#{step_template_path}/hiera/data/common.yaml.erb", "#{step_path}/hiera/data/common.yaml", {ssh_key: '', project_name: shortname})
       end
     end
 
@@ -186,7 +195,7 @@ module Bebox
     def generate_so_dependencies_files
       FileUtils.cd(self.path) { FileUtils.mkdir_p 'puppet/prepare/dependencies/ubuntu' }
       ubuntu_dependencies_content = File.read("#{Bebox::FilesHelper.templates_path}/project/ubuntu_dependencies")
-      File::open("#{self.path}/puppet/prepare/dependencies/ubuntu/packages", "w")do |f|
+      File::open("#{self.path}/puppet/prepare/dependencies/ubuntu/packages", "w") do |f|
         f.write(ubuntu_dependencies_content)
       end
     end

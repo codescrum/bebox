@@ -2,7 +2,6 @@
 module Bebox
 
   PROVISION_STEPS = %w{step-0 step-1 step-2 step-3}
-  PROVISION_STEP_NAMES = %w{0-fundamental 1-users 2-services 3-security}
   RESERVED_WORDS = %w{and case class default define else elsif false if in import inherits node or true undef unless main settings}
 
   class Provision
@@ -33,35 +32,35 @@ module Bebox
 
     # Check if it's necessary a Puppetfile accord to it's content
     def check_puppetfile_content
-      puppetfile_content = File.read("#{project_root}/puppet/steps/#{step_name}/Puppetfile").strip
-      (FileUtils.rm "#{project_root}/puppet/steps/#{step_name}/Puppetfile", force: true) if puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten.empty?
+      puppetfile_content = File.read("#{project_root}/puppet/steps/#{step}/Puppetfile").strip
+      (FileUtils.rm "#{project_root}/puppet/steps/#{step}/Puppetfile", force: true) if puppetfile_content.scan(/^\s*(mod\s*.+?)$/).flatten.empty?
     end
 
     # Copy the static modules to the step-N modules path
     def copy_static_modules
-      FileUtils.cp_r "#{Bebox::FilesHelper::templates_path}/puppet/#{self.step}/modules/.", "#{self.project_root}/puppet/steps/#{step_name}/modules"
+      modules_path = "#{Bebox::FilesHelper::templates_path}/puppet/#{step}/modules"
+      FileUtils.cp_r "#{modules_path}/.", "#{self.project_root}/puppet/steps/#{step}/modules" unless Dir.glob(modules_path).empty?
     end
 
     # Generate the hiera templates for each step
     def self.generate_hiera_for_steps(project_root, template_file, filename, options)
-      Bebox::PROVISION_STEPS.each do |step|
-        step_dir = Bebox::Provision.step_name(step)
-        generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/hiera/data/#{template_file}", "#{project_root}/puppet/steps/#{step_dir}/hiera/data/#{filename}.yaml", options)
-      end
+      Bebox::PROVISION_STEPS.each{ |step| generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/hiera/data/#{template_file}",
+        "#{project_root}/puppet/steps/#{step}/hiera/data/#{filename}.yaml", options) }
     end
 
     # Generate the roles and profiles modules for the step
     def self.generate_roles_and_profiles(project_root, step, role, profiles)
+      modules_path = "#{project_root}/puppet/steps/#{step}/modules"
       # Re-create the roles and profiles puppet module directories
-      FileUtils.cd("#{project_root}/puppet/steps/#{step_name(step)}/modules") { FileUtils.rm %w{roles profiles}, force: true }
-      FileUtils.cd("#{project_root}/puppet/steps/#{step_name(step)}/modules") { FileUtils.mkdir_p %w{roles/manifests profiles/manifests} }
+      %w{roles profiles}.each{ |dir| FileUtils.rm "#{modules_path}/#{dir}", force: true }
+      %w{roles/manifests profiles/manifests}.each{ |dir| FileUtils.mkdir_p "#{modules_path}/#{dir}", force: true }
       # Copy role to puppet roles module
-      FileUtils.cp_r "#{project_root}/puppet/roles/#{role}/manifests/init.pp", "#{project_root}/puppet/steps/#{step_name(step)}/modules/roles/manifests/#{role}.pp"
+      FileUtils.cp_r "#{project_root}/puppet/roles/#{role}/manifests/init.pp", "#{modules_path}/roles/manifests/#{role}.pp"
       # Copy profiles to puppet profiles module
       profiles.each do |profile|
         profile_tree = profile.gsub('::','/')
         profile_tree_parent = profile_tree.split('/')[0...-1].join('/')
-        profile_path = "#{project_root}/puppet/steps/#{step_name(step)}/modules/profiles/manifests"
+        profile_path = "#{modules_path}/profiles/manifests"
         FileUtils.mkdir_p "#{profile_path}/#{profile_tree_parent}"
         FileUtils.cp_r "#{project_root}/puppet/profiles/#{profile_tree}/manifests/init.pp", "#{profile_path}/#{profile_tree}.pp"
       end
@@ -70,18 +69,17 @@ module Bebox
     # Generate the Puppetfile from the role-profiles partial puppetfiles
     def self.generate_puppetfile(project_root, step, profiles)
       modules = []
-      puppetfile_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile"
       profiles.each do |profile|
         profile_puppetfile_path = "#{project_root}/puppet/profiles/#{profile.gsub('::','/')}/Puppetfile"
         puppetfile_content = File.read(profile_puppetfile_path)
         modules << puppetfile_content.scan(/^\s*(mod\s*.+?)$/).uniq
       end
-      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/Puppetfile.erb", "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/Puppetfile", {profile_modules: modules.flatten})
+      generate_file_from_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/Puppetfile.erb", "#{project_root}/puppet/steps/#{step}/Puppetfile", {profile_modules: modules.flatten})
     end
 
     # Get the role name associated with a node
     def self.role_from_node(project_root, step, node)
-      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp"
+      manifest_path = "#{project_root}/puppet/steps/#{step}/manifests/site.pp"
       manifest_content = File.read(manifest_path)
       matching_nodes = manifest_content.match(/^\s*node\s+#{node}\s*({.*?}\s*)/m)
       unless matching_nodes.nil?
@@ -112,7 +110,7 @@ module Bebox
       Bebox::PROVISION_STEPS.each do |step|
         manifest_node = render_erb_template("#{Bebox::FilesHelper::templates_path}/puppet/#{step}/manifests/node.erb", {node: node})
         Bebox::Provision.remove_node(project_root, node.hostname, step)
-        manifest_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp"
+        manifest_path = "#{project_root}/puppet/steps/#{step}/manifests/site.pp"
         content = File.read(manifest_path)
         content += "\n#{manifest_node}\n"
         write_content_to_file(manifest_path, content)
@@ -121,20 +119,18 @@ module Bebox
 
     # Remove hiera data file for node
     def self.remove_hiera_for_steps(project_root, node_name)
-      Bebox::PROVISION_STEP_NAMES.each{ |step| FileUtils.cd("#{project_root}/puppet/steps/#{step}/hiera/data") { FileUtils.rm "#{node_name}.yaml", :force => true } }
+      Bebox::PROVISION_STEPS.each{ |step| FileUtils.rm "#{project_root}/puppet/steps/#{step}/hiera/data/#{node_name}.yaml", :force => true }
     end
 
     # Remove node in manifests file for each step
     def self.remove_node_for_steps(project_root, node_name)
-      Bebox::PROVISION_STEPS.each do |step|
-        Bebox::Provision.remove_node(project_root, node_name, step)
-      end
+      Bebox::PROVISION_STEPS.each { |step| Bebox::Provision.remove_node(project_root, node_name, step) }
     end
 
     # Add a role to a node
     def self.add_role(project_root, node_name, role_name)
-      tempfile_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name('step-2')}/manifests/site.pp.tmp"
-      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name('step-2')}/manifests/site.pp"
+      manifest_path = "#{project_root}/puppet/steps/step-2/manifests/site.pp"
+      tempfile_path = "#{manifest_path}.tmp"
       tempfile = File.open(tempfile_path, 'w')
       manifest_file = File.new(manifest_path)
       manifest_file.each do |line|
@@ -148,7 +144,7 @@ module Bebox
 
     # Remove the current role in a node
     def self.remove_node(project_root, node_name, step)
-      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp"
+      manifest_path = "#{project_root}/puppet/steps/#{step}/manifests/site.pp"
       regexp = /^\s*node\s+#{node_name}\s*({.*?}\s*)/m
       content = File.read(manifest_path).sub(regexp, '')
       File.open(manifest_path, 'wb') { |file| file.write(content) }
@@ -156,7 +152,7 @@ module Bebox
 
     # Remove the current role in a node
     def self.remove_role(project_root, node_name, step)
-      manifest_path = "#{project_root}/puppet/steps/#{Bebox::Provision.step_name(step)}/manifests/site.pp"
+      manifest_path = "#{project_root}/puppet/steps/#{step}/manifests/site.pp"
       regexp = /^\s*node\s+#{node_name}\s*({.*?}\s*)/m
       content = File.read(manifest_path).sub(regexp, "\nnode #{node_name} {\n\n}\n\n")
       File.open(manifest_path, 'wb') { |file| file.write(content) }
@@ -177,7 +173,7 @@ module Bebox
 
     # Executes capistrano commands
     def cap(command)
-      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{command} -S phase='#{self.step}' -S step_dir='#{step_name}' -S environment=#{environment} HOSTS=#{self.node.hostname}`
+      `cd #{self.project_root} && BUNDLE_GEMFILE=Gemfile bundle exec cap #{command} -S phase='#{step}' -S step_dir='#{step}' -S environment=#{environment} HOSTS=#{self.node.hostname}`
     end
 
     # Create checkpoint for step
@@ -186,25 +182,6 @@ module Bebox
       self.node.finished_at = DateTime.now.to_s
       generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/provisioned_node.yml.erb",
         "#{self.project_root}/.checkpoints/environments/#{self.environment}/phases/phase-2/steps/#{self.step}/#{self.node.hostname}.yml", {node: self.node})
-    end
-
-    # Translate step name to directory name
-    def step_name
-      Bebox::Provision.step_name(self.step)
-    end
-
-    # Translate step name to directory name
-    def self.step_name(step)
-      case step
-        when 'step-0'
-          '0-fundamental'
-        when 'step-1'
-          '1-users'
-        when 'step-2'
-          '2-services'
-        when 'step-3'
-          '3-security'
-      end
     end
   end
 end
