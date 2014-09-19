@@ -32,7 +32,7 @@ describe 'Bebox::Cli' do
     end
 
     it 'executes new project command' do
-      argv = ['new', 'pname']
+      argv = ['new', 'vagrant_box_test']
       Bebox::ProjectWizard.any_instance.stub(:create_new_project) { true }
       capture(:stdout) { cli_command(argv, :success) }
     end

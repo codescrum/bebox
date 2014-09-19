@@ -1,7 +1,7 @@
 
 FactoryGirl.define do
   factory :provision, :class => Bebox::Provision do
-    project_root  "#{Dir.pwd}/tmp/bebox-pname"
+    project_root  "#{Dir.pwd}/tmp/bebox-vagrant_box_test"
     environment   'vagrant'
     node          FactoryGirl.build(:node)
     step          'step-0'

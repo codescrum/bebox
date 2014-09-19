@@ -53,7 +53,7 @@ module Bebox
       modules_path = "#{project_root}/puppet/steps/#{step}/modules"
       # Re-create the roles and profiles puppet module directories
       %w{roles profiles}.each{ |dir| FileUtils.rm "#{modules_path}/#{dir}", force: true }
-      %w{roles/manifests profiles/manifests}.each{ |dir| FileUtils.mkdir_p "#{modules_path}/#{dir}", force: true }
+      %w{roles/manifests profiles/manifests}.each{ |dir| FileUtils.mkdir_p "#{modules_path}/#{dir}" }
       # Copy role to puppet roles module
       FileUtils.cp_r "#{project_root}/puppet/roles/#{role}/manifests/init.pp", "#{modules_path}/roles/manifests/#{role}.pp"
       # Copy profiles to puppet profiles module

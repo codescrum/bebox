@@ -133,11 +133,13 @@ en:
     role:
       invalid_name:                     |
                                         The role name can only contain:
+
                                         * Lowercase letters
                                         * Numbers
                                         * Underscores
-                                        * Must begin with an Lowercase letter
+                                        * Must begin with a Lowercase letter
                                         * Can not be any of: %{words}
+
                                         No changes were made.
       name_exist:                       "The '%{role}' role already exist. No changes were made."
       creation_success:                 'Role created!.'
@@ -157,7 +159,7 @@ en:
                                         * Lowercase letters
                                         * Numbers
                                         * Underscores
-                                        * Must begin with an Lowercase letter
+                                        * Must begin with a Lowercase letter
                                         * Can not be any of: %{words}
 
                                         No changes were made.
@@ -178,7 +180,7 @@ en:
       deletion_success:                 'Profile removed!.'
     provision:
       ssh_key_advice:                   "Please add a ssh key pair (id_rsa, id_rsa.pub) in config/keys/environments/%{environment} to do this step."
-      no_provision_nodes:               "There are no nodes for provision in %{step}. No changes were made."
+      no_provision_nodes:               "There are no nodes for provision to %{step}. No changes were made."
       title:                            "Provisioning %{step} in node %{hostname}:"
       apply_success:                    "Node '%{hostname}' provisioned to %{step}."
       apply_failure:                    "An error ocurred in the provision of %{step} for node '%{hostname}'"

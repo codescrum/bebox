@@ -48,7 +48,7 @@ module Bebox
         "#{node_spec_path}/phase-1_prepare_spec.rb", {node: self, dependencies: dependencies, number_dependencies: dependencies.split(' ').size})
       # Create steps specs
       Bebox::PROVISION_STEPS.each{|step| generate_file_from_template("#{spec_template_path}/#{step}_spec.erb",
-        "#{node_spec_path}/phase-2_#{step}_prepare_spec.rb", { user: Bebox::Project.shortname_from_file(project_root) } ) }
+        "#{node_spec_path}/phase-2_#{step}_provision_spec.rb", { user: Bebox::Project.shortname_from_file(project_root) } ) }
     end
 
     # Generates the serverspec spec files
@@ -224,8 +224,8 @@ module Bebox
 
     # Restore the previous local hosts file
     def restore_local_hosts(project_name)
-      FileUtils.cp "#{local_hosts_path}/hosts_before_#{project_name}", "#{local_hosts_path}/hosts"
-      FileUtils.rm "#{local_hosts_path}/hosts_before_#{project_name}", force: true
+      `sudo cp #{local_hosts_path}/hosts_before_#{project_name} #{local_hosts_path}/hosts`
+      `sudo rm #{local_hosts_path}/hosts_before_#{project_name}`
     end
   end
 end

@@ -15,7 +15,7 @@ describe 'Bebox::Node', :fakefs do
     FakeCmd.off!
   end
 
-  context 'node creation' do
+  context '00: node creation' do
 
     before :all do
       subject.create
@@ -33,7 +33,7 @@ describe 'Bebox::Node', :fakefs do
     it 'creates the serverspec spec files' do
       expect(File.exist?("#{subject.project_root}/spec/#{subject.hostname}/phase-1_prepare_spec.rb")).to be true
       Bebox::PROVISION_STEPS.each do |step|
-        expect(File.exist?("#{subject.project_root}/spec/#{subject.hostname}/phase-2_#{step}_prepare_spec.rb")).to be true
+        expect(File.exist?("#{subject.project_root}/spec/#{subject.hostname}/phase-2_#{step}_provision_spec.rb")).to be true
       end
     end
 
@@ -72,7 +72,7 @@ describe 'Bebox::Node', :fakefs do
     end
   end
 
-  context 'self methods' do
+  context '01: self methods' do
     it 'obtains the nodes in a given environment and phase' do
       expected_nodes = [subject.hostname]
       object_nodes = Bebox::Node.nodes_in_environment(subject.project_root, subject.environment, 'phase-0')
@@ -102,7 +102,7 @@ describe 'Bebox::Node', :fakefs do
     end
   end
 
-  context 'node deletion' do
+  context '02: node deletion' do
     before :all do
       subject.remove
     end

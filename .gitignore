@@ -70,7 +70,7 @@ puppet/hiera/data/new_production.yaml
 pkg/
 
 # Spec tests
-spec/support/config_specs.yaml
+spec/vagrant/support/config_specs.yaml
 coverage/
 
 # Local

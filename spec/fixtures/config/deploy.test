@@ -1,5 +1,5 @@
 
-set :application, "pname"
+set :application, "vagrant_box_test"
 set :environment, environment
 set :use_sudo, false
 set :keep_releases, 3

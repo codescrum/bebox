@@ -19,7 +19,7 @@ describe 'Bebox::Profile', :fakefs do
     FakeCmd.off!
   end
 
-  context 'profile creation' do
+  context '00: profile creation' do
 
     it 'validates the profile name' do
       # Test not valid reserved words
@@ -60,7 +60,7 @@ describe 'Bebox::Profile', :fakefs do
     end
   end
 
-  context 'profile list' do
+  context '01: profile list' do
     it 'list the profiles' do
       current_profiles = [subject.relative_path]
       profiles = Bebox::Profile.list(subject.project_root)
@@ -68,14 +68,14 @@ describe 'Bebox::Profile', :fakefs do
     end
   end
 
-  context 'profile deletion' do
+  context '02: profile deletion' do
     it 'deletes the profile directory' do
       subject.remove
       expect(Dir.exist?("#{subject.absolute_path}")).to be (false)
     end
   end
 
-  context 'self methods' do
+  context '03: self methods' do
     it 'counts the number of profiles in the project' do
       profiles_count = Bebox::Profile.profiles_count(subject.project_root)
       expect(profiles_count).to eq(9)

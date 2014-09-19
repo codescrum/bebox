@@ -17,7 +17,7 @@ describe 'Bebox::Role, Bebox::Profile association', :fakefs do
     FakeCmd.off!
   end
 
-  context 'add profiles' do
+  context '00: add profiles' do
     it 'should add a profile to a role' do
       role_content = "include profiles::#{profile.namespace_name}"
       Bebox::Role.add_profile(role.project_root, role.name, profile.relative_path)
@@ -26,7 +26,7 @@ describe 'Bebox::Role, Bebox::Profile association', :fakefs do
     end
   end
 
-  context 'list profiles' do
+  context '01: list profiles' do
     it 'should list profiles' do
       current_profiles = [profile.relative_path]
       profiles = Bebox::Role.list_profiles(role.project_root, role.name)
@@ -34,7 +34,7 @@ describe 'Bebox::Role, Bebox::Profile association', :fakefs do
     end
   end
 
-  context 'remove profiles' do
+  context '02: remove profiles' do
     it 'should delete profile in a role' do
       role_content = "include profiles::#{profile.namespace_name}"
       Bebox::Role.remove_profile(role.project_root, role.name, profile.relative_path)

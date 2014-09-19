@@ -1,6 +1,6 @@
 FactoryGirl.define do
   factory :project, :class => Bebox::Project do
-    name "bebox-pname"
+    name "bebox-vagrant_box_test"
     vagrant_box_base "#{Dir.pwd}/ubuntu-server-12042-x64-vbox4210-nocm.box"
     parent_path "#{Dir.pwd}/tmp"
     vagrant_box_provider 'virtualbox'

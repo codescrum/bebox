@@ -20,16 +20,12 @@ describe 'Bebox::Project', :fakefs do
     FakeCmd.clear!
   end
 
-  it 'creates the project directory' do
-    expect(Dir.exist?(subject.path)).to be true
-  end
+  context '00: Project config files creation' do
 
-  it 'destroys a temporary project' do
-    temporary_project.destroy
-    expect(Dir.exist?(temporary_project.path)).to be false
-  end
+    it 'creates the project directory' do
+      expect(Dir.exist?(subject.path)).to be true
+    end
 
-  context 'Project config files creation' do
     it 'creates the support directories' do
       expected_directories = ['templates', 'roles', 'profiles', 'spec', 'factories']
       directories = []
@@ -94,7 +90,7 @@ describe 'Bebox::Project', :fakefs do
     end
   end
 
-  context 'Create puppet base' do
+  context '01: Create puppet base' do
     it 'generates the SO dependencies files' do
       content = File.read("#{subject.path}/puppet/prepare/dependencies/ubuntu/packages")
       output = File.read("#{fixtures_path}/puppet/ubuntu_dependencies.test")
@@ -127,7 +123,7 @@ describe 'Bebox::Project', :fakefs do
       expect(directories).to include(*expected_profiles_directories)
     end
 
-    context 'generate steps templates' do
+    context '02: generate steps templates' do
       it 'generates the manifests templates' do
         Bebox::PROVISION_STEPS.each do |step|
           content = File.read("#{fixtures_path}/puppet/steps/#{step}/manifests/site.pp.test")
@@ -152,7 +148,7 @@ describe 'Bebox::Project', :fakefs do
     end
   end
 
-  context 'checkpoints' do
+  context '03: checkpoints' do
     it 'creates checkpoints directories' do
       expected_directories = ['.checkpoints', 'environments']
       directories = []
@@ -162,7 +158,7 @@ describe 'Bebox::Project', :fakefs do
     end
   end
 
-  context 'bundle project' do
+  context '04: bundle project' do
     it 'install project dependencies' do
       # Fake the Gemfile.lock file creation by the bundle install command (because FakeFS)
       FileUtils.touch("#{subject.path}/Gemfile.lock")
@@ -170,7 +166,7 @@ describe 'Bebox::Project', :fakefs do
     end
   end
 
-  context 'create default environments' do
+  context '05: create default environments' do
     it 'generates the deploy environment files' do
       subject.environments.each do |environment|
         config_deploy_vagrant_content = File.read("#{subject.path}/config/environments/#{environment.name}/deploy.rb").gsub(/\s+/, ' ').strip
@@ -200,7 +196,7 @@ describe 'Bebox::Project', :fakefs do
     end
   end
 
-  context 'self methods' do
+  context '06: self methods' do
     it 'obtains a vagrant box provider' do
       vagrant_box_provider = Bebox::Project.vagrant_box_provider_from_file(subject.path)
       expect(vagrant_box_provider).to eq(subject.vagrant_box_provider)
@@ -215,6 +211,14 @@ describe 'Bebox::Project', :fakefs do
       expected_dependencies = File.read("#{subject.path}/puppet/prepare/dependencies/ubuntu/packages").gsub(/\s+/, ' ').strip
       dependencies = Bebox::Project.so_dependencies.gsub(/\s+/, ' ').strip
       expect(dependencies).to eq(expected_dependencies)
+    end
+  end
+
+  context '07: destroy project' do
+
+    it 'destroys a temporary project' do
+      temporary_project.destroy
+      expect(Dir.exist?(temporary_project.path)).to be false
     end
   end
 end

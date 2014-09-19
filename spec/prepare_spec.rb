@@ -19,7 +19,7 @@ describe 'Bebox::Node prepare', :fakefs do
     FakeCmd.off!
   end
 
-  context 'pre vagrant prepare' do
+  context '00: pre vagrant prepare' do
     it 'should regenerate the Vagrantfile' do
       network_interface = RUBY_PLATFORM =~ /darwin/ ? 'en0' : 'eth0'
       Bebox::VagrantHelper.generate_vagrantfile(nodes)
@@ -36,7 +36,7 @@ describe 'Bebox::Node prepare', :fakefs do
     end
   end
 
-  context 'vagrant prepare' do
+  context '01: vagrant prepare' do
 
     before :all do
       # Fake hosts backup file
@@ -132,7 +132,7 @@ describe 'Bebox::Node prepare', :fakefs do
     end
   end
 
-  context 'destroy machine' do
+  context '02: destroy machine' do
 
     before :all do
       # Fake hosts backup file
@@ -169,7 +169,15 @@ describe 'Bebox::Node prepare', :fakefs do
 
     it 'restores the local hosts file' do
       hosts_backup_content = File.read("#{local_hosts_path}/hosts_before_#{project.name}").gsub(/\s+/, ' ').strip
-      nodes.first.restore_local_hosts(project.name)
+      FakeCmd.clear!
+      FakeCmd.on!
+      FakeCmd.add 'sudo cp', 0, ""
+      FakeCmd.add 'sudo rm', 0, ""
+      FakeCmd do
+        nodes.first.restore_local_hosts(project.name)
+        FileUtils.cp "#{local_hosts_path}/hosts_before_#{project.name}", "#{local_hosts_path}/hosts"
+        FileUtils.rm "#{local_hosts_path}/hosts_before_#{project.name}", force: true
+      end
       hosts_content = File.read("#{local_hosts_path}/hosts").gsub(/\s+/, ' ').strip
       expect(hosts_content).to eq(hosts_backup_content)
       expect(File.exist?("#{local_hosts_path}/hosts_before_#{project.name}")).to be(false)

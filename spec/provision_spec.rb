@@ -24,7 +24,7 @@ describe 'Bebox::Provision', :fakefs do
     FakeCmd.off!
   end
 
-  context 'pre provision' do
+  context '00: pre provision' do
     it 'should generate a Puppetfile' do
       Bebox::Provision.generate_puppetfile(provision.project_root, provision.step, profiles)
       output_file = File.read("#{provision.project_root}/puppet/steps/#{provision.step}/Puppetfile").gsub(/\s+/, ' ').strip
@@ -47,7 +47,7 @@ describe 'Bebox::Provision', :fakefs do
     end
   end
 
-  context 'provision' do
+  context '01: provision' do
 
     before :all do
       FakeCmd.on!

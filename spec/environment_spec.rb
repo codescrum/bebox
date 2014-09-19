@@ -15,15 +15,15 @@ describe 'Bebox::Environment', :fakefs do
     FakeCmd.off!
   end
 
-  it 'list the current environments' do
-    current_environments = %w{vagrant staging production}
-    environments = Bebox::Environment.list(subject.project_root)
-    expect(environments).to include(*current_environments)
-  end
-
-  context 'environment creation' do
+  context '00: environment creation' do
     before :all do
       subject.create
+    end
+
+    it 'list the current environments' do
+      current_environments = %w{vagrant staging production}
+      environments = Bebox::Environment.list(subject.project_root)
+      expect(environments).to include(*current_environments)
     end
 
     it 'creates checkpoints' do
@@ -66,7 +66,7 @@ describe 'Bebox::Environment', :fakefs do
     end
   end
 
-  context 'environment deletion' do
+  context '01: environment deletion' do
     before :all do
       subject.remove
     end
@@ -94,7 +94,7 @@ describe 'Bebox::Environment', :fakefs do
     end
   end
 
-  context 'self methods' do
+  context '02: self methods' do
     it 'checks for environment access keys' do
       access = Bebox::Environment.check_environment_access(subject.project_root, 'vagrant')
       expect(access).to eq(true)

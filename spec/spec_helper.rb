@@ -20,10 +20,15 @@ require 'awesome_print'
 require 'jazz_hands'
 require 'pry'
 require 'factory_girl'
+require 'serverspec'
+require 'pathname'
 require 'net/ssh'
 require 'tilt'
 require 'fakefs/safe'
 require 'fakecmd'
+
+include Serverspec::Helper::Ssh
+include Serverspec::Helper::Debian
 
 require_relative '../lib/bebox'
 
@@ -46,6 +51,9 @@ RSpec.configure do |config|
   config.after(:each) do
     ENV['RUBY_ENV'] = 'development'
   end
+
+  # Exclude the slow puppet/vagrant tests
+  config.filter_run_excluding :vagrant => true
 
   # Initialize fake filesystem with some needed files before any spec with :fakefs => true
   config.before(:all, :fakefs) do |example|

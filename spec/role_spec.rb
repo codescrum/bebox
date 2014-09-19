@@ -20,7 +20,7 @@ describe 'Bebox::Role', :fakefs do
     FakeCmd.off!
   end
 
-  context 'role creation' do
+  context '00: role creation' do
 
     it 'validates the role name' do
       # Test not valid reserved words
@@ -47,7 +47,7 @@ describe 'Bebox::Role', :fakefs do
     end
   end
 
-  context 'role list' do
+  context '01: role list' do
     it 'list the roles' do
       current_roles = [subject.name]
       roles = Bebox::Role.list(subject.project_root)
@@ -55,7 +55,7 @@ describe 'Bebox::Role', :fakefs do
     end
   end
 
-  context 'self methods' do
+  context '02: self methods' do
     it 'counts the number of roles in the project' do
       roles_count = Bebox::Role.roles_count(subject.project_root)
       expect(roles_count).to eq(4)
@@ -87,7 +87,7 @@ describe 'Bebox::Role', :fakefs do
     end
   end
 
-  context 'role deletion' do
+  context '03: role deletion' do
     it 'deletes the role directory' do
       subject.remove
       expect(Dir.exist?("#{subject.path}")).to be (false)

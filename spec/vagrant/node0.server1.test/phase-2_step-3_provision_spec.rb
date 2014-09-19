@@ -1,7 +1,16 @@
 require 'spec_helper'
 require_relative 'puppet_connector.rb'
 
-describe 'Phase-2, Step-3: Apply provision for security layer' do
+describe 'Test 06: Apply provision for security layer step-3', :vagrant do
+
+  let(:provision) { build(:provision, step: 'step-3') }
+  let(:security_profiles) {['base/security/fail2ban', 'base/security/iptables', 'base/security/ssh', 'base/security/sysctl']}
+
+  before(:all) do
+    Bebox::Provision.generate_puppetfile(provision.project_root, provision.step, security_profiles)
+    Bebox::Provision.generate_roles_and_profiles(provision.project_root, provision.step, 'security', security_profiles)
+    provision.apply
+  end
 
   context 'fail2ban module' do
     describe service('fail2ban') do
@@ -52,5 +61,14 @@ describe 'Phase-2, Step-3: Apply provision for security layer' do
       its(:stdout) { should match /net.ipv4.conf.default.accept_redirects = 0/ }
       its(:stdout) { should match /net.ipv6.conf.default.accept_redirects = 0/ }
     end
+  end
+
+  it 'should create checkpoint' do
+    checkpoint_file_path = "#{provision.project_root}/.checkpoints/environments/#{provision.environment}/phases/phase-2/steps/#{provision.step}/#{provision.node.hostname}.yml"
+    expect(File.exist?(checkpoint_file_path)).to eq(true)
+    prepared_node_content = File.read(checkpoint_file_path).gsub(/\s+/, ' ').strip
+    ouput_template = Tilt::ERBTemplate.new("#{Dir.pwd}/spec/fixtures/node/provisioned_node_0.test.erb")
+    prepared_node_expected_content = ouput_template.render(nil, node: provision.node).gsub(/\s+/, ' ').strip
+    expect(prepared_node_content).to eq(prepared_node_expected_content)
   end
 end

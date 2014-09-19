@@ -52,9 +52,6 @@ sysctl:
     value: '0'
   'net.ipv6.conf.default.accept_redirects':
     value: '0'
-  # Ignore Directed pings
-  'net.ipv4.icmp_echo_ignore_all':
-    value: '1'
 iptables::allow_icmp: 'yes'
 iptables::allow_localhost: 'yes'
 iptables::log_failures: 'yes'

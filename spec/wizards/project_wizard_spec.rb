@@ -7,7 +7,7 @@ describe 'Bebox::ProjectWizard' do
 
     subject { Bebox::ProjectWizard.new }
 
-    let(:project_name) { 'bebox-pname' }
+    let(:project_name) { 'bebox-vagrant_box_test' }
     let(:parent_path) { "#{Dir.pwd}/tmp" }
     let(:http_box_uri) {'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box'}
     let(:local_box_uri) {"#{Dir.pwd}/spec/fixtures/box.test"}
