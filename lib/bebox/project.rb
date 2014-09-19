@@ -168,7 +168,10 @@ module Bebox
 
     # Generate steps directories
     def generate_steps_directories
-      Bebox::PROVISION_STEPS.each{ |step| %w{hiera/data manifests modules}.each {|dir| FileUtils.mkdir_p "#{path}/puppet/steps/#{step}/#{dir}"} }
+      Bebox::PROVISION_STEPS.each do |step|
+        %w{hiera/data manifests modules}.each {|dir| FileUtils.mkdir_p "#{path}/puppet/steps/#{step}/#{dir}"}
+        FileUtils.touch "#{path}/puppet/steps/#{step}/modules/.keep"
+      end
     end
 
     # Generate steps templates for hiera and manifests files
