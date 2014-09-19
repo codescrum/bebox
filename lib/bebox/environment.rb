@@ -52,6 +52,7 @@ module Bebox
     def create_capistrano_base
       # Create keys directory for environment
       `cd #{self.project_root} && mkdir -p config/keys/environments/#{self.name}`
+      `cd #{self.project_root}/config/keys/environments/#{self.name} && touch .keep`
       # Create ssh key for puppet user if environment is vagrant
       generate_puppet_user_keys('vagrant') if self.name == 'vagrant'
     end
