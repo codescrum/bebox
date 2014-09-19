@@ -74,6 +74,7 @@ module Bebox
 
     # Clean a path to make it valid
     def self.cleanpath(path_name)
+      return path_name if path_name.empty?
       valid_path = Pathname.new(path_name).cleanpath.to_path.split('/').reject{|c| c.empty? }
       return valid_path.nil? ? '' : valid_path.join('/')
     end
