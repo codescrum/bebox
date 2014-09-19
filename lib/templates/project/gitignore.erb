@@ -1,7 +1,8 @@
 .vagrant/
 .bundle/
 .checkpoints/
-config/keys/
+config/**/keys/id_rsa
+config/**/keys/id_rsa.pub
 <% steps.each do |step_name| %>
 puppet/steps/<%=step_name%>/hiera/data/
 <% end %>

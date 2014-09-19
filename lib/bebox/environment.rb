@@ -52,7 +52,10 @@ module Bebox
     def create_config_base
       # Create keys directory for environment
       FileUtils.cd(self.project_root) { FileUtils.mkdir_p "config/environments/#{self.name}" }
-      FileUtils.cd("#{project_root}/config/environments/#{self.name}") { FileUtils.mkdir_p %w{steps keys} }
+      FileUtils.cd("#{project_root}/config/environments/#{self.name}") {
+        FileUtils.mkdir_p %w{steps keys}
+        FileUtils.touch 'keys/.keep'
+      }
       # Create ssh key for puppet user if environment is vagrant
       generate_puppet_user_keys('vagrant') if self.name == 'vagrant'
     end
@@ -90,10 +93,7 @@ module Bebox
     def generate_puppet_user_keys(environment)
       require 'sshkey'
       key_path = "#{self.project_root}/config/environments/#{environment}/keys"
-      FileUtils.cd(key_path) {
-        %w{id_rsa id_rsa.pub}.each { |key_file| FileUtils.rm key_file, force: true }
-        FileUtils.touch '.keep'
-      }
+      FileUtils.cd(key_path) { %w{id_rsa id_rsa.pub}.each { |key_file| FileUtils.rm key_file, force: true } }
       sshkey = SSHKey.generate(:type => "RSA", :bits => 1024)
       write_content_to_file("#{key_path}/id_rsa", sshkey.private_key)
       write_content_to_file("#{key_path}/id_rsa.pub", sshkey.ssh_public_key)

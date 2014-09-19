@@ -1,7 +1,8 @@
 .vagrant/
 .bundle/
 .checkpoints/
-config/keys/
+config/**/keys/id_rsa
+config/**/keys/id_rsa.pub
 puppet/steps/step-0/hiera/data/
 puppet/steps/step-1/hiera/data/
 puppet/steps/step-2/hiera/data/
