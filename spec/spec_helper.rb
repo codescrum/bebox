@@ -43,6 +43,7 @@ RSpec.configure do |config|
   end
 
   config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.deprecation_stream = 'rspec-deprecations.log'
 
   config.before(:each) do
     ENV['RUBY_ENV'] = 'test'
@@ -63,6 +64,9 @@ RSpec.configure do |config|
     FakeFS::FileSystem.clone("#{lib_path}/templates")
     FakeFS::FileSystem.clone("#{lib_path}/deb")
     FakeFS.activate!
+    # Stub console out messages from commands
+    $stdout.stub(:write)
+    $stderr.stub(:write)
   end
 
   # Clean the fake filesystem after any spec with :fakefs => true

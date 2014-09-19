@@ -19,6 +19,11 @@ describe 'Bebox::Node prepare', :fakefs do
     FakeCmd.off!
   end
 
+  before :each do
+    $stdout.stub(:write)
+    $stderr.stub(:write)
+  end
+
   context '00: pre vagrant prepare' do
     it 'should regenerate the Vagrantfile' do
       network_interface = RUBY_PLATFORM =~ /darwin/ ? 'en0' : 'eth0'
@@ -39,6 +44,8 @@ describe 'Bebox::Node prepare', :fakefs do
   context '01: vagrant prepare' do
 
     before :all do
+      $stdout.stub(:write)
+      $stderr.stub(:write)
       # Fake hosts backup file
       FileUtils.cp "#{local_hosts_path}/hosts", "#{local_hosts_path}/hosts_before_#{project.name}"
       FakeCmd.on!
@@ -135,6 +142,8 @@ describe 'Bebox::Node prepare', :fakefs do
   context '02: destroy machine' do
 
     before :all do
+      $stdout.stub(:write)
+      $stderr.stub(:write)
       # Fake hosts backup file
       FileUtils.cp "#{local_hosts_path}/hosts", "#{local_hosts_path}/hosts_before_#{project.name}"
       FakeCmd.clear!

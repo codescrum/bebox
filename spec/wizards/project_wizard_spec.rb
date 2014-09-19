@@ -15,6 +15,7 @@ describe 'Bebox::ProjectWizard' do
 
     before :each do
       $stdout.stub(:write)
+      $stderr.stub(:write)
     end
 
     after :all do
