@@ -4,6 +4,7 @@ Bebox
 [![Code Climate](https://codeclimate.com/github/codescrum/bebox/badges/gpa.svg)](https://codeclimate.com/github/codescrum/bebox)
 [![Test Coverage](https://codeclimate.com/github/codescrum/bebox/badges/coverage.svg)](https://codeclimate.com/github/codescrum/bebox)
 
+
 Introduction
 ------------
 
@@ -13,7 +14,7 @@ Bebox was originally born from the necessity of automating the provisioning of e
 
 Bebox's main concern is __organization__. It is generally a good idea to have conventions about how different source code files are placed and named and be able to use this to reduce the details required to understand a project while also providing automation in key places. These conventions may include things like from how to write modules, integrate them into the projects, a directory structure for the projects to follow, how to have a replicated “development/test” environment into virtual machines, etc.
 
-NOTE: For the moment, Bebox assumes that the remote machines' OS is Debian based.
+NOTE: For the moment, Bebox assumes that the remote machine OS is Debian based.
 
 Bebox development is based on awesome tools on their own, and essentially based on the following:
 
@@ -22,6 +23,7 @@ Bebox development is based on awesome tools on their own, and essentially based 
 * Uses [Puppet (opensource)](http://puppetlabs.com/puppet/puppet-open-source) for provisioning machines, and its the main component that the Bebox workflow aims to organize.
 * Uses [Vagrant](http://www.vagrantup.com/) for setting up a similar development/test environment in accordance to the remote machines real setup.
 * Uses [Capistrano](http://capistranorb.com/) for automating the tasks to be executed on remote/vagrant machines.
+* Uses [Serverspec](http://http://serverspec.org/) for automatic generated provision tests.
 
 Workflow
 --------
@@ -336,6 +338,39 @@ To add hiera data you need to edit any of the **[node].yaml**, **[environment].y
 [node]: correspond to the hiera file for the node hostname (Ex. node0.server1.com.yaml).
 [environment]: correspond to the hiera file for the node hostname (Ex. vagrant.yaml, production.yaml).
 
+
+###Serverspec tests
+
+Bebox generate automatic tests templates for each node created on your project based on [Serverspec](http://http://serverspec.org/). The specs generated allows to test the preparation of a vagrant machine (phase-1_prepare_spec.rb) and its provisioning with puppet (phase-2_step-N_prepare_spec.rb).
+
+    ── spec
+        ├── factories
+        │   └── node.rb
+        ├── <node_hostname>
+        │   ├── phase-1_prepare_spec.rb
+        │   ├── phase-2_step-0_prepare_spec.rb
+        │   ├── phase-2_step-1_prepare_spec.rb
+        │   ├── phase-2_step-2_prepare_spec.rb
+        │   ├── phase-2_step-3_prepare_spec.rb
+        │   ├── puppet_connector.rb
+        │   └── vagrant_connector.rb
+        └── spec_helper.rb
+
+The prepare spec can be run after a ' **bebox prepare** ' command doing:
+
+    rspec spec/<node_hostname>/phase-1_prepare_spec.rb
+
+The provision specs can be run after a ' **bebox apply step-N** ' command doing:
+
+    rspec spec/<node_hostname>/phase-2_step-N_prepare_spec.rb
+
+All the specs has a predefined set of test examples except the **phase-2_step-2_prepare_spec.rb** spec, that must be constructed in base to the services configured in the puppet provisioning phase.
+
+NOTE: step-N correspond to one of: step-0, step-1, step-2, step-3.
+
+**Important:** The node specs are deleted if you delete the corresponding node by command (**bebox node remove**); so use version control to avoid information lost.
+
+
 ###Checkpoints
 
 Bebox create a series of checkpoint files to reflect the node phase and step current state. The checkpoints are stored in a structure like the following:
@@ -360,7 +395,7 @@ Bebox create a series of checkpoint files to reflect the node phase and step cur
 
 The **[node].yml** file store some information about datetimes for creation, start and finish of the node in each phase.
 
-**Note:** The .checkpoints directory is gitignored by default.
+NOTE: The .checkpoints directory is gitignored by default.
 
 
 Development
@@ -400,3 +435,30 @@ To use the project in development mode, you need to do this:
 * Execute any project commands preceded by **bundle exec**
 
         bundle exec bebox environment
+
+Tests
+-----
+
+The bebox tests will be separated in two parts: common tests and vagrant/puppet tests.
+
+###Common tests
+
+This tests has no pre-requisites, to run them just do:
+
+    rspec spec/*
+
+###Vagrant/Puppet tests
+
+Running the bebox tests require first to do some configurations:
+
+* First you need to have the [ubuntu-server-12042-x64-vbox4210-nocm.box](http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210-nocm.box) in the bebox root folder to run the tests. This is the vagrant box used for the test project.
+
+* Configure an IP address for the test vagrant machine. To do this create the file *spec/vagrant/support/config_specs.yaml* from the *spec/vagrant/support/config_specs.yaml.example* and edit the file with a free IP address in your local network.
+
+        cp spec/vagrant/support/config_specs.yaml.example spec/vagrant/support/config_specs.yaml
+
+By project's nature the specs must be run in order. To do this all vagrant specs has a 'Test XX:' naming convention. If you want to run all tests in order we have an ordered_phases_spec.rb file that you can run with:
+
+    rspec spec/vagrant/ordered_phases_spec.rb --tag vagrant
+
+It would take a large time (at least 20 minutes) because it creates a vagrant machine and do a basic provision downloading packages and installing them in the machine. Also it can ask for some input (password, interface selection) during the process. The vagrant machine and the bebox test project would be destroyed after completion.
