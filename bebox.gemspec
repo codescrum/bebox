@@ -26,9 +26,9 @@ spec = Gem::Specification.new do |s|
   s.executables << 'bebox'
   s.required_ruby_version = '>= 1.9.2'
   s.add_development_dependency('rake', '10.3.1')
-  s.add_development_dependency('rspec', '2.14.1')
+  s.add_development_dependency('rspec', '2.99.0')
   s.add_development_dependency('jazz_hands', '0.5.2')
-  s.add_development_dependency('serverspec', '1.6.0')
+  s.add_development_dependency('serverspec', '1.16.0')
   s.add_development_dependency('factory_girl', '4.3.0')
   s.add_development_dependency('codeclimate-test-reporter', '0.4.0')
   s.add_development_dependency('simplecov', '0.9.0')
