@@ -154,7 +154,10 @@ module Bebox
 
     # Generate steps directories
     def generate_steps_directories
-      Bebox::PROVISION_STEP_NAMES.each{|step| `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`}
+      Bebox::PROVISION_STEP_NAMES.each do |step|
+        `cd #{self.path} && mkdir -p puppet/steps/#{step}/{hiera/data,manifests,modules}`
+        `cd puppet/steps/#{step}/modules && touch .keep`
+      end
       `cd #{self.path} && mkdir -p puppet/{roles,profiles}`
     end
 
