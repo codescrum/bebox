@@ -180,6 +180,7 @@ module Bebox
     def create_step_checkpoint(started_at)
       self.node.started_at = started_at
       self.node.finished_at = DateTime.now.to_s
+      Bebox::Environment.create_checkpoint_directories(project_root, environment)
       generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/provisioned_node.yml.erb",
         "#{self.project_root}/.checkpoints/environments/#{self.environment}/phases/phase-2/steps/#{self.step}/#{self.node.hostname}.yml", {node: self.node})
     end

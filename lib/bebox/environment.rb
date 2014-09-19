@@ -32,10 +32,15 @@ module Bebox
     end
 
     # Create checkpoints base directories
-    def create_checkpoints
-      phases_path = "#{project_root}/.checkpoints/environments/#{self.name}/phases"
+    def self.create_checkpoint_directories(project_root, environment)
+      phases_path = "#{project_root}/.checkpoints/environments/#{environment}/phases"
       %w{phase-0 phase-1 phase-2}.each { |phase| FileUtils.mkdir_p "#{phases_path}/#{phase}"}
       (0..3).each{ |i| FileUtils.mkdir_p "#{phases_path}/phase-2/steps/step-#{i}" }
+    end
+
+    # Create checkpoints base directories
+    def create_checkpoints
+      Bebox::Environment.create_checkpoint_directories(project_root, name)
     end
 
     # Remove checkpoints base directories
@@ -85,7 +90,10 @@ module Bebox
     def generate_puppet_user_keys(environment)
       require 'sshkey'
       key_path = "#{self.project_root}/config/environments/#{environment}/keys"
-      FileUtils.cd(key_path) { FileUtils.rm Dir.glob('*') }
+      FileUtils.cd(key_path) {
+        %w{id_rsa id_rsa.pub}.each { |key_file| FileUtils.rm key_file, force: true }
+        FileUtils.touch '.keep'
+      }
       sshkey = SSHKey.generate(:type => "RSA", :bits => 1024)
       write_content_to_file("#{key_path}/id_rsa", sshkey.private_key)
       write_content_to_file("#{key_path}/id_rsa.pub", sshkey.ssh_public_key)

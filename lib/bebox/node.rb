@@ -107,6 +107,7 @@ module Bebox
     def create_prepare_checkpoint(started_at)
       self.started_at = started_at
       self.finished_at = DateTime.now.to_s
+      Bebox::Environment.create_checkpoint_directories(project_root, environment)
       generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/prepared_node.yml.erb",
         "#{self.project_root}/.checkpoints/environments/#{self.environment}/phases/phase-1/#{self.hostname}.yml", {node: self})
     end
@@ -139,6 +140,7 @@ module Bebox
       # Set the creation time for the node
       self.created_at = DateTime.now.to_s
       # Create the checkpoint file from template
+      Bebox::Environment.create_checkpoint_directories(project_root, environment)
       generate_file_from_template("#{Bebox::FilesHelper::templates_path}/node/node.yml.erb",
         "#{project_root}/.checkpoints/environments/#{environment}/phases/phase-0/#{hostname}.yml", {node: self})
     end
